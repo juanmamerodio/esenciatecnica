@@ -22,6 +22,8 @@ lanza `TypeError: OrderService.isProcessed is not a function` y devuelve 500.
 - Implementar `isProcessed(pedidoId)` consultando `pedidos.comprobante_url` o la tabla `verificaciones`.
 - O quitar la idempotencia y validar duplicados por `pedido_id + estado`.
 
+**Resuelto 2026-10-23:** se implementó `OrderService.isProcessed` consultando `comprobante_url` (commit `a984727`).
+
 ---
 
 ## 2. 🔴 Crítico: `comprobante_url` no se guarda
@@ -47,6 +49,9 @@ El tercer argumento se asigna a `log_ia`; `comprobante_url` se descarta. El pane
 **Fix sugerido:** cambiar la firma a `updateStatus(pedidoId, status, patch?: Partial<Pedido>)` y
 hacer `update({ estado: status, ...patch })`.
 
+**Resuelto 2026-10-23:** la firma ahora recibe `patch: Partial<Pedido>` y `verify-payment` guarda
+`comprobante_url` (commit `a984727`).
+
 ---
 
 ## 3. 🟠 Gemini sigue en el código legacy, pero en el sistema final no existe
@@ -59,6 +64,10 @@ hacer `update({ estado: status, ...patch })`.
 **Fix:** eliminar `gemini.ts`, el import y el bloque de análisis; subir el comprobante, guardar
 `comprobante_url` y dejar el pedido en `Comprobante Subido` para revisión humana. Recién después
 borrar `GEMINI_API_KEY` de Vercel y del `.env.example`.
+
+**Resuelto 2026-10-23:** se eliminó `src/lib/gemini.ts`, el bloque de IA, la tabla espejo
+`verificaciones`, el tipo `GeminiResponse`, `log_ia` y `GEMINI_API_KEY`. El comprobante queda en
+`Comprobante Subido` (commit `a984727`). Falta borrar la key en Vercel.
 
 ---
 
