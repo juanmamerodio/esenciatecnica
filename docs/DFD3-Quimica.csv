@@ -1,0 +1,59 @@
+id,Nombre,Biblioteca de figuras,ID de página,Contenido por,Grupo,Origen de línea,Destino de la línea,Flecha de origen,Flecha de destino,Estado,Área de texto 1,Comentarios,Notas,ID de figura
+1,Documento,,,,,,,,,Borrador,DFD3-Quimica,,,d94e24c2-c4fd-406d-a9d2-82c6214226e4
+2,Página,,,,,,,,,,Page 1,,,0_0
+3,Texto,Estándar,2,,,,,,,,NIvel 4 de Gestionar Pedidos (1): Gestionar boleta de entrega (1.5.3),,,cyHnGFeD.9An
+4,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Alta de remito 1.5.3.1,,,cyHnOvkAdF.F
+5,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Actualización de estado de remito 1.5.3.3,,,cyHnxERZLV_0
+6,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Remitos,,,cyHnnAK-szKw
+7,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Enviar remito 1.5.3.4,,,cyHnRIh9sSEr
+8,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,cyHnEkKlfWOj
+9,Texto,Estándar,2,,,,,,,,NIvel 3 de Gestionar Pedidos (1): Burbuja Gestionar pago (1.5),,,sCHnV~Txb0ng
+10,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,sCHnN2urwiyQ
+11,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Registrar pago 1.5.1,,,sCHn7aMXBZFL
+12,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Comprobantes,,,sCHnsHa6VuU8
+13,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Validar por admin 1.5.2,,,sCHnBMYxj6fZ
+14,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,sCHnO1naY4Z3
+15,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar remito de entrega 1.5.3,,,sCHn~jq22mLE
+16,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar remito de entrega 1.5.3,,,EZHnl8MLulhK
+17,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,LZHnHlPTCOHb
+18,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Temporizador semanal,,,Z8-o9PljOtSK
+19,Texto,Estándar,2,,,,,,,,NIvel 3 Actualizacion semanal del stock en cantidades 2.5,,,98-o1Y.ivUdI
+20,Texto,Estándar,2,,,,,,,,Los viernes por el horario escolar,,,E_-o-_SK9oms
+21,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Verificar si el pago no esta validado,,,Fi_o8LR-zEuf
+22,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Sumar cantidad al stock,,,gj_o4y.ZfI2o
+23,Texto,Estándar,2,,,,,,,,Nivel 3 Verificar cantidades actuales de los warnigs 3.1,,,​-C_oAg6vIw8~
+24,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Temporizador de verificacion de limites,,,LI_oDUrK6qWN
+25,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Verificar si la cantidad actual esta por debajo,,,gJ_oMbb__yUL
+26,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Stock,,,_J_oy4CGgh-i
+27,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Notificar al admin,,,qL_o9fWvNeGe
+28,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Registar carrito 1.1,,,r5_oBr.U8uZG
+29,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Confirmar el pedido 1.2 ,,,r5_oCK.GqEte
+30,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,carrito,,,r5_oFpHedqvE
+31,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Temporizador de 24hrs 1.3,,,r5_oBV5z7mqp
+32,Texto,Estándar,2,,,,,,,,NIvel 3 de Gestionar Pedidos (1): Burbuja Gestionar carrito (1.5),,,Y6_oAA~C-jls
+33,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,36_olTNI__eJ
+34,Línea,,2,,,4,6,None,Arrow,,,,,cyHnByJhK_lB
+35,Línea,,2,,,5,6,None,Arrow,,,,,cyHnQgYBIrSq
+36,Línea,,2,,,6,7,None,Arrow,,,,,cyHnS.ZelaSc
+37,Línea,,2,,,7,8,None,Arrow,,email,,,cyHnJdRz0oU~
+38,Línea,,2,,,10,11,None,Arrow,,,,,sCHniIoZNi7J
+39,Línea,,2,,,11,12,None,Arrow,,Pago,,,sCHn67cmcErz
+40,Línea,,2,,,14,13,None,Arrow,,,,,sCHni.1ZT2Jt
+41,Línea,,2,,,13,15,None,CircleOpen,,,,,sCHn1PztTyaK
+42,Línea,,2,,,12,13,None,Arrow,,Estado del pedido,,,sCHnphV-dUxH
+43,Línea,,2,,,13,12,None,Arrow,,,,,sCHn2Fm33YTd
+44,Línea,,2,,,12,15,None,Arrow,,,,,sCHnQ~B4rV7U
+45,Línea,,2,,,17,4,None,Arrow,,,,,PZHnY0VoAIYF
+46,Línea,,2,,,18,21,None,Arrow,,,,,Z8-o7qvt3RU5
+47,Línea,,2,,,21,22,None,CircleClosed,,,,,fj_o2KiEwUlA
+48,Línea,,2,,,16,17,None,Arrow,,,,,RB_oSnAFpcRl
+49,Línea,,2,,,24,25,None,Arrow,,,,,eJ_ofzu_zYFR
+50,Línea,,2,,,26,25,None,Arrow,,,,,eK_oB0FSf0~D
+51,Línea,,2,,,25,27,None,Arrow,,,,,FK_oi2WqSUGy
+52,Línea,,2,,,25,26,None,Arrow,,,,,KL_o1ITu1KGI
+53,Línea,,2,,,33,28,None,Arrow,,,,,r5_oYVz5te8b
+54,Línea,,2,,,28,29,None,Arrow,,,,,r5_oICyTiL02
+55,Línea,,2,,,28,30,None,Arrow,,,,,r5_oQjGqe5NV
+56,Línea,,2,,,30,28,None,Arrow,,,,,r5_oTFBSZgq6
+57,Línea,,2,,,29,31,None,Arrow,,,,,r5_o6vubRduo
+58,Línea,,2,,,31,29,None,Arrow,,,,,r5_o~rsJl7yJ

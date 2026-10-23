@@ -1,0 +1,36 @@
+id,Nombre,Biblioteca de figuras,ID de página,Contenido por,Grupo,Origen de línea,Destino de la línea,Flecha de origen,Flecha de destino,Estado,Área de texto 1,Comentarios,Notas,ID de figura
+1,Documento,,,,,,,,,Borrador,DFD1-Quimica,,,b61b3f10-e0cd-4a1f-a708-4d9914ac57d1
+2,Página,,,,,,,,,,Página 1,,,0_0
+3,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,byUiofpYg6gC
+4,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar pedidos (1),,,pyUi7bzSvO6z
+5,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Base de datos,,,RyUioA0MqLeC
+6,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar Stock (2),,,gzUin8MoHHLp
+7,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Base de datos,,,BzUiK72FxO.4
+8,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar Alertas (3),,,VzUi6x1X_kac
+9,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,LAUil4SElG90
+10,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Consultas (4),,,5AUi3B4qgexY
+11,Texto,Estándar,2,,,,,,,,Nivel 1,,,mBUiDfTLyC4p
+12,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,FBUiSYXxd2i2
+13,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,SIstema de proceso de venta,,,PBUii0F2qzqz
+14,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,9BUiaXbLXskM
+15,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Base de datos,,,tCUi.2FW35GU
+16,Texto,Estándar,2,,,,,,,,Nivel 0,,,CCUi9jqPjTN4
+17,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Temporizador (5),,,XpHnx.sxexYK
+18,Línea,,2,,,3,4,None,Arrow,,,,,lyUiOFJ13VAd
+19,Línea,,2,,,4,5,None,Arrow,,,,,OyUiO3QubXrf
+20,Línea,,2,,,5,4,None,Arrow,,,,,0yUiYfY2-MaP
+21,Línea,,2,,,4,6,None,Arrow,,,,,ezUih96Kl9h0
+22,Línea,,2,,,6,7,None,Arrow,,,,,zzUi64e9FBoZ
+23,Línea,,2,,,7,6,None,Arrow,,,,,KzUi_c0S18gC
+24,Línea,,2,,,7,8,None,Arrow,,,,,UzUiV5LKrkeC
+25,Línea,,2,,,8,9,None,Arrow,,,,,JAUip4YCN7NT
+26,Línea,,2,,,6,10,None,Arrow,,,,,3AUih4Rp3KAM
+27,Línea,,2,,,12,13,None,Arrow,,,,,OBUiJrv8sxqm
+28,Línea,,2,,,13,14,None,Arrow,,,,,7BUilTmQUULr
+29,Línea,,2,,,14,13,None,Arrow,,,,,eCUiO4VpoZ.J
+30,Línea,,2,,,13,12,None,Arrow,,,,,mCUi0lGvqjPb
+31,Línea,,2,,,13,15,None,Arrow,,,,,sCUiW9~YT6GT
+32,Línea,,2,,,15,13,None,Arrow,,,,,ACUi5wXQzB7i
+33,Línea,,2,,,9,10,None,Arrow,,,,,NF4m13MDA_-X
+34,Línea,,2,,,3,10,None,Arrow,,,,,YF4m.Pii.w5s
+35,Línea,,2,,,17,8,None,Arrow,,,,,VpHnpuCCarlR

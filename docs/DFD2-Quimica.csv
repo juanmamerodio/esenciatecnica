@@ -1,0 +1,45 @@
+id,Nombre,Biblioteca de figuras,ID de página,Contenido por,Grupo,Origen de línea,Destino de la línea,Flecha de origen,Flecha de destino,Estado,Área de texto 1,Comentarios,Notas,ID de figura
+1,Documento,,,,,,,,,Borrador,DFD2-Quimica,,,afb9b366-838b-4eae-a743-4830f0454024
+2,Página,,,,,,,,,,Página 1,,,0_0
+3,Texto,Estándar,2,,,,,,,,NIvel 2 de Gestionar Pedidos (1),,,BuLh-DC_am1k
+4,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Alta de pedido (1.2),,,EHLhtO-b587P
+5,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Consultar pedido (1.4),,,OSLhvAk9C~-4
+6,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Pedido,,,2XLhI90trMZr
+7,Texto,Estándar,2,,,,,,,,Nivel 2 de Gestionar Stock (2),,,.HMhZX-ZKKyH
+8,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Modificar stock 2.3,,,vNMhPKr-jnIB
+9,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Stock,,,vNMh47WUbXIY
+10,Texto,Estándar,2,,,,,,,,Nivel 2 de Gestionar Alertas (3),,,ePMhNbWeGE5C
+11,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Alta de alerta 3.2,,,XPMh31MZnErR
+12,Base de datos,Figuras de diagrama de flujo/contenedores,2,,,,,,,,alerta,,,XPMh9wtanAhK
+13,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Enviar alertas 3.3,,,0SMhb4c.bGlJ
+14,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cliente,,,wUSiwOcumPvX
+15,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Actualizacion de variables del stock 2.4,,,XmTieI9JRvrA
+16,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,r1JjeeMjrSRo
+17,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar pago (1.3),,,JTSiw.4vsBVQ
+18,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,GvHnSou.~yTm
+19,Proceso,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Admin,,,vwHnRBhhbO.K
+20,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Alta de stock 2.1,,,vNMh1aPALW5V
+21,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Verificar cantidades actuales de los warnigs 3.1,,,dAHnvfsiLCoh
+22,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Actualizacion de variables del stock 2.5,,,_8VoDB6CmRWV
+23,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Actualizacion semanal del stock en cantidades 2.5,,,HW-o-svHnw0M
+24,Texto,Estándar,2,,,,,,,,*Campo: cantidades_reservadas se va a ir sumando semnalmente si la compra no fue ejecutada (viernes). Dependiendo del estado del comprabante validado por el admin.,,,a2-o.6YezUOA
+25,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar pedido 1.1,,,y5_o1Y3_6MHK
+26,Línea,,2,,,4,6,None,Arrow,,,,,SWLhvLCAaIXz
+27,Línea,,2,,,6,5,None,Arrow,,,,,6WLhxAj1tssu
+28,Línea,,2,,,20,9,None,Arrow,,,,,vNMhMl1vx50F
+29,Línea,,2,,,8,9,None,Arrow,,,,,vNMh-jZDp_mo
+30,Línea,,2,,,11,12,None,Arrow,,,,,XPMhV77iuc81
+31,Línea,,2,,,12,13,None,Arrow,,,,,XSMhEH3vnbso
+32,Línea,,2,,,5,6,None,Arrow,,,,,aabiXnbbj.lr
+33,Línea,,2,,,17,6,None,Arrow,,,,,NTSiiOxXN8Un
+34,Línea,,2,,,19,20,None,Arrow,,,,,ywHn5Zoy0YXd
+35,Línea,,2,,,13,16,None,Arrow,,Alerta del Stock,,,q1JjM03nHhQ4
+36,Línea,,2,,,14,17,None,Arrow,,,,,dvHnSAwD78-3
+37,Línea,,2,,,18,5,None,Arrow,,,,,IvHn6-TLuIjt
+38,Línea,,2,,,19,8,None,Arrow,,,,,DwHnlEip6TI9
+39,Línea,,2,,,21,11,None,Arrow,,,,,UAHncvJ.D-a_
+40,Línea,,2,,,22,21,None,Arrow,,,,,cDHnzKZR587A
+41,Línea,,2,,,8,23,None,Arrow,,,,,_4-ocZYwpnwF
+42,Línea,,2,,,8,15,None,Arrow,,,,,d5-o.-mobJIf
+43,Línea,,2,,,14,25,None,Arrow,,,,,x5_oWhZLRheP
+44,Línea,,2,,,25,4,None,Arrow,,,,,N5_oH8uFfEfB

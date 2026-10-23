@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f8f9fa">
+<meta name="description" content="Esencia Técnica - E.E.S.T N°1 Luciano Reyes | Prototipo SPA compilado (e-commerce escolar)">
+<title>Esencia Técnica - SPA Prototype</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary:#154212;
+  --on-primary:#ffffff;
+  --primary-container:#2d5a27;
+  --on-primary-container:#9dd090;
+  --secondary:#4c6700;
+  --on-secondary:#ffffff;
+  --secondary-container:#c9f16f;
+  --on-secondary-container:#516d00;
+  --error:#ba1a1a;
+  --on-error:#ffffff;
+  --error-container:#ffdad6;
+  --on-error-container:#93000a;
+  --background:#f8f9fa;
+  --on-background:#191c1d;
+  --surface:#f8f9fa;
+  --on-surface:#191c1d;
+  --surface-variant:#e1e3e4;
+  --on-surface-variant:#42493e;
+  --surface-container-lowest:#ffffff;
+  --surface-container-low:#f3f4f5;
+  --surface-container:#edeeef;
+  --surface-container-high:#e7e8e9;
+  --surface-container-highest:#e1e3e4;
+  --outline:#72796e;
+  --outline-variant:#c2c9bb;
+  --radius-lg:18px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent;scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--background);color:var(--on-surface);-webkit-font-smoothing:antialiased;overflow-x:hidden;min-height:100vh}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit}
+input{font-family:inherit}
+::selection{background:var(--secondary-container);color:var(--on-secondary-container)}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+.font-headline{font-family:'Poppins',sans-serif}
+.font-mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+h1,h2,h3,h4{font-family:'Poppins',sans-serif;line-height:1.2}
+
+.mi{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;display:inline-block;line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;-webkit-font-smoothing:antialiased;user-select:none;vertical-align:middle}
+.mi.filled{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+
+.container{max-width:1280px;margin:0 auto;padding:0 24px}
+.glass-panel{background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08)}
+.glass-modal{background:rgba(255,255,255,.9);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);box-shadow:0 10px 25px -5px rgba(0,0,0,.05)}
+.animate-in{animation:fadeUp .5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.float-badge{animation:bounce 2.2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface-variant);border-radius:9999px}
+::-webkit-scrollbar-thumb:hover{background:var(--outline-variant)}
+
+/* ===== Public Layout ===== */
+.topnav{position:sticky;top:0;z-index:50;width:100%;background:rgba(248,249,250,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(194,201,187,.2);box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.topnav-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:12px;text-align:left}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:rgba(21,66,18,.10);color:var(--primary);display:flex;align-items:center;justify-content:center;border:1px solid rgba(21,66,18,.2);flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;min-width:0}
+.logo-name{font-family:'Poppins';font-weight:700;color:var(--primary);font-size:1.125rem;line-height:1;white-space:nowrap}
+.logo-sub{font-size:9px;color:var(--on-surface-variant);letter-spacing:.08em;text-transform:uppercase;margin-top:3px;font-weight:500;white-space:nowrap}
+.pillnav{display:none;align-items:center;gap:2px;background:rgba(237,238,239,.5);padding:4px;border-radius:999px;border:1px solid rgba(194,201,187,.3);font-size:14px;font-weight:500}
+.pillnav .pill{padding:9px 20px;border-radius:999px;color:var(--on-surface-variant);transition:all .2s}
+.pillnav .pill:hover{color:var(--on-surface)}
+.pillnav .pill.active{background:var(--primary);color:var(--on-primary);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.cart-btn{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--on-surface-variant);border-radius:50%;transition:all .2s}
+.cart-btn:hover{color:var(--primary);background:rgba(243,244,245,.6)}
+.cart-badge{position:absolute;top:-3px;right:-3px;background:var(--primary);color:var(--on-primary);font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:1px solid var(--surface)}
+.gestion-btn{display:none;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;border:1px solid var(--outline-variant);color:var(--on-surface-variant);font-size:14px;font-weight:500;transition:all .2s}
+.gestion-btn:hover{background:var(--surface-container-lowest)}
+.gestion-icon{display:flex;width:36px;height:36px;align-items:center;justify-content:center;color:var(--on-surface-variant);border-radius:50%;transition:all .2s}
+.gestion-icon:hover{color:var(--primary);background:rgba(243,244,245,.6)}
+
+/* ===== Footer ===== */
+.footer{background:var(--surface-container-highest);padding:48px 24px;border-top:1px solid rgba(194,201,187,.3);margin-top:64px}
+.footer-grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:32px}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--primary);font-weight:700;font-size:16px}
+.footer-brand p{font-family:'Poppins'}
+.footer-desc{color:var(--on-surface-variant);font-size:12px;line-height:1.6;max-width:300px;margin-top:12px}
+.footer h4{color:var(--on-surface);font-weight:600;font-size:14px;margin-bottom:12px}
+.footer-info{color:var(--on-surface-variant);font-size:14px}
+.footer-info + .footer-info{margin-top:4px}
+.cycle-chip{display:inline-block;margin-top:16px;padding:4px 10px;border-radius:6px;background:var(--surface-container);color:var(--on-surface-variant);font-family:'JetBrains Mono';font-size:10px;font-weight:700}
+.footer-copy{max-width:1280px;margin:48px auto 0;padding-top:32px;border-top:1px solid rgba(194,201,187,.3);text-align:center;color:var(--on-surface-variant);font-size:12px}
+
+/* ===== Home ===== */
+.hero{position:relative;overflow:hidden;padding:48px 0 96px;border-bottom:1px solid rgba(194,201,187,.3)}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(21,66,18,.05),transparent 65%);z-index:-1}
+.hero-grid{display:grid;grid-template-columns:1fr;gap:48px;align-items:center}
+.hero h1{font-weight:800;font-size:clamp(2.25rem,2rem + 3.5vw,3.75rem);letter-spacing:-.02em;color:var(--on-surface)}
+.badge-tech{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(201,241,111,.5);color:var(--on-secondary-container);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--secondary);flex-shrink:0}
+.hero-copy p{color:var(--on-surface-variant);font-size:1.125rem;line-height:1.7;max-width:32rem}
+.hc>*+*{margin-top:20px}
+.cta{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:var(--primary);color:var(--on-primary);border-radius:10px;font-weight:700;font-size:1rem;box-shadow:0 1px 3px rgba(0,0,0,.1);transition:box-shadow .2s}
+.cta:hover{box-shadow:0 6px 16px rgba(21,66,18,.28)}
+.img-frame{position:relative;padding:8px;border-radius:16px;transform:rotate(1deg);transition:transform .5s}
+.img-frame:hover{transform:rotate(0)}
+.img-frame>img{width:100%;height:400px;object-fit:cover;border-radius:12px}
+.badge-float{position:absolute;bottom:-24px;left:-8px;display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,.1)}
+.badge-float .mi-badge{width:40px;height:40px;border-radius:10px;background:var(--secondary-container);color:var(--on-secondary-container);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.badge-float .t1{font-size:10px;font-weight:700;color:var(--outline);text-transform:uppercase;letter-spacing:.06em}
+.badge-float .t2{font-size:14px;font-weight:700;color:var(--on-surface)}
+.section-pad{padding:96px 0}
+.section-head h2{font-weight:700;font-size:clamp(1.75rem,1.5rem + 1vw,2.25rem);color:var(--on-surface)}
+.section-head p{color:var(--on-surface-variant);margin-top:8px;font-size:16px}
+
+/* ===== Product Cards ===== */
+.grid-products{display:grid;grid-template-columns:1fr;gap:32px}
+.prod{background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .3s,box-shadow .3s}
+.prod:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(21,66,18,.10)}
+.prod-img{height:224px;position:relative;padding:24px;background:var(--surface-container-low);display:flex;align-items:center;justify-content:center}
+.prod-img>img{width:100%;height:100%;object-fit:cover;border-radius:10px;mix-blend-mode:multiply;opacity:.9;transition:opacity .3s}
+.prod:hover .prod-img>img{opacity:1}
+.ph-badge{position:absolute;top:16px;right:16px;background:rgba(248,249,250,.92);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);padding:4px 10px;border-radius:999px;font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--on-surface);border:1px solid rgba(194,201,187,.3)}
+.prod-body{padding:24px;flex:1;display:flex;flex-direction:column}
+.prod-cat{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary)}
+.prod-name{font-family:'Poppins';font-weight:700;font-size:1.125rem;color:var(--on-surface);margin-top:4px}
+.prod-desc{font-size:14px;color:var(--on-surface-variant);margin-top:8px;flex:1;line-height:1.55}
+.prod-foot{margin-top:24px;padding-top:16px;border-top:1px solid rgba(194,201,187,.3);display:flex;justify-content:space-between;align-items:center;gap:12px}
+.prod-price{font-family:'JetBrains Mono';font-weight:700;font-size:20px;color:var(--on-surface);white-space:nowrap}
+.prod-price small{font-size:12px;color:var(--outline);font-family:'Inter';font-weight:400}
+.add-btn{width:40px;height:40px;border-radius:50%;background:rgba(21,66,18,.10);color:var(--primary);display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s,transform .15s;flex-shrink:0}
+.add-btn:hover{background:var(--primary);color:var(--on-primary)}
+.add-btn:active{transform:scale(.92)}
+.add-btn .mi{font-size:20px}
+.gestion-btn .mi{font-size:18px}
+.login-icon .mi{font-size:32px}
+.status-dot .mi{font-size:14px}
+.login-main .submit-btn .mi{font-size:20px}
+
+/* ===== Catalog ===== */
+.catalog-hero{padding:48px 0 32px;border-bottom:1px solid rgba(194,201,187,.3)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.chip{padding:8px 16px;border-radius:999px;background:var(--surface-container);color:var(--on-surface-variant);border:1px solid transparent;font-size:13px;font-weight:600;transition:all .2s}
+.chip:hover{background:var(--surface-container-high)}
+.chip.active{background:var(--secondary-container);color:var(--on-secondary-container);font-weight:700}
+.searchbar{margin-top:20px;max-width:440px}
+.searchbar .search{position:relative;display:flex;align-items:center}
+.searchbar .mi{position:absolute;left:14px;color:var(--outline)}
+.searchbar input{width:100%;background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08);border-radius:10px;padding:12px 16px 12px 44px;font-size:14px;color:var(--on-surface);outline:none;transition:box-shadow .2s}
+.searchbar input:focus{box-shadow:0 0 0 2px var(--primary)}
+.searchbar input::placeholder{color:var(--outline-variant)}
+.empty-state{text-align:center;padding:64px 24px;color:var(--on-surface-variant)}
+.empty-state .mi{font-size:44px;color:var(--outline-variant)}
+
+/* ===== Investigation ===== */
+.inv-hero{padding:48px 0 96px;border-bottom:1px solid rgba(194,201,187,.3)}
+.inv-hero p{color:var(--on-surface-variant);font-size:1.0625rem;line-height:1.7;max-width:44rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;max-width:640px}
+.stat .stat-n{font-family:'Poppins';font-weight:800;font-size:clamp(1.75rem,1.5rem + 1.5vw,2.5rem);color:var(--on-surface)}
+.stat .stat-n.acc{color:var(--primary)}
+.stat .stat-l{font-size:11px;color:var(--on-surface-variant);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bento figure{overflow:hidden;border-radius:16px;position:relative}
+.bento figcaption{position:absolute;inset:auto 0 0 0;padding:24px 16px 12px;background:linear-gradient(to top,rgba(0,0,0,.45),transparent);color:#fff;font-size:12px;font-weight:600}
+.bento img{width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.bento figure:hover img{transform:scale(1.05)}
+.bento .b-h-1,.bento .b-h-4{aspect-ratio:4/3.2}
+.bento .b-h-2,.bento .b-h-3{aspect-ratio:4/2.8}
+.feat-card{background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08);border-radius:16px;padding:28px}
+.feat-card .mi-box{width:44px;height:44px;border-radius:12px;background:var(--secondary-container);color:var(--on-secondary-container);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.feat-card h3{font-weight:700;font-size:1.125rem;color:var(--on-surface)}
+.feat-card p{font-size:14px;color:var(--on-surface-variant);margin-top:8px;line-height:1.6}
+
+/* ===== Cart ===== */
+.cart-layout{max-width:1080px;margin:48px auto 96px;padding:0 24px;display:grid;grid-template-columns:1fr;gap:32px;align-items:start}
+.cart-row{display:flex;gap:16px;align-items:center;padding:16px;border-radius:16px;margin-bottom:16px}
+.cart-row img{width:88px;height:88px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.cart-row .c-name{font-weight:700;font-size:15px}
+.cart-row .c-cat{font-size:11px;color:var(--outline);text-transform:uppercase;font-weight:700;letter-spacing:.05em;margin-top:2px}
+.qty{display:flex;align-items:center;gap:10px;margin-top:10px}
+.qty button{width:28px;height:28px;border-radius:8px;background:var(--surface-container);color:var(--on-surface);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.qty button:hover{background:var(--surface-container-high)}
+.qty .q{min-width:22px;text-align:center;font-weight:700;font-family:'JetBrains Mono';font-size:14px}
+.c-line{font-family:'JetBrains Mono';font-weight:700;font-size:15px;margin-left:auto;white-space:nowrap}
+.c-line small{font-family:'Inter';color:var(--outline);font-weight:400}
+.c-remove{color:var(--on-surface-variant);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.c-remove:hover{color:var(--error);background:rgba(186,26,26,.06)}
+.cart-summary{padding:24px;border-radius:16px}
+.cart-summary h3{font-weight:700;font-size:1.25rem;margin-bottom:20px}
+.sum-row{display:flex;justify-content:space-between;font-size:14px;color:var(--on-surface-variant);margin-bottom:10px}
+.sum-row.total{border-top:1px solid rgba(194,201,187,.3);margin-top:16px;padding-top:16px;color:var(--on-surface);font-size:18px;font-weight:700;font-family:'JetBrains Mono'}
+.sum-row.total small{font-family:'Inter';font-size:12px;color:var(--outline);font-weight:400}
+.checkout-btn{width:100%;margin-top:20px;padding:14px;border-radius:10px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+.checkout-btn:hover{opacity:.9}
+
+/* ===== Login ===== */
+.login-wrap{min-height:100vh;position:relative;overflow:hidden;background:var(--surface);display:flex;flex-direction:column}
+.login-blob{position:absolute;z-index:0;pointer-events:none;border-radius:50%;filter:blur(100px)}
+.blob-1{top:25%;left:25%;width:384px;height:384px;background:rgba(21,66,18,.12)}
+.blob-2{bottom:30%;right:22%;width:500px;height:500px;background:rgba(76,103,0,.08)}
+.login-back{position:absolute;top:24px;left:24px;z-index:20;display:flex;align-items:center;gap:8px;color:var(--on-surface-variant);font-weight:700;font-size:14px;transition:color .2s}
+.login-back:hover{color:var(--primary)}
+.login-main{flex:1;display:flex;align-items:center;justify-content:center;padding:64px 24px;position:relative;z-index:10}
+.login-card{position:relative;width:100%;max-width:28rem;padding:32px 28px;border-radius:16px;overflow:hidden;box-shadow:0 10px 25px -5px rgba(0,0,0,.08);border:.5px solid rgba(194,201,187,.4)}
+.login-card .accent{position:absolute;top:0;left:0;width:100%;height:4px;background:var(--primary)}
+.login-head{text-align:center;margin-bottom:40px}
+.login-icon{width:64px;height:64px;margin:0 auto 24px;background:rgba(237,238,239,.5);border:.5px solid rgba(194,201,187,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--primary)}
+.login-head h1{font-size:1.5rem;font-weight:700;color:var(--primary);margin-bottom:8px}
+.login-head p{font-size:14px;color:var(--on-surface-variant)}
+.field{position:relative;margin-bottom:24px}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--outline);margin-bottom:4px;transition:color .2s}
+.field .line{position:relative;display:flex;align-items:center}
+.field .line .mi{position:absolute;left:0;color:var(--outline-variant);pointer-events:none;transition:color .2s}
+.field input{width:100%;background:transparent;border:0;border-bottom:1px solid rgba(194,201,187,.5);padding:8px 32px;color:var(--on-surface);font-size:16px;outline:none;border-radius:0;transition:border-color .2s}
+.field input::placeholder{color:var(--outline-variant)}
+.field input:focus{border-bottom-color:var(--primary)}
+.field:focus-within label{color:var(--primary)}
+.field:focus-within .mi{color:var(--primary)}
+.submit-btn{width:100%;background:var(--primary);color:var(--on-primary);font-weight:700;padding:14px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;transition:background .2s,opacity .2s}
+.submit-btn:hover{background:var(--primary-container)}
+.submit-btn:disabled{opacity:.7;cursor:wait}
+.login-secure{border-top:1px solid rgba(194,201,187,.2);margin-top:32px;padding-top:24px;text-align:center}
+.login-secure p{font-size:11px;color:var(--outline);display:flex;align-items:center;justify-content:center;gap:6px}
+
+/* ===== Admin ===== */
+.admin-shell{min-height:100vh;display:flex;background:var(--background)}
+.sidebar{display:none;width:256px;flex-direction:column;position:fixed;left:0;top:0;height:100%;background:var(--surface-container-lowest);border-right:1px solid rgba(194,201,187,.2);padding:16px;z-index:40}
+.side-brand{padding:0 8px;margin-bottom:32px}
+.side-brand h1{font-size:1.25rem;font-weight:700;color:var(--primary);letter-spacing:-.01em}
+.side-brand p{font-size:12px;font-weight:500;color:var(--on-surface-variant)}
+.side-nav{flex:1;display:flex;flex-direction:column;gap:8px}
+.side-btn{position:relative;border-radius:10px;font-weight:700;display:flex;align-items:center;gap:12px;padding:12px;color:var(--on-surface-variant);transition:all .18s}
+.side-btn .mi{font-size:22px}
+.side-btn:hover{background:var(--surface-container-high);color:var(--on-surface)}
+.side-btn.active{background:var(--secondary-container);color:var(--on-secondary-container)}
+.side-btn.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:32px;background:var(--secondary);border-radius:0 8px 8px 0}
+.side-logout{margin-top:auto;border-top:1px solid rgba(194,201,187,.2);padding-top:16px}
+.logout-btn{width:100%;display:flex;align-items:center;gap:12px;padding:8px;color:var(--error);border-radius:10px;transition:background .2s;margin-top:8px;font-size:14px;font-weight:700}
+.logout-btn:hover{background:rgba(255,218,214,.5)}
+.admin-main{flex:1;min-height:100vh;display:flex;flex-direction:column}
+.admin-topbar{height:64px;flex-shrink:0;background:rgba(248,249,250,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(194,201,187,.3);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:30;gap:16px}
+.topbar-brand{font-family:'Poppins';font-weight:700;color:var(--primary);white-space:nowrap}
+.topbar-label{display:none;font-size:12px;font-weight:700;color:var(--outline);text-transform:uppercase;letter-spacing:.12em}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.report-btn{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--primary);color:var(--on-primary);border-radius:8px;font-size:14px;font-weight:700;transition:opacity .2s}
+.report-btn:hover{opacity:.9}
+.avatar{width:32px;height:32px;border-radius:50%;overflow:hidden;background:var(--surface-container-high);border:1px solid rgba(194,201,187,.5);flex-shrink:0}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.mobile-tabs{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(194,201,187,.2);background:var(--surface);position:sticky;top:64px;z-index:25}
+.mobile-tab{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:14px;text-align:center;color:var(--on-surface-variant);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
+.mobile-tab.active{background:var(--secondary-container);color:var(--on-secondary-container)}
+.admin-content{flex:1;padding:16px;overflow-x:hidden}
+.admin-inner{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+
+/* ===== Admin KPIs ===== */
+.kpi-grid{display:grid;grid-template-columns:1fr;gap:24px}
+.kpi{position:relative;overflow:hidden;padding:24px;border-radius:14px;display:flex;flex-direction:column;justify-content:space-between;min-height:150px}
+.kpi .deco{position:absolute;right:0;top:0;width:96px;height:96px;border-radius:0 0 0 9999px;transition:transform .3s;z-index:0}
+.kpi:hover .deco{transform:scale(1.1)}
+.kpi>*{position:relative;z-index:1}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.kpi-icon{width:40px;height:40px;border-radius:10px;background:var(--surface-container);display:flex;align-items:center;justify-content:center}
+.kpi-chip{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;color:var(--on-secondary-container);background:rgba(201,241,111,.25)}
+.kpi-label{font-size:11px;font-weight:700;color:var(--outline);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.kpi-value{font-family:'Poppins';font-weight:700;font-size:2.25rem;color:var(--on-surface);line-height:1}
+.kpi-error{border:1px solid rgba(186,26,26,.25);border-left:4px solid var(--error);background:rgba(186,26,26,.05)}
+.kpi-error .kpi-icon{background:var(--error-container);color:var(--error)}
+.kpi-error .kpi-label{color:var(--error)}
+.kpi-error .kpi-value{color:var(--error)}
+.kpi-error .kpi-sub{font-size:12px;color:rgba(147,0,10,.85);margin-top:8px;font-weight:700}
+.kpi-store{display:flex;flex-direction:column;justify-content:center}
+.store-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.store-head p{font-size:11px;font-weight:700;color:var(--outline);text-transform:uppercase;letter-spacing:.06em}
+.bar-block{margin-bottom:16px}
+.bar-block:last-child{margin-bottom:0}
+.bar-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.bar-row .b-name{color:var(--on-surface);font-weight:500}
+.bar-row .b-val{color:var(--outline);font-weight:700}
+.bar{width:100%;height:6px;background:var(--surface-container-high);border-radius:999px;overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:999px}
+
+/* ===== Admin Panel & Table ===== */
+.panel-split{display:flex;flex-direction:column;gap:12px;justify-content:space-between;align-items:stretch}
+.panel-split .pt{min-width:0}
+.panel-split h2{font-weight:700;font-size:1.5rem;color:var(--on-surface);letter-spacing:-.01em}
+.panel-split p{font-size:14px;color:var(--on-surface-variant);margin-top:4px}
+.panel-actions{display:flex;gap:12px;width:100%}
+.search-glass{flex:1;position:relative;display:flex;align-items:center;background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08);border-radius:10px;padding:4px 12px;min-width:0}
+.search-glass .mi{color:var(--outline);margin-right:8px;font-size:20px;flex-shrink:0}
+.search-glass input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:var(--on-surface);padding:8px 0;min-width:0}
+.search-glass input::placeholder{color:var(--outline-variant)}
+.table-card{background:rgba(255,255,255,.7);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border:.5px solid rgba(0,0,0,.08);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.table-head{padding:16px;border-bottom:1px solid rgba(194,201,187,.3);display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(255,255,255,.4)}
+.table-head h3{font-family:'Poppins';font-weight:700;color:var(--on-surface);font-size:1.125rem}
+.table-tools{display:flex;gap:8px}
+.tool-btn{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--on-surface-variant);transition:all .2s}
+.tool-btn:hover{background:var(--surface-container);color:var(--on-surface)}
+.table-scroll{overflow-x:auto;min-width:0}
+table{width:100%;border-collapse:collapse;font-size:14px;text-align:left}
+thead th{padding:16px;background:rgba(243,244,245,.5);border-bottom:1px solid rgba(194,201,187,.2);font-size:10px;font-weight:700;color:var(--on-surface-variant);text-transform:uppercase;letter-spacing:.08em;vertical-align:middle}
+thead th.r,td.r{text-align:right}
+thead th.c,td.c{text-align:center}
+tbody tr{border-bottom:1px solid rgba(194,201,187,.1);transition:background .18s}
+tbody tr:hover{background:rgba(243,244,245,.8)}
+tbody tr.alert{background:rgba(186,26,26,.05)}
+tbody tr.alert:hover{background:rgba(186,26,26,.1)}
+td{padding:16px;vertical-align:middle}
+td.id-mono{font-family:'JetBrains Mono';font-size:12px;color:var(--outline);white-space:nowrap}
+tr:hover td.id-mono{color:var(--primary)}
+tr.alert td.id-mono{color:var(--error);font-weight:700}
+td .p-name{font-weight:700;color:var(--on-surface)}
+td .p-sub{font-size:12px;color:var(--outline);margin-top:2px}
+.tag{display:inline-block;padding:4px 10px;border-radius:6px;background:var(--surface-container);color:var(--on-surface-variant);font-size:11px;border:1px solid rgba(194,201,187,.2);white-space:nowrap}
+td .c-qty{font-family:'JetBrains Mono';font-weight:700;white-space:nowrap}
+td .c-qty small{font-family:'Inter';font-weight:400;opacity:.7;font-size:12px}
+td .est{font-size:10px;color:var(--outline);margin-top:3px;white-space:nowrap}
+.status-dot{display:inline-flex;width:24px;height:24px;border-radius:50%;align-items:center;justify-content:center}
+.status-dot.ok{background:var(--secondary-container);color:var(--on-secondary-container)}
+.status-dot.warn{background:var(--error-container);color:var(--error)}
+.status-dot.mid{background:var(--surface-variant);color:var(--on-surface-variant)}
+.more-btn{padding:6px;border-radius:50%;color:var(--outline);opacity:0;transition:all .2s}
+tr:hover .more-btn{opacity:1}
+.more-btn:hover{color:var(--primary);background:var(--surface-container)}
+.hide-sm{display:none}
+
+/* Status chip orders */
+.schip{display:inline-block;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.schip.ok{background:rgba(201,241,111,.35);color:var(--on-secondary-container)}
+.schip.pending{background:var(--surface-container-high);color:var(--on-surface-variant)}
+.schip.bad{background:var(--error-container);color:var(--on-error-container)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--on-background);color:#fff;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform .3s,opacity .3s;z-index:300;box-shadow:0 10px 30px rgba(0,0,0,.2);max-width:calc(100vw - 48px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:576px){
+  .panel-split{flex-direction:row;align-items:center}
+  .panel-actions{width:auto}
+}
+@media (min-width:640px){
+  .hide-sm{display:table-cell}
+}
+@media (min-width:768px){
+  .pillnav{display:flex}
+  .gestion-btn{display:flex}
+  .gestion-icon{display:none}
+  .grid-products{grid-template-columns:repeat(3,1fr)}
+  .footer-grid{grid-template-columns:repeat(4,1fr)}
+  .kpi-grid{grid-template-columns:repeat(3,1fr)}
+  .kpi-store{grid-column:span 3}
+  .cart-layout{grid-template-columns:1fr 360px}
+  .admin-content{padding:32px}
+  .sidebar{display:flex}
+  .admin-main{margin-left:256px}
+  .mobile-tabs{display:none}
+  .topbar-label{display:flex}
+  .topbar-brand{display:none}
+}
+@media (min-width:1024px){
+  .hero-grid{grid-template-columns:repeat(12,1fr)}
+  .hero-copy{grid-column:span 6}
+  .hero-visual{grid-column:span 6}
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .kpi-store{grid-column:span 1}
+}
+@media (min-width:640px){.badge-float{left:-24px;bottom:-24px}}
+@media (max-width:380px){.badge-float{left:-6px;padding:12px}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ DATA ============ */
+var PRODUCTS = [
+  { id:'prod_1', name:'Película BioTec 1 Alginato', category:'Envoltorio Biodegradable', description:'Película polimérica flexible con reticulación iónica de CaCl₂ y ácido tánico hidrorresistente.', price:1200, stock:45, ph:'pH 7.0 Neutro', image:'https://lh3.googleusercontent.com/aida-public/AB6AXuDAb5vg3kza3tD5Weip8yqDPR2sTuHziNbpRfiBt-542cQbowWN7cS5qiHR_Kg5bb_6tvCKoqVjzNVcXlCcIinVK_oBWlKzxneA5jHswfxDG7WyNdGLwLvKvMk917X4ge_rejSTBlrtE21Os07Fweve5m6c1VQ8RfyP_H-8xYr6jrDY5--zlTWCit0rCfMoNFBDlCGxn-7u01CvgFh68DcYnXEmudKlOFk0NAuO30brPnGzFZ0xQLkaqTRHCyFdgXQ7bZM' },
+  { id:'prod_2', name:'Extracto Celular Bioactivo', category:'Extracto Botánico', description:'Matriz botánica altamente concentrada formulada para regeneración y preservación dérmica.', price:8000, stock:22, ph:'pH 5.5', image:'https://lh3.googleusercontent.com/aida-public/AB6AXuCUnbzeL5Inu4U8LPbitDL5Y2RcwQGNc7pCLMgu6LIDCvlQmreJAcLUBeg3uM4lHHc5svrVDyVLtuaoWUZqg_xdrrS14EqSzWQVISYcbL6YT0qPpQI7hs1cIsgmXU4R5aOpWraXvXpOLg73vY7bT6kOd71a3wt9VOT97cmqAZGhdPek6z5mC0cYKdk7cLb9Gkrvu029PA8_I894zswg5lpLuhXyBs7xZ5PaK2M3HT2Q_DxAdbP7yJnwwN8PiggIBahpooI' },
+  { id:'prod_3', name:'Solución Alginato Sódico Base', category:'Reactivo Calibrado', description:'Reactivo de grado analítico preparado para síntesis de polímeros y encapsulaciones hidrosolubles.', price:4450, stock:80, ph:'99.8% Pureza', image:'https://lh3.googleusercontent.com/aida-public/AB6AXuAa4vV_yBqPyM_KnLhJb4ymzu5Vy0i3XdIx1N4biB6in4QXRQeEN93HPSPS87DXzW1wkiQBdebPv6L-hSJZXXdyHiBFWcHq9SppatRXT3KT2vMMm43v1lWaCjJMKyvkPtFYMr6aAq-FgLf1gRktJ6U4gQE_nu7OJ64ji3RfnLax-VTKgHSCW5l4Lc0WkGp3YZ-350wbV4k3tA_WmdKd7JCgsnN0mn7krevtFFDmPeCq1Ozh2Nb_8eSWBrd2FU0ryMl2In4' }
+];
+
+var INVENTORY = [
+  { id:'STK-001', name:'Película BioTec 1 (Alginato)', category:'Bioplástico', type:'Sólido film', stock:45, standard:50, status:'optimo' },
+  { id:'STK-002', name:'Cloruro de Calcio (CaCl₂) Solución 1%', category:'Reactivo', type:'Líquido inmersión', stock:3, standard:20, status:'critico' },
+  { id:'STK-003', name:'Ácido Tánico (Polifenoles)', category:'Reactivo', type:'Polvo fino', stock:850, standard:1000, status:'optimo' },
+  { id:'STK-004', name:'Glicerina Vegetal Pura', category:'Plastificante', type:'Líquido viscoso', stock:2, standard:15, status:'reponer' },
+  { id:'STK-005', name:'Extracto Celular Bioactivo 30ml', category:'Producto Terminado', type:'Gotero vidrio', stock:22, standard:30, status:'optimo' }
+];
+
+var ORDERS = [
+  { id:'#ORD-8821', client:'Lab Farmacológico Sur', date:'24/10/2023', total:12450, status:'Enviado' },
+  { id:'#ORD-8822', client:'Clínica Estética Integral', date:'25/10/2023', total:4200, status:'Pendiente' },
+  { id:'#ORD-8820', client:'Dermatología Avanzada', date:'23/10/2023', total:28900, status:'Entregado' }
+];
+
+var IMG_TEAM = 'https://lh3.googleusercontent.com/aida-public/AB6AXuD3x_l5QxlzrlA9tjDuPfIalZTiaZgBjAup2sStWDisVfVq1Kr26SrOozsrt_GYh1EG-_PTVIy8RsIKOaQD4J6zlJF-N7qMN4P7cNnarekrjMBtERxg7dicCSKmS7OjfnpmHGiINzthWzOJlbOqsh8EAZUy3gBuuGGqDjrtcRzhgpS0iVfMMR1xr38imhoUTPFGv2fPUYMXRr94onpLPYNdKf_tlyGxEYh6flHnEynsKOciknQWrIbKGqzsOllo9fXix_A';
+var IMG_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFO2EeHstJoMCdiGlBCtrV3rnQh-siYMXgLT7s4_gY4loHOLduK6_6hvvHSSBKnUOh7xm-oFHaxznFNAWlF4yEhf8LDYJ7JNjuWwiMQkbuIS3_IGD0WdVGeK3yVmYnsq_LCQMqG1AIIjRHHGAwS8_5c15jzq9rXZQBR6IN0U2ONP-nLl4aTTWn7GaOozDk7uTJ5ITT4l1uyYPZmUCBAviMqryGg9tT20J_1-Kft8oiegvSkNd5T7p1';
+
+/* ============ STATE ============ */
+var STATE = { view:'home', cat:'all', query:'' };
+var CART = { prod_1:2, prod_2:0, prod_3:0 };
+
+/* ============ HELPERS ============ */
+function mi(icon, filled, cls) {
+  return '<span class="mi' + (filled ? ' filled' : '') + (cls ? ' ' + cls : '') + '">' + icon + '</span>';
+}
+function money(n) { return '$ ' + n.toLocaleString('es-AR'); }
+function cartCount() {
+  var t = 0;
+  for (var k in CART) t += CART[k];
+  return t;
+}
+function byId(id, fallback) { return PRODUCTS.filter(function (p) { return p.id === id; })[0] || fallback; }
+
+function toast(msg) {
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.innerHTML = mi('check_circle', true) + '<span>' + msg + '</span>';
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(function () { el.classList.remove('show'); }, 2200);
+}
+
+function go(view) {
+  STATE.view = view;
+  paint();
+  window.scrollTo({ top: 0 });
+}
+
+/* ============ PRODUCT CARD ============ */
+function productCard(p) {
+  return '<div class="prod">' +
+    '<div class="prod-img">' +
+      '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">' +
+      '<span class="ph-badge">' + p.ph + '</span>' +
+    '</div>' +
+    '<div class="prod-body">' +
+      '<span class="prod-cat">' + p.category + '</span>' +
+      '<h3 class="prod-name">' + p.name + '</h3>' +
+      '<p class="prod-desc">' + p.description + '</p>' +
+      '<div class="prod-foot">' +
+        '<span class="prod-price">' + money(p.price) + ' <small>ARS</small></span>' +
+        '<button class="add-btn" onclick="addToCart(\'' + p.id + '\')" aria-label="Agregar ' + p.name + '">' + mi('add_shopping_cart') + '</button>' +
+      '</div>' +
+    '</div></div>';
+}
+
+/* ============ PUBLIC SHELL ============ */
+function shell(active, body) {
+  return '<div class="topnav animate-in">' +
+    '<div class="topnav-inner">' +
+      '<button class="logo" onclick="go(\'home\')">' +
+        '<span class="logo-icon">' + mi('science') + '</span>' +
+        '<span class="logo-text"><span class="logo-name">Esencia Técnica</span><span class="logo-sub">E.E.S.T N°1 Luciano Reyes</span></span>' +
+      '</button>' +
+      '<div class="pillnav">' +
+        '<button class="pill' + (active === 'home' ? ' active' : '') + '" onclick="go(\'home\')">Inicio</button>' +
+        '<button class="pill' + (active === 'catalog' ? ' active' : '') + '" onclick="go(\'catalog\')">Catálogo</button>' +
+        '<button class="pill' + (active === 'investigation' ? ' active' : '') + '" onclick="go(\'investigation\')">Investigación</button>' +
+      '</div>' +
+      '<div class="nav-actions">' +
+        '<button class="cart-btn" onclick="go(\'cart\')" aria-label="Carrito">' + mi('shopping_cart') + '<span class="cart-badge" id="cart-badge">' + cartCount() + '</span></button>' +
+        '<button class="gestion-btn" onclick="go(\'login\')">' + mi('admin_panel_settings') + '<span>Gestión</span></button>' +
+        '<button class="gestion-icon" onclick="go(\'login\')" aria-label="Acceso administrador">' + mi('admin_panel_settings') + '</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+  '<main>' + body + '</main>' +
+  footerHTML();
+}
+
+function footerHTML() {
+  return '<footer class="footer">' +
+    '<div class="footer-grid">' +
+      '<div>' +
+        '<div class="footer-brand">' + mi('biotech') + '<p>Esencia Técnica</p></div>' +
+        '<p class="footer-desc">Proyecto de vinculación técnica y desarrollo biotecnológico sostenible desarrollado por estudiantes de 7.° año de Química.</p>' +
+      '</div>' +
+      '<div><h4>Institución</h4><p class="footer-info">E.E.S.T N°1 "Luciano Reyes"</p><p class="footer-info">Campana, Buenos Aires</p></div>' +
+      '<div><h4>Contacto</h4><p class="footer-info">proyectos@esenciatecnica.edu.ar</p><span class="cycle-chip">Ciclo Lectivo 2026</span></div>' +
+      '<div><h4>Accesos</h4><p class="footer-info">Catálogo de productos</p><p class="footer-info">Investigación BioTec</p><p class="footer-info">Panel docente (Gestión)</p></div>' +
+    '</div>' +
+    '<div class="footer-copy">© 2026 Esencia Técnica · E.E.S.T N°1 Luciano Reyes.</div>' +
+  '</footer>';
+}
+
+/* ============ HOME ============ */
+function homeHTML() {
+  var featured = PRODUCTS.map(productCard).join('');
+  return '<div class="animate-in">' +
+    '<section class="hero">' +
+      '<div class="container hero-grid">' +
+        '<div class="hero-copy hc">' +
+          '<span class="badge-tech"><span class="badge-dot pulse"></span>Investigación Técnica</span>' +
+          '<h1>Nuestra esencia técnica <br><span style="color:var(--primary)">más cerca de vos.</span></h1>' +
+          '<p>Avanzamos en la frontera de la biotecnología y síntesis botánica. Fórmulas de extractos naturales y películas biodegradables desarrolladas por alumnos.</p>' +
+          '<div style="margin-top:28px"><button class="cta" onclick="go(\'catalog\')">Explorar Catálogo ' + mi('arrow_forward', false, '') + '</button></div>' +
+        '</div>' +
+        '<div class="hero-visual" style="position:relative">' +
+          '<div class="img-frame glass-panel">' +
+            '<img src="' + PRODUCTS[0].image + '" alt="Laboratorio BioTec">' +
+          '</div>' +
+          '<div class="badge-float glass-modal float-badge">' +
+            '<div class="mi-badge">' + mi('verified', true) + '</div>' +
+            '<div><p class="t1">Iniciativa Sostenible</p><p class="t2">BioTec 1 Alginatos</p></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</section>' +
+    '<section class="container section-pad">' +
+      '<div class="section-head" style="margin-bottom:48px"><h2>Lanzamientos y Fórmulas</h2><p>Compuestos clínicos validados listos para distribución.</p></div>' +
+      '<div class="grid-products">' + featured + '</div>' +
+    '</section>' +
+  '</div>';
+}
+
+/* ============ CATALOG ============ */
+function catalogHTML() {
+  var cats = ['Envoltorio Biodegradable', 'Extracto Botánico', 'Reactivo Calibrado'];
+  var chips = '<button class="chip' + (STATE.cat === 'all' ? ' active' : '') + '" data-cat="all" onclick="setCat(\'all\')">Todos</button>';
+  cats.forEach(function (c) {
+    chips += '<button class="chip' + (STATE.cat === c ? ' active' : '') + '" data-cat="' + c + '" onclick="setCat(this.getAttribute(\'data-cat\'))">' + c + '</button>';
+  });
+  return '<div class="animate-in">' +
+    '<section class="catalog-hero">' +
+      '<div class="container">' +
+        '<span class="badge-tech"><span class="badge-dot pulse"></span>Catálogo Escolar</span>' +
+        '<h1 style="font-size:clamp(1.9rem,1.6rem+1.6vw,2.75rem);font-weight:700;margin-top:16px">Catálogo de Productos</h1>' +
+        '<p style="color:var(--on-surface-variant);margin-top:10px;max-width:36rem">Formulaciones desarrolladas por los alumnos de 7.° año de Química, listas para encargarse por lote escolar.</p>' +
+        '<div class="searchbar"><div class="search">' + mi('search') + '<input id="cat-search" type="text" placeholder="Buscar por nombre, categoría o descripción…" oninput="applyFilters()" value="' + STATE.query + '"></div></div>' +
+        '<div class="chips">' + chips + '</div>' +
+      '</div>' +
+    '</section>' +
+    '<section class="container section-pad" style="padding-top:48px">' +
+      '<div class="grid-products" id="cat-grid"></div>' +
+    '</section>' +
+  '</div>';
+}
+
+function catalogFiltered() {
+  var q = (STATE.query || '').toLowerCase();
+  return PRODUCTS.filter(function (p) {
+    var okCat = STATE.cat === 'all' || p.category === STATE.cat;
+    var okQ = !q || p.name.toLowerCase().indexOf(q) > -1 || p.category.toLowerCase().indexOf(q) > -1 || p.description.toLowerCase().indexOf(q) > -1;
+    return okCat && okQ;
+  });
+}
+
+function applyFilters() {
+  var inp = document.getElementById('cat-search');
+  if (inp) STATE.query = inp.value;
+  document.querySelectorAll('.chips .chip').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-cat') === STATE.cat);
+  });
+  var grid = document.getElementById('cat-grid');
+  if (!grid) return;
+  var list = catalogFiltered();
+  grid.innerHTML = list.length
+    ? list.map(productCard).join('')
+    : '<div class="empty-state">' + mi('search_off') + '<h3 style="margin-top:12px">Sin resultados</h3><p style="margin-top:6px">Probá con otro término o categoría.</p></div>';
+}
+
+function setCat(c) {
+  STATE.cat = c;
+  applyFilters();
+}
+
+/* ============ INVESTIGATION ============ */
+function investigationHTML() {
+  return '<div class="animate-in">' +
+    '<section class="inv-hero">' +
+      '<div class="container">' +
+        '<span class="badge-tech"><span class="badge-dot pulse"></span>BioTec 1 · 2026</span>' +
+        '<h1 style="font-size:clamp(1.9rem,1.6rem+1.6vw,2.75rem);font-weight:700;margin-top:16px">Películas biodegradables de alginato</h1>' +
+        '<p style="margin-top:16px">Investigación aplicada del departamento de Química: desarrollamos envoltorios poliméricos a partir de alginato sódico, reticulados iónicamente con CaCl₂ y reforzados con ácido tánico para resistencia a la humedad.</p>' +
+        '<div class="stats">' +
+          '<div class="stat"><p class="stat-n">100%</p><p class="stat-l">Biodegradable</p></div>' +
+          '<div class="stat"><p class="stat-n">98%</p><p class="stat-l">Retención de masa</p></div>' +
+          '<div class="stat"><p class="stat-n acc">Campana</p><p class="stat-l">Polo Científico EEST N°1</p></div>' +
+        '</div>' +
+      '</div>' +
+    '</section>' +
+    '<section class="container section-pad">' +
+      '<div class="section-head" style="margin-bottom:32px"><h2>En el laboratorio</h2><p>El proceso detrás de cada lote.</p></div>' +
+      '<div class="bento">' +
+        '<figure class="b-h-1"><img src="' + PRODUCTS[0].image + '" alt="Laboratorio" loading="lazy"><figcaption>Síntesis en laboratorio</figcaption></figure>' +
+        '<figure class="b-h-2"><img src="' + PRODUCTS[2].image + '" alt="Muestras" loading="lazy"><figcaption>Control de muestras</figcaption></figure>' +
+        '<figure class="b-h-3"><img src="' + PRODUCTS[1].image + '" alt="Extractos" loading="lazy"><figcaption>Extractos botánicos</figcaption></figure>' +
+        '<figure class="b-h-4"><img src="' + IMG_TEAM + '" alt="Trabajo en equipo" loading="lazy"><figcaption>Trabajo de 7.° año</figcaption></figure>' +
+      '</div>' +
+    '</section>' +
+    '<section class="container section-pad" style="padding-top:0">' +
+      '<div class="section-head" style="margin-bottom:32px"><h2>Aportes del proyecto</h2></div>' +
+      '<div class="grid-products">' +
+        featCard('recycling', '100% Biodegradable', 'Los envoltorios se degradan por completo sin residuos tóxicos. Pensados para reducir el uso de plásticos de un solo uso en la institución.') +
+        featCard('grain', 'Reticulación iónica', 'El CaCl₂ entrecruza las cadenas de alginato otorgando estabilidad estructural y resistencia mecánica controlada.') +
+        featCard('local_florist', 'Doble propósito', 'Cada lote combina formación técnica real con un producto comercializable a la comunidad escolar.') +
+      '</div>' +
+    '</section>' +
+  '</div>';
+}
+
+function featCard(icon, title, text) {
+  return '<div class="feat-card"><div class="mi-box">' + mi(icon) + '</div><h3>' + title + '</h3><p>' + text + '</p></div>';
+}
+
+/* ============ CART ============ */
+function cartHTML() {
+  var items = PRODUCTS.filter(function (p) { return (CART[p.id] || 0) > 0; });
+  var total = items.reduce(function (acc, p) { return acc + (CART[p.id] || 0) * p.price; }, 0);
+
+  if (!items.length) {
+    return '<div class="cart-layout" style="grid-template-columns:1fr"><div class="empty-state glass-panel" style="border-radius:16px;padding:72px 24px">' +
+      mi('remove_shopping_cart', false, '') +
+      '<h3 style="margin-top:16px;font-family:Poppins">Tu carrito está vacío</h3>' +
+      '<p style="margin-top:8px">Explorá el catálogo y sumá productos de los lotes escolares.</p>' +
+      '<div style="margin-top:24px"><button class="cta" onclick="go(\'catalog\')">Ir al catálogo</button></div>' +
+    '</div></div>';
+  }
+
+  var rows = items.map(function (p) {
+    return '<div class="cart-row glass-panel">' +
+      '<img src="' + p.image + '" alt="' + p.name + '">' +
+      '<div style="min-width:0;flex:1">' +
+        '<p class="c-cat">' + p.category + '</p>' +
+        '<p class="c-name">' + p.name + '</p>' +
+        '<div class="qty">' +
+          '<button onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Restar">' + mi('remove') + '</button>' +
+          '<span class="q">' + CART[p.id] + '</span>' +
+          '<button onclick="changeQty(\'' + p.id + '\',1)" aria-label="Sumar">' + mi('add') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<span class="c-line">' + money(CART[p.id] * p.price) + ' <small>ARS</small></span>' +
+      '<button class="c-remove" onclick="changeQty(\'' + p.id + '\',-9999)" aria-label="Quitar ' + p.name + '">' + mi('delete') + '</button>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="cart-layout">' +
+    '<div class="animate-in">' +
+      '<span class="badge-tech"><span class="badge-dot pulse"></span>Pedido Escolar</span>' +
+      '<h1 style="font-size:clamp(1.9rem,1.6rem+1.6vw,2.75rem);font-weight:700;margin:16px 0 24px">Tu carrito</h1>' +
+      '<div>' + rows + '</div>' +
+    '</div>' +
+    '<aside class="cart-summary glass-panel animate-in">' +
+      '<h3>Resumen del pedido</h3>' +
+      '<div class="sum-row"><span>Productos</span><span>' + items.length + '</span></div>' +
+      '<div class="sum-row"><span>Unidades</span><span>' + cartCount() + '</span></div>' +
+      '<div class="sum-row total"><span>Total</span><span>' + money(total) + ' <small>ARS</small></span></div>' +
+      '<button class="checkout-btn" onclick="checkout()">' + mi('lock_open') + '<span>Iniciar Checkout</span></button>' +
+      '<p style="font-size:11px;color:var(--outline);margin-top:14px;text-align:center">El pago se realiza por transferencia al alias institucional.</p>' +
+    '</aside>' +
+  '</div>';
+}
+
+function changeQty(id, delta) {
+  CART[id] = (CART[id] || 0) + delta;
+  if (CART[id] < 0) CART[id] = 0;
+  paint();
+  var b = document.getElementById('cart-badge');
+  if (b) b.textContent = cartCount();
+}
+function checkout() { toast('Checkout en desarrollo para el prototipo'); }
+
+/* ============ LOGIN ============ */
+function loginHTML() {
+  return '<div class="login-wrap animate-in">' +
+    '<div class="login-blob blob-1"></div>' +
+    '<div class="login-blob blob-2"></div>' +
+    '<button class="login-back" onclick="go(\'home\')">' + mi('arrow_back') + 'Volver al inicio</button>' +
+    '<main class="login-main">' +
+      '<div class="login-card glass-modal">' +
+        '<div class="accent"></div>' +
+        '<div class="login-head">' +
+          '<div class="login-icon">' + mi('biotech', false, '') + '</div>' +
+          '<h1>Acceso Administrador</h1>' +
+          '<p>Ingrese sus credenciales para acceder al panel técnico.</p>' +
+        '</div>' +
+        '<form onsubmit="return handleLogin(event)">' +
+          '<div class="field">' +
+            '<label for="op-id">ID de Operador</label>' +
+            '<div class="line">' + mi('badge') + '<input id="op-id" type="text" placeholder="Ej. OP-7492" required></div>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label for="op-pass">Clave de Acceso</label>' +
+            '<div class="line">' + mi('lock') + '<input id="op-pass" type="password" placeholder="••••••••" required></div>' +
+          '</div>' +
+          '<div style="margin-top:8px">' +
+            '<button type="submit" class="submit-btn" id="login-btn">Ingresar al Panel ' + mi('login') + '</button>' +
+          '</div>' +
+        '</form>' +
+        '<div class="login-secure"><p>' + mi('encrypted') + 'Conexión segura 256-bit</p></div>' +
+      '</div>' +
+    '</main>' +
+  '</div>';
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = 'Validando... ' + mi('progress_activity', false, 'spin');
+  setTimeout(function () { go('admin-stock'); }, 1000);
+  return false;
+}
+
+/* ============ ADMIN ============ */
+function adminShell(active, body) {
+  return '<div class="admin-shell">' +
+    '<aside class="sidebar">' +
+      '<div class="side-brand"><h1>Panel Técnico</h1><p style="margin-top:4px">E.E.S.T N°1 Luciano Reyes</p></div>' +
+      '<nav class="side-nav">' +
+        '<button class="side-btn' + (active === 'admin-stock' ? ' active' : '') + '" onclick="go(\'admin-stock\')">' + mi('inventory_2', active === 'admin-stock') + '<span>Stock</span></button>' +
+        '<button class="side-btn' + (active === 'admin-orders' ? ' active' : '') + '" onclick="go(\'admin-orders\')">' + mi('receipt_long', active === 'admin-orders') + '<span>Pedidos</span></button>' +
+      '</nav>' +
+      '<div class="side-logout">' +
+        '<button class="logout-btn" onclick="go(\'home\')">' + mi('logout') + '<span>Cerrar Sesión</span></button>' +
+      '</div>' +
+    '</aside>' +
+    '<div class="admin-main">' +
+      '<header class="admin-topbar">' +
+        '<span class="topbar-brand">Esencia Técnica</span>' +
+        '<span class="topbar-label">' + (active === 'admin-orders' ? 'Seguimiento de Pedidos' : 'Gestión de Inventario') + '</span>' +
+        '<div class="topbar-actions">' +
+          '<button class="report-btn">' + mi('add', false, '') + '<span>Reporte</span></button>' +
+          '<div class="avatar"><img src="' + IMG_AVATAR + '" alt="Administrador"></div>' +
+        '</div>' +
+      '</header>' +
+      '<div class="mobile-tabs">' +
+        '<button class="mobile-tab' + (active === 'admin-stock' ? ' active' : '') + '" onclick="go(\'admin-stock\')">' + mi('inventory_2') + 'Stock</button>' +
+        '<button class="mobile-tab' + (active === 'admin-orders' ? ' active' : '') + '" onclick="go(\'admin-orders\')">' + mi('receipt_long') + 'Pedidos</button>' +
+      '</div>' +
+      '<main class="admin-content">' +
+        '<div class="admin-inner">' + body + '</div>' +
+      '</main>' +
+    '</div>' +
+  '</div>';
+}
+
+function statusBadge(status) {
+  if (status === 'optimo') return '<span class="status-dot ok">' + mi('check', false, '') + '</span>';
+  if (status === 'critico') return '<span class="status-dot warn">' + mi('warning', true, '') + '</span>';
+  return '<span class="status-dot mid">' + mi('remove') + '</span>';
+}
+
+function unitOf(type) {
+  if (type.indexOf('Líquido') > -1) return 'L';
+  if (type.indexOf('Polvo') > -1) return 'g';
+  return 'u';
+}
+
+function adminStockHTML() {
+  var rows = INVENTORY.map(function (it) {
+    return '<tr class="' + (it.status === 'critico' ? 'alert' : '') + '">' +
+      '<td class="id-mono">' + it.id + '</td>' +
+      '<td><p class="p-name">' + it.name + '</p><p class="p-sub">' + it.type + '</p></td>' +
+      '<td class="hide-sm"><span class="tag">' + it.category + '</span></td>' +
+      '<td class="r"><p class="c-qty' + (it.status === 'critico' ? '" style="color:var(--error)' : '') + '">' + it.stock + ' <small>' + unitOf(it.type) + '</small></p><p class="est">Est: ' + it.standard + '</p></td>' +
+      '<td class="c">' + statusBadge(it.status) + '</td>' +
+      '<td class="r"><button class="more-btn" aria-label="Acciones"><span class="mi">more_vert</span></button></td>' +
+    '</tr>';
+  }).join('');
+
+  return '<div class="panel-split">' +
+    '<div class="pt">' +
+      '<h2>Inventario General</h2>' +
+      '<p>Última actualización: Sist. Automatizado • 14:02 ART</p>' +
+    '</div>' +
+    '<div class="panel-actions">' +
+      '<div class="search-glass">' + mi('search') + '<input type="text" placeholder="Buscar reactivo o ID..." aria-label="Buscar"></div>' +
+      '<button class="report-btn" style="border-radius:10px">' + mi('add') + '<span>Alta Lote</span></button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="kpi-grid">' +
+    '<div class="kpi glass-panel"><div class="deco" style="background:rgba(201,241,111,.3)"></div>' +
+      '<div class="kpi-top"><div class="kpi-icon" style="color:var(--primary)">' + mi('science') + '</div><span class="kpi-chip">+12% vs Mes Ant.</span></div>' +
+      '<div><p class="kpi-label">Artículos Activos</p><p class="kpi-value">1,248</p></div>' +
+    '</div>' +
+    '<div class="kpi glass-panel"><div class="deco" style="background:rgba(21,66,18,.05)"></div>' +
+      '<div class="kpi-icon" style="color:var(--secondary);margin-bottom:16px">' + mi('category') + '</div>' +
+      '<div><p class="kpi-label">Categorías Registradas</p><p class="kpi-value">14</p></div>' +
+    '</div>' +
+    '<div class="kpi kpi-error">' +
+      '<div class="kpi-top"><div class="kpi-icon">' + mi('warning', true) + '</div><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:var(--error)"></span></div>' +
+      '<div><p class="kpi-label">Nivel Crítico</p><p class="kpi-value">7</p><p class="kpi-sub">Requieren reposición inmediata</p></div>' +
+    '</div>' +
+    '<div class="kpi kpi-store glass-panel">' +
+      '<div class="store-head"><p>Capacidad de Almacén</p>' + mi('warehouse') + '</div>' +
+      '<div>' +
+        '<div class="bar-block"><div class="bar-row"><span class="b-name">Refrigerado (2-8°C)</span><span class="b-val">82%</span></div><div class="bar"><span style="width:82%;background:var(--secondary)"></span></div></div>' +
+        '<div class="bar-block"><div class="bar-row"><span class="b-name">Ambiente Controlado</span><span class="b-val">45%</span></div><div class="bar"><span style="width:45%;background:var(--primary)"></span></div></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="table-card">' +
+    '<div class="table-head"><h3>Registro Detallado</h3><div class="table-tools"><button class="tool-btn" title="Filtrar">' + mi('filter_list') + '</button><button class="tool-btn" title="Exportar CSV">' + mi('download') + '</button></div></div>' +
+    '<div class="table-scroll"><table>' +
+      '<thead><tr>' +
+        '<th>ID Lote</th><th>Producto / Componente</th><th class="hide-sm">Categoría</th><th class="r">Cant. Actual</th><th class="c">Estado</th><th class="r">Acciones</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table></div>' +
+  '</div>';
+}
+
+function schip(status) {
+  if (status === 'Enviado' || status === 'Entregado') return '<span class="schip ok">' + status + '</span>';
+  if (status === 'Pendiente') return '<span class="schip pending">' + status + '</span>';
+  return '<span class="schip bad">' + status + '</span>';
+}
+
+function adminOrdersHTML() {
+  var rows = ORDERS.map(function (o) {
+    return '<tr>' +
+      '<td class="id-mono">' + o.id + '</td>' +
+      '<td><p class="p-name">' + o.client + '</p><p class="p-sub">Comprobante verificado por IA</p></td>' +
+      '<td class="hide-sm">' + o.date + '</td>' +
+      '<td class="r"><p class="c-qty">' + money(o.total) + ' <small>ARS</small></p></td>' +
+      '<td>' + schip(o.status) + '</td>' +
+      '<td class="r"><button class="more-btn" aria-label="Acciones"><span class="mi">more_vert</span></button></td>' +
+    '</tr>';
+  }).join('');
+
+  return '<div class="panel-split">' +
+    '<div class="pt"><h2>Seguimiento de Pedidos</h2><p>Validación de comprobantes vía Gemini · E.E.S.T N°1</p></div>' +
+    '<div class="panel-actions">' +
+      '<div class="search-glass">' + mi('search') + '<input type="text" placeholder="Buscar pedido o cliente..." aria-label="Buscar"></div>' +
+      '<button class="report-btn" style="border-radius:10px">' + mi('qr_code_scanner') + '<span>Verificar</span></button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="kpi-grid">' +
+    '<div class="kpi glass-panel"><div class="deco" style="background:rgba(201,241,111,.3)"></div>' +
+      '<div class="kpi-icon" style="color:var(--primary);margin-bottom:16px">' + mi('orders') + '</div>' +
+      '<div><p class="kpi-label">Pedidos Totales</p><p class="kpi-value">128</p></div>' +
+    '</div>' +
+    '<div class="kpi glass-panel"><div class="deco" style="background:rgba(21,66,18,.05)"></div>' +
+      '<div class="kpi-icon" style="color:var(--secondary);margin-bottom:16px">' + mi('hourglass_top') + '</div>' +
+      '<div><p class="kpi-label">Pendientes</p><p class="kpi-value">9</p></div>' +
+    '</div>' +
+    '<div class="kpi kpi-error">' +
+      '<div class="kpi-top"><div class="kpi-icon">' + mi('gpp_bad') + '</div><span class="pulse" style="width:8px;height:8px;border-radius:50%;background:var(--error)"></span></div>' +
+      '<div><p class="kpi-label">Rechazados</p><p class="kpi-value">2</p><p class="kpi-sub">Comprobantes observados por la IA</p></div>' +
+    '</div>' +
+    '<div class="kpi kpi-store glass-panel" style="justify-content:center">' +
+      '<div class="store-head"><p>Validación IA</p>' + mi('psychology') + '</div>' +
+      '<div>' +
+        '<div class="bar-block"><div class="bar-row"><span class="b-name">Pre-aprobados</span><span class="b-val">94%</span></div><div class="bar"><span style="width:94%;background:var(--secondary)"></span></div></div>' +
+        '<div class="bar-block"><div class="bar-row"><span class="b-name">Tiempo medio</span><span class="b-val">12 s</span></div><div class="bar"><span style="width:40%;background:var(--primary)"></span></div></div>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="table-card">' +
+    '<div class="table-head"><h3>Últimos Pedidos</h3><div class="table-tools"><button class="tool-btn" title="Filtrar">' + mi('filter_list') + '</button><button class="tool-btn" title="Exportar CSV">' + mi('download') + '</button></div></div>' +
+    '<div class="table-scroll"><table>' +
+      '<thead><tr><th>Pedido</th><th>Cliente / Institución</th><th class="hide-sm">Fecha</th><th class="r">Total</th><th>Estado</th><th class="r">Acciones</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table></div>' +
+  '</div>';
+}
+
+/* ============ RENDERER ============ */
+function renderView() {
+  switch (STATE.view) {
+    case 'catalog': return shell('catalog', catalogHTML());
+    case 'investigation': return shell('investigation', investigationHTML());
+    case 'cart': return shell('cart', cartHTML());
+    case 'login': return loginHTML();
+    case 'admin-orders': return adminShell('admin-orders', adminOrdersHTML());
+    case 'admin-stock': return adminShell('admin-stock', adminStockHTML());
+    default: return shell('home', homeHTML());
+  }
+}
+
+function paint() {
+  document.getElementById('app').innerHTML = renderView();
+  if (STATE.view === 'catalog') {
+    var inp = document.getElementById('cat-search');
+    if (inp) inp.value = STATE.query;
+    applyFilters();
+  }
+}
+
+paint();
+</script>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
