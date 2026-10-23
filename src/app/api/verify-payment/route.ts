@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServiceSupabase } from '@/lib/supabase';
-import { verifyReceiptWithGemini } from '@/lib/gemini';
+import { getServiceSupabase, type OrderStatus } from '@/lib/supabase';
 import { OrderService } from '@/services/order.service';
 import { VerifyPaymentSchema } from '@/lib/schemas';
 import { Resend } from 'resend';
@@ -13,7 +12,8 @@ const rateLimitMap = new Map<string, { count: number, lastAttempt: number }>();
 
 /**
  * API ROUTE: /api/verify-payment
- * Flujo Hardened: Rate Limit -> Validation -> Idempotency -> Analysis -> Persistence -> Notification
+ * Flujo: Rate Limit -> Validation -> Idempotency -> Upload -> Persistence -> Notification
+ * La validación del comprobante es manual (Administradores de Química): no hay IA.
  */
 export async function POST(req: Request) {
   try {
@@ -86,44 +86,30 @@ export async function POST(req: Request) {
 
     const comprobanteUrl = publicUrlData.publicUrl;
 
-    // 5. ANÁLISIS IA (GEMINI)
-    const iaResponse = await verifyReceiptWithGemini(imageBase64, mimeType, totalEsperado);
-
-    // 6. PERSISTENCIA Y CAMBIO DE ESTADO
-    // Guardamos auditoría
-    await serviceClient.from('verificaciones').insert({
-      pedido_id: pedidoId,
-      respuesta_gemini: iaResponse,
-      verificado: iaResponse.valid
-    });
-
-    const nuevoEstado = iaResponse.valid ? 'pre_aprobado' : 'comprobante_subido';
+    // 5. PERSISTENCIA Y CAMBIO DE ESTADO
+    // Validación manual: el comprobante queda subido y a la espera del Administrador de Química.
+    const nuevoEstado: OrderStatus = 'comprobante_subido';
     await OrderService.updateStatus(pedidoId, nuevoEstado, {
-      comprobante_url: comprobanteUrl,
-      log_ia: iaResponse
+      comprobante_url: comprobanteUrl
     });
 
-    // 7. NOTIFICACIÓN RESEND
+    // 6. NOTIFICACIÓN RESEND
     try {
       const pedidoInfo = await OrderService.getById(pedidoId);
       const apiKey = process.env.RESEND_API_KEY;
 
       if (pedidoInfo?.email && apiKey) {
         const resend = new Resend(apiKey);
-        const isSuccess = iaResponse.valid;
 
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || 'quimica@eest1.edu.ar',
           to: pedidoInfo.email,
-          subject: isSuccess ? '✅ Pago Pre-Aprobado - Química Shop' : '📩 Comprobante Recibido - Química Shop',
+          subject: '📩 Comprobante recibido - Esencia Técnica',
           html: `
             <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 16px;">
-              <h2 style="color: ${isSuccess ? '#3d8c6e' : '#1c1c1e'};">${isSuccess ? '¡Pago Validado!' : 'Comprobante Recibido'}</h2>
+              <h2 style="color: #1c1c1e;">Comprobante recibido</h2>
               <p>Hola <strong>${pedidoInfo.nombre_cliente}</strong>,</p>
-              <p>${isSuccess
-              ? `Tu comprobante de <strong>$${totalEsperado} ARS</strong> fue validado exitosamente. Tu pedido ha sido pre-aprobado.`
-              : `Recibimos tu comprobante de <strong>$${totalEsperado} ARS</strong>. Un administrador lo revisará manualmente pronto.`
-            }</p>
+              <p>Recibimos tu comprobante de <strong>$${totalEsperado} ARS</strong>. Un Administrador de Química lo revisa manualmente y te avisamos cuando esté validado.</p>
               <div style="margin-top: 20px; padding: 15px; background: #f7f7f5; border-radius: 12px; font-size: 12px; color: #8e8e93; text-align: center;">
                 E.E.S.T N°1 Luciano Reyes · Departamento de Química
               </div>
@@ -138,8 +124,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       estado: nuevoEstado,
-      url: comprobanteUrl,
-      ia_valid: iaResponse.valid
+      url: comprobanteUrl
     });
 
   } catch (error) {

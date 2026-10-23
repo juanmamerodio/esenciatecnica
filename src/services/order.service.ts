@@ -63,20 +63,27 @@ export class OrderService {
   }
 
   /**
+   * Indica si el pedido ya tiene un comprobante cargado (idempotencia del checkout).
+   */
+  static async isProcessed(pedidoId: string): Promise<boolean> {
+    const order = await this.getById(pedidoId);
+    return Boolean(order?.comprobante_url);
+  }
+
+  /**
    * Actualiza el estado de un pedido y gestiona efectos secundarios (Webhooks).
-   * SOLUCIÓN AL ERROR DE TIPADO: Usamos Pedido['log_ia'] para asegurar compatibilidad.
    */
   static async updateStatus(
     pedidoId: string,
     status: OrderStatus,
-    log_ia: Pedido['log_ia'] = {} as Pedido['log_ia'] // <--- CORRECCIÓN AQUÍ
+    patch: Partial<Pedido> = {}
   ): Promise<{ success: boolean; error: string | null }> {
     const supabase = getServiceSupabase();
 
-    // Definimos el payload explícitamente como Partial<Pedido> para evitar errores de asignación
+    // El patch trae los campos que acompañan al cambio de estado (ej: comprobante_url).
     const updatePayload: Partial<Pedido> = {
-      estado: status,
-      log_ia: log_ia
+      ...patch,
+      estado: status
     };
 
     const { error } = await supabase

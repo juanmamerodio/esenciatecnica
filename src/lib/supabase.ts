@@ -45,7 +45,6 @@ export type Pedido = {
   total_ars: number;
   estado: OrderStatus;
   comprobante_url: string | null;
-  log_ia: GeminiResponse | null;
   created_at: string;
 }
 
@@ -56,23 +55,6 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
-
-export type GeminiResponse = {
-  valid: boolean;
-  amount_matches: boolean;
-  recipient_matches: boolean;
-  date_ok: boolean;
-  amount_found: number;
-  reason: string;
-}
-
-export type Verificacion = {
-  id: string;
-  pedido_id: string;
-  respuesta_gemini: GeminiResponse;
-  verificado: boolean;
-  created_at: string;
-}
 
 /**
  * DEFINICIÓN DEL ESQUEMA DE BASE DE DATOS
@@ -96,29 +78,14 @@ export type Database = {
       };
       pedidos: {
         Row: Pedido;
-        Insert: Omit<Pedido, 'id' | 'created_at' | 'telefono' | 'comprobante_url' | 'log_ia'> & { 
+        Insert: Omit<Pedido, 'id' | 'created_at' | 'telefono' | 'comprobante_url'> & { 
           id?: string; 
           created_at?: string;
           telefono?: string | null;
           comprobante_url?: string | null;
-          log_ia?: GeminiResponse | null;
         };
         Update: Partial<Pedido>;
         Relationships: [];
-      };
-      verificaciones: {
-        Row: Verificacion;
-        Insert: Omit<Verificacion, 'id' | 'created_at'> & { id?: string; created_at?: string };
-        Update: Partial<Verificacion>;
-        Relationships: [
-          {
-            foreignKeyName: "verificaciones_pedido_id_fkey";
-            columns: ["pedido_id"];
-            isOneToOne: false;
-            referencedRelation: "pedidos";
-            referencedColumns: ["id"];
-          }
-        ];
       };
     };
     Views: { [key: string]: never };
