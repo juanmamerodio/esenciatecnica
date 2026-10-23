@@ -1,0 +1,27 @@
+id,Nombre,Biblioteca de figuras,ID de página,Contenido por,Grupo,Origen de línea,Destino de la línea,Flecha de origen,Flecha de destino,Estado,Área de texto 1,Comentarios,Notas,ID de figura
+1,Documento,,,,,,,,,Borrador,DCU-Quimica,,,de071bba-d13d-4a71-b526-a51c6a221fe4
+2,Página,,,,,,,,,,Page 1,,,0_0
+3,Actor,UML,2,,,,,,,,Cliente,,,oVfvnPVkbZiA
+4,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Generar carrito,,,hWfvJxmfXR4-
+5,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Confirmar pedido,,,YWfvd3Cmu2h0
+6,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cargar comprobante,,,aXfvIA.BisJU
+7,Actor,UML,2,,,,,,,,Admin,,,rXfvn6PeR9tk
+8,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Gestionar stock,,,CXfvKbXEIij2
+9,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Validar comprobante,,,TXfvF1IAWM2c
+10,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Cambiar estados del comprobante,,,aYfvV5~.6kYO
+11,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Visualizar blog,,,C0fvtUzhDapt
+12,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Alta de producto,,,w3fvZR0qr3jD
+13,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Consultar stock,,,13fvKapBfTE8
+14,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Recibir alertas de stock,,,a5fv0YaUmRE~
+15,Conector,Figuras de diagrama de flujo/contenedores,2,,,,,,,,Recibir remito de entrega,,,y6fvxXwbO635
+16,Línea,,2,,,3,4,None,None,,<<incluye>>,,,oVfvGZBDKncg
+17,Línea,,2,,,4,5,None,Arrow,,<<incluye>>,,,XWfvdqph2SQS
+18,Línea,,2,,,3,6,None,None,,<<incluye>>,,,~WfvAbFcLEEF
+19,Línea,,2,,,7,8,None,None,,<<incluye>>,,,BXfvVFPeSMG~
+20,Línea,,2,,,7,9,None,None,,<<incluye>>,,,SXfvz1Eb6CPy
+21,Línea,,2,,,9,10,None,Arrow,,<<extend>>,,,.Xfv3Mr7QStU
+22,Línea,,2,,,3,11,None,None,,<<extend>>,,,B0fvzp-hlYu9
+23,Línea,,2,,,8,12,None,Arrow,,<<incluye>>,,,u3fvHKoxsewd
+24,Línea,,2,,,8,13,None,Arrow,,<<incluye>>,,,53fvwbrUS~.B
+25,Línea,,2,,,7,14,None,None,,<<incluye>>,,,~4fvHF1AFkKw
+26,Línea,,2,,,3,15,None,None,,<<incluye>>,,,x6fvUia9kbgG

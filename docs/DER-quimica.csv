@@ -1,0 +1,95 @@
+id,Nombre,Biblioteca de figuras,ID de página,Contenido por,Grupo,Origen de línea,Destino de la línea,Flecha de origen,Flecha de destino,Estado,Área de texto 1,Área de texto 2,Comentarios,Notas,ID de figura
+1,Documento,,,,,,,,,Borrador,DER-quimica,,,,d8c27501-67e7-491e-9675-98fe4564abbb
+2,Página,,,,,,,,,,Clase UML,,,,HWEp-vi-RSFO
+3,Clase,UML,2,,,,,,,,Pedido,"id_pedido int(PK)
+id_cliente int(FK)
+id_estado int(FK)
+fecha varchar(30)
+total int(200)",,,U_Epn0PlUUul
+4,Clase,UML,2,,,,,,,,Cliente,"id_cliente int(PK)
+id_carrito int(FK)
+dni int(11)
+nombre varchar(30)
+email varchar(30)
+telefono int(20)",,,U_EpCBzs7Tjd
+5,Clase,UML,2,,,,,,,,Detalle_del_pedido,"id_pedido int(PK)
+id_cliente int(FK)
+id_producto int(FK)
+estado varchar(30)
+fecha varchar(30)
+total int(200)
+cantidad int(300)
+precio_unitario int(200)",,,FOS5ab0hqqvm
+6,Clase,UML,2,,,,,,,,Producto,"id_producto int(PK)
+id_stock int (FK)
+id_detalle_pedido int(FK)
+nombre varchar(30)
+categoria varchar(30)
+tipo varchar(30)
+descripcion varchar(30)
+precio int(200)
+tiempo_produccion int(100)",,,QPS5xUd6pWPi
+7,Clase,UML,2,,,,,,,,Comprobante,"id_comprobante int(PK)
+id_pedido int(FK)
+foto_comprobante varchar
+fecha varchar(30)
+total int(200)",,,xSS5BZU-7YST
+8,Clase,UML,2,,,,,,,,Stock,"id_stock int(PK)
+id_producto int(FK)
+categoria varchar(30)
+tipo varchar(30)
+descripcion varchar(30)
+cantidad_actual int(500)
+cantidad_warning int(500)
+porcentaje int(500)
+cantidad_reservada int (100)",,,Li45rkbug.en
+9,Clase,UML,2,,,,,,,,Alerta_de_estado,"id_alerta int(PK)
+id_stock int(FK)
+fecha varchar(30)
+mes varchar(10)
+año varchar(4)
+porcentaje int(100)
+descripcion varchar(30)
+email_contacto int 200)",,,Fk45QLEwNatb
+10,Clase,UML,2,,,,,,,,Estados_pedidos,"id_estado int(PK)
+id_pedido int(FK)
+estado varchar(30)
+fecha date(30)",,,P1Siti1fY~pc
+11,Clase,UML,2,,,,,,,,remitos_de_venta,"id_remito int(PK)
+id_comprobante int(FK)
+id_cliente int(FK)
+fecha varchar(30)
+total int(200)
+producto_selec varchar(30)",,,lkWoeynH8wTt
+12,Clase,UML,2,,,,,,,,Estados_comprobante,"id_estado int(PK)
+id_pedido int(FK)
+estado varchar(30)
+fecha date(30)",,,fm9o41xTCF5I
+13,Clase,UML,2,,,,,,,,Detalle_carrito,"id_carrito int(PK)
+id_cliente int(FK)
+id_producto int(FK)
+dni int(11)
+nombre varchar(30)
+email varchar(30)
+cantidad int(30)
+producto_seleccionado varchar(40)",,,Fs9o2f4TOuuT
+14,Texto,Estándar,2,,,,,,,,"Si el comprobante es valido si afecta directamente al stock, si no lo suma semanalmente si la compra no fue ejecutada.",,,,k7-oXyEV_HAE
+15,Clase,UML,2,,,,,,,,Roll,"id_rol int(PK)
+descripcion_rol varchar(30)",,,D~CukGoYwDoZ
+16,Clase,UML,2,,,,,,,,Admin,"id_admin int(PK)
+dni int(11)
+nombre varchar(30)
+contrasenia varchar(30)",,,0~CuDhjnuTYK
+17,Línea,,2,,,5,6,CFN ERD Many Arrow,Measure,,,,,,GPS5WRBjIXA~
+18,Línea,,2,,,3,7,Measure,Measure,,,,,,tSS5NH9e400F
+19,Línea,,2,,,4,3,Measure,CFN ERD Many Arrow,,,,,,GVS5CVxPs0y_
+20,Línea,,2,,,3,5,Measure,CFN ERD Many Arrow,,,,,,CXS5AQb~iE5i
+21,Línea,,2,,,6,8,Measure,None,,,,,,bi45yPgdOBFE
+22,Línea,,2,,,10,3,CFN ERD Many Arrow,None,,,,,,U1SirKcA5wNc
+23,Línea,,2,,,8,9,Measure,CFN ERD Many Arrow,,,,,,J~Vo3g6Q7jTe
+24,Línea,,2,,,7,11,None,None,,,,,,1jWoB.w22uzX
+25,Línea,,2,,,12,,CFN ERD Many Arrow,None,,,,,,fm9oS9uv4ivw
+26,Línea,,2,,,6,13,CFN ERD Many Arrow,None,,,,,,gt9onH7lbkG~
+27,Línea,,2,,,4,13,Measure,None,,,,,,mW9o1CbvSrSM
+28,Línea,,2,,,4,15,Measure,None,,,,,,TpDuOls5.XAr
+29,Línea,,2,,,15,16,Measure,None,,,,,,gqDuNak3LvWe

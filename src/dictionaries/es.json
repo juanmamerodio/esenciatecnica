@@ -1,0 +1,79 @@
+{
+  "nav": {
+    "title": "EEST N°1",
+    "titleAccent": "Shop",
+    "langEs": "ES",
+    "langEn": "EN"
+  },
+  "catalog": {
+    "title": "Catálogo de",
+    "titleAccent": "Insumos",
+    "subtitle": "Seleccioná los materiales necesarios para tus prácticas de laboratorio.",
+    "addToCart": "Agregar",
+    "categories": {
+      "reactivos": "Reactivos",
+      "materiales": "Materiales",
+      "equipos": "Equipos"
+    }
+  },
+  "cart": {
+    "title": "Tu",
+    "titleAccent": "Carrito",
+    "empty": "Tu carrito está vacío.",
+    "goToCatalog": "Ir al catálogo",
+    "continueShopping": "Continuar comprando",
+    "emptyTitle": "El matraz está vacío",
+    "emptyDescription": "Parece que no has añadido ningún reactivo o equipo todavía. Explora nuestro catálogo para empezar tu pedido.",
+    "exploreProducts": "Explorar Productos",
+    "emptyNotice": "Agregá productos para continuar",
+    "each": "c/u",
+    "remove": "Eliminar",
+    "summary": {
+      "title": "Resumen del Pedido",
+      "subtotal": "Subtotal",
+      "shipping": "Envío",
+      "shippingNote": "Retiro en EEST N°1",
+      "total": "Total",
+      "cta": "Proceder al Pago",
+      "disclaimer": "El pago se realiza mediante transferencia. Se solicitará el comprobante en el siguiente paso."
+    }
+  },
+  "checkout": {
+    "title": "Finalizar",
+    "titleAccent": "Pedido",
+    "transfer": {
+      "title": "Datos para Transferencia",
+      "alias": "Alias",
+      "aliasValue": "quimica.reyes.eest1",
+      "cbu": "CBU",
+      "cbuValue": "0140000000000000000000",
+      "holder": "Titular",
+      "holderValue": "Cooperadora E.E.S.T N°1",
+      "totalLabel": "Total a transferir"
+    },
+    "aiNote": "Nuestro sistema está impulsado por <strong>Google Gemini IA</strong>. Por favor, asegurate de que la imagen del comprobante sea nítida y muestre claramente el importe y la fecha.",
+    "form": {
+      "name": "Nombre completo",
+      "namePlaceholder": "Ej: Juan Pérez",
+      "email": "Email estudiantil",
+      "emailPlaceholder": "ejemplo@eest1.edu.ar",
+      "receipt": "Comprobante de Transferencia",
+      "submit": "Finalizar y Enviar",
+      "submitting": "Verificando con IA..."
+    },
+    "success": {
+      "title": "¡Comprobante Recibido!",
+      "message": "La inteligencia artificial está verificando tu pago. Te enviaremos un email de confirmación a la brevedad.",
+      "backToCatalog": "Volver al catálogo"
+    },
+    "uploader": {
+      "clickToUpload": "Hacé clic para subir",
+      "dragHint": "o arrastrá el comprobante",
+      "formats": "JPG, PNG o WEBP (Máx. 5MB)",
+      "change": "Cambiar imagen"
+    }
+  },
+  "footer": {
+    "text": "E.E.S.T N°1 Luciano Reyes - Departamento de Química © 2026"
+  }
+}

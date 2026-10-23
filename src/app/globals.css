@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #f7f7f5;
+    --color-surface: #ffffff;
+    --color-glass: rgba(255, 255, 255, 0.62);
+    --color-accent: #3d8c6e;
+    --color-accent-lt: #e8f3ef;
+    --color-gray: #6b7280;
+    --color-gray-lt: #f0f0ee;
+    --color-text: #1c1c1e;
+    --color-muted: #8e8e93;
+    --color-border: rgba(0, 0, 0, 0.08);
+
+    --font-sans: var(--font-dm-sans), sans-serif;
+    --font-mono: var(--font-dm-mono), monospace;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Card base — elevación 1 */
+  .card {
+    background: var(--color-glass);
+    backdrop-filter: blur(20px) saturate(1.4);
+    -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid var(--color-border);
+    border-radius: 20px; /* M3 Expressive: esquinas generosas */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); /* Elevación sutil, no dramática */
+    transition: background 180ms ease, transform 180ms ease, opacity 180ms ease;
+  }
+
+  /* Efecto Hover general aplicado a las cards que actúan como interactuables */
+  .card-interactive:hover {
+    background: var(--color-gray-lt);
+    transform: translateY(-1px);
+  }
+
+  /* NavBar flotante — iOS 26 translucency */
+  .navbar {
+    background: rgba(247, 247, 245, 0.80);
+    backdrop-filter: blur(32px) saturate(1.6);
+    -webkit-backdrop-filter: blur(32px) saturate(1.6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Botón primario — M3 Filled */
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-surface);
+    border-radius: 100px; /* M3: pill shape para acciones primarias */
+    padding: 12px 28px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 180ms ease, transform 180ms ease, opacity 180ms ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  /* Botón secundario */
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: 100px;
+    border: 1px solid var(--color-border);
+    padding: 12px 28px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 180ms ease, transform 180ms ease, opacity 180ms ease;
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-gray-lt);
+    transform: translateY(-1px);
+  }
+
+  /* Chip / Badge — M3 Assist chip */
+  .chip {
+    background: var(--color-accent-lt);
+    color: var(--color-accent);
+    border-radius: 8px; /* M3/iOS inputs */
+    border: 1px solid rgba(61, 140, 110, 0.20);
+    padding: 4px 12px;
+    font-size: 0.875rem; /* label-sm aproximado */
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+@layer utilities {
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
