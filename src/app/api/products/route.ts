@@ -1,21 +1,17 @@
-import { NextResponse } from 'next/server';
-import { getSupabase } from '@/lib/supabase';
+import { NextResponse } from "next/server";
+import { leerCatalogo } from "@/lib/catalogo-servidor";
 
-// GET: Obtener todos los productos activos
+/**
+ * Catálogo público en JSON. Una sola fuente con la UI: el módulo de catálogo.
+ * Si la base no está migrada o no responde, devuelve 503 con el motivo — nunca una
+ * lista vacía que se confunda con una tienda sin productos.
+ */
 export async function GET() {
-  try {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from('productos')
-      .select('*')
-      .eq('activo', true)
-      .order('created_at', { ascending: false });
+  const resultado = await leerCatalogo();
 
-    if (error) throw error;
-    
-    return NextResponse.json({ products: data });
-  } catch (error) {
-    console.error("Error GET products:", error);
-    return NextResponse.json({ error: 'Error interno al obtener productos' }, { status: 500 });
+  if (resultado.estado === "error") {
+    return NextResponse.json({ error: resultado.mensaje }, { status: 503 });
   }
+
+  return NextResponse.json({ productos: resultado.productos });
 }

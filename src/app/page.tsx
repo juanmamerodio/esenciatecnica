@@ -1,155 +1,131 @@
-import { getSupabase, type Producto } from "@/lib/supabase";
-import ProductCard from "@/components/ProductCard";
-import {
-  Beaker,
-  GraduationCap,
-  Heart,
-  Sparkles,
-  ArrowRight,
-  Flame,
-  Info
-} from "lucide-react";
 import Link from "next/link";
+import { ArrowRight, GraduationCap, HandHeart, Info, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import EncabezadoSeccion from "@/components/EncabezadoSeccion";
+import GrillaProductos from "@/components/GrillaProductos";
+import ImagenProducto from "@/components/ImagenProducto";
+import { leerCatalogo } from "@/lib/catalogo-servidor";
+
+// El catálogo cambia con el stock: no se cachea una foto vieja de la tienda.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const supabase = getSupabase();
-
-  // Fetch de productos activos
-  const { data: allProducts, error } = await supabase
-    .from('productos')
-    .select('*')
-    .eq('activo', true);
-
-  if (error || !allProducts) {
-    console.error("Error fetching products:", error);
-  }
-
-  // Lógica de segmentación (Simulada hasta agregar columnas a la DB)
-  const popularProducts = (allProducts as Producto[])?.slice(0, 4) || [];
-  const offerProducts = (allProducts as Producto[])?.filter(p => p.precio_ars < 2000).slice(0, 4) || [];
+  const resultado = await leerCatalogo();
+  const portada = resultado.estado === "ok" ? resultado.productos[0] : undefined;
 
   return (
     <div className="space-y-24 pb-20">
+      {/* 1 · Hero editorial: quiénes somos y a dónde ir */}
+      <section className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div className="space-y-6">
+          <span className="inline-flex items-center gap-2 rounded-pill border border-border bg-surface px-4 py-2 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
+            <GraduationCap aria-hidden className="h-3.5 w-3.5" />
+            Proyecto educativo · E.E.S.T N°1 Luciano Reyes
+          </span>
 
-      {/* 1. HERO SECTION - Identidad y Propósito */}
-      <section className="relative overflow-hidden rounded-[40px] bg-accent-lt p-8 md:p-20 text-center">
-        <div className="absolute -top-24 -left-24 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl" />
-
-        <div className="relative z-10 max-w-4xl mx-auto space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface text-accent text-xs font-bold uppercase tracking-widest shadow-sm border border-accent/10">
-            <GraduationCap className="w-3 h-3" />
-            Proyecto Educativo · E.E.S.T N°1 Luciano Reyes
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-bold text-text tracking-tight leading-[1.1]">
-            Ciencia que se siente, <br />
-            <span className="text-accent italic font-serif">calidad artesanal.</span>
+          <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-text sm:text-5xl lg:text-6xl">
+            Cosmética e higiene{" "}
+            <span className="text-accent">elaboradas en la escuela.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray max-w-2xl mx-auto leading-relaxed">
-            Transformamos el aprendizaje de química en productos reales.
-            Jabones, champús y fórmulas creadas por alumnos de 7mo año.
+          <p className="max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+            Jabones, cremas y champús formulados por el Departamento de Química y elaborados por
+            alumnos de 7mo año. Cada compra sostiene las prácticas y los materiales del taller.
           </p>
 
-          {/* BOTONES DE NAVEGACIÓN PRINCIPAL */}
-          <div className="flex flex-wrap justify-center gap-4 pt-6">
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Link href="/catalog" className="btn-primary gap-2 text-base">
+              Ver el catálogo
+              <ArrowRight aria-hidden className="h-5 w-5" />
+            </Link>
+            <Link href="/about" className="btn-secondary gap-2 text-base">
+              <Info aria-hidden className="h-5 w-5" />
+              Sobre el proyecto
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="overflow-hidden rounded-card border border-border bg-surface shadow-soft">
+            <ImagenProducto
+              url={portada?.imagenUrl ?? null}
+              nombre={portada?.nombre ?? "Elaboración del Departamento de Química"}
+              categoria={portada?.categoria ?? "Cosmética"}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
+          </div>
+          <div className="card absolute -bottom-6 left-4 flex items-center gap-3 p-4 sm:left-6">
+            <span className="rounded-2xl bg-accent-lt p-2 text-accent">
+              <Sparkles aria-hidden className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                Hecho por estudiantes
+              </span>
+              <span className="block text-sm font-semibold text-text">7mo año · Ciclo Lectivo 2026</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* 2 · Productos publicados: una sola grilla, ordenada por nombre */}
+      <section className="space-y-10 pt-6">
+        <EncabezadoSeccion
+          titulo="Nuestros productos"
+          subtitulo="Lo que el Departamento de Química tiene publicado hoy. Si algo no está disponible, se avisa en la card."
+          accion={
             <Link
               href="/catalog"
-              className="btn-primary flex items-center gap-2 text-lg px-8 group"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-accent underline-offset-4 hover:underline"
             >
-              Ver Catálogo Completo
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              Ver el catálogo completo
+              <ArrowRight aria-hidden className="h-4 w-4" />
             </Link>
-            <Link
-              href="/about"
-              className="flex items-center gap-2 px-8 py-3 rounded-full bg-white/50 backdrop-blur-md text-text font-medium border border-border hover:bg-white transition-all"
-            >
-              <Info className="w-5 h-5" />
-              Sobre el Proyecto
-            </Link>
-          </div>
-        </div>
+          }
+        />
+        <GrillaProductos resultado={resultado} mensajeVacio="Todavía no hay productos publicados" />
       </section>
 
-      {/* 2. SECCIÓN DE POPULARES - "Lo más buscado" */}
-      <section className="space-y-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-accent-lt text-accent">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <h2 className="text-3xl font-bold text-text tracking-tight">Favoritos de la Comunidad</h2>
+      {/* 3 · Confianza en el pago: transferencia validada a mano */}
+      <section className="card grid grid-cols-1 gap-8 p-8 md:grid-cols-2 md:p-12">
+        <div className="space-y-4">
+          <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
+            <Wallet aria-hidden className="h-4 w-4" />
+            Cómo se paga
+          </span>
+          <h2 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">
+            Transferencia con validación manual
+          </h2>
+          <p className="text-sm leading-relaxed text-muted sm:text-base">
+            Confirmás el pedido, transferís y subís el comprobante. Un Administrador de Química compara
+            la imagen con el total del pedido y lo aprueba a mano; te avisamos por email cuando queda
+            validado.
+          </p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {popularProducts.map((product: Producto) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <ul className="space-y-4 text-sm text-muted">
+          <li className="flex gap-3">
+            <ShieldCheck aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+            <span>
+              <strong className="block font-semibold text-text">Sin pago automático</strong>
+              Nadie valida tu pago con un algoritmo: lo revisa una persona del Departamento de Química.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <HandHeart aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+            <span>
+              <strong className="block font-semibold text-text">Sin fines de lucro</strong>
+              Lo recaudado se reinvierte en los materiales que necesitan las prácticas del taller.
+            </span>
+          </li>
+          <li className="flex gap-3">
+            <GraduationCap aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+            <span>
+              <strong className="block font-semibold text-text">Entrega a coordinar</strong>
+              El retiro o la entrega se acuerda después de la aprobación: el proyecto no incluye envío ni
+              seguimiento.
+            </span>
+          </li>
+        </ul>
       </section>
-
-      {/* 3. SECCIÓN DE OFERTAS - "Oportunidades" */}
-      <section className="relative p-8 md:p-12 rounded-[40px] bg-text text-surface overflow-hidden">
-        <div className="absolute top-0 right-0 p-10 opacity-10">
-          <Flame className="w-64 h-64 rotate-12" />
-        </div>
-
-        <div className="relative z-10 space-y-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-accent font-bold uppercase tracking-widest text-sm">
-                <Flame className="w-4 h-4" />
-                Ofertas Especiales
-              </div>
-              <h2 className="text-4xl font-bold tracking-tight">Precios Promocionales</h2>
-              <p className="text-gray-400 max-w-md">
-                Productos seleccionados con descuento para apoyar la producción del laboratorio.
-              </p>
-            </div>
-            <Link href="/catalog" className="text-accent font-semibold flex items-center gap-2 hover:underline">
-              Ver todas las ofertas <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {offerProducts.map((product: Producto) => (
-              <div key={product.id} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-[20px] p-4 transition-transform hover:scale-[1.02]">
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. VALORES DEL PROYECTO - El "Por qué" */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          {
-            icon: <Beaker className="w-6 h-6" />,
-            title: "Ciencia Aplicada",
-            desc: "Cada jabón y champú es el resultado de una práctica de laboratorio real y controlada."
-          },
-          {
-            icon: <Heart className="w-6 h-6" />,
-            title: "Sin Fines de Lucro",
-            desc: "Los fondos recaudados se reinvierten en materiales para el departamento de química."
-          },
-          {
-            icon: <GraduationCap className="w-6 h-6" />,
-            title: "Formación Técnica",
-            desc: "Apoyando este proyecto, impulsás la educación técnica de los alumnos de 7mo año."
-          },
-        ].map((item, i) => (
-          <div key={i} className="card p-8 flex flex-col items-center text-center space-y-4 group">
-            <div className="p-4 rounded-3xl bg-accent-lt text-accent group-hover:bg-accent group-hover:text-surface transition-all duration-300">
-              {item.icon}
-            </div>
-            <h4 className="text-xl font-semibold text-text">{item.title}</h4>
-            <p className="text-muted leading-relaxed">{item.desc}</p>
-          </div>
-        ))}
-      </section>
-
     </div>
   );
 }

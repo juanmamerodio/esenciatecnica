@@ -1,26 +1,6 @@
 import { z } from 'zod';
 
 /**
- * SCHEMA: PRODUCTO
- * Validación de la estructura de un producto proveniente de la DB.
- */
-export const ProductSchema = z.object({
-  id: z.string().uuid(),
-  nombre_es: z.string().min(1),
-  nombre_en: z.string().min(1),
-  descripcion_es: z.string().nullable(),
-  descripcion_en: z.string().nullable(),
-  precio_ars: z.number().positive(),
-  stock: z.number().int().nonnegative(),
-  categoria: z.enum(['reactivos', 'materiales', 'equipos']),
-  imagen_url: z.string().url().nullable(),
-  activo: z.boolean(),
-  created_at: z.string().datetime().optional(),
-});
-
-export type Product = z.infer<typeof ProductSchema>;
-
-/**
  * SCHEMA: ITEM DE PEDIDO
  * Validación para los items dentro de un carrito/pedido.
  */

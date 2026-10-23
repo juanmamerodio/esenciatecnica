@@ -5,8 +5,6 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  * Definimos interfaces concretas para evitar el uso de 'any' y 'Json' genérico.
  */
 
-export type ProductCategory = 'reactivos' | 'materiales' | 'equipos';
-
 export type OrderStatus =
   | 'pendiente'
   | 'comprobante_subido'
@@ -20,20 +18,6 @@ export type CartItem = {
   priceArs: number;
   quantity: number;
   subtotal: number;
-}
-
-export type Producto = {
-  id: string;
-  nombre_es: string;
-  nombre_en: string;
-  descripcion_es: string | null;
-  descripcion_en: string | null;
-  precio_ars: number;
-  stock: number;
-  categoria: ProductCategory;
-  imagen_url: string | null;
-  activo: boolean;
-  created_at: string;
 }
 
 export type Pedido = {
@@ -57,25 +41,15 @@ export type Json =
   | Json[]
 
 /**
- * DEFINICIÓN DEL ESQUEMA DE BASE DE DATOS
- * Mapeo exacto de las tablas de Supabase para garantizar integridad de datos.
+ * DEFINICIÓN DEL ESQUEMA DE BASE DE DATOS (LEGACY)
+ *
+ * Sólo cubre las tablas legacy que todavía usan `/admin` y las APIs viejas, que se
+ * retiran en T5/T7. El contrato vigente del e-commerce es `src/lib/database.types.ts`.
+ * El catálogo ya no pasa por acá (T1 · issue #5).
  */
 export type Database = {
   public: {
     Tables: {
-      productos: {
-        Row: Producto;
-        Insert: Omit<Producto, 'id' | 'created_at' | 'descripcion_es' | 'descripcion_en' | 'imagen_url' | 'activo'> & { 
-          id?: string; 
-          created_at?: string;
-          descripcion_es?: string | null;
-          descripcion_en?: string | null;
-          imagen_url?: string | null;
-          activo?: boolean;
-        };
-        Update: Partial<Producto>;
-        Relationships: [];
-      };
       pedidos: {
         Row: Pedido;
         Insert: Omit<Pedido, 'id' | 'created_at' | 'telefono' | 'comprobante_url'> & { 

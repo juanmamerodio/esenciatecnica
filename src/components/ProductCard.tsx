@@ -1,145 +1,36 @@
-"use client";
-
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Check, Beaker } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { useCartStore } from "@/lib/store";
-import { type Producto, type ProductCategory } from "@/lib/supabase";
+import type { ProductoCatalogo } from "@/lib/catalogo";
+import ImagenProducto from "@/components/ImagenProducto";
 
-const ETIQUETAS_CATEGORIA: Record<ProductCategory, string> = {
-  reactivos: "Reactivos",
-  materiales: "Materiales",
-  equipos: "Equipos",
-};
-
-interface ProductCardProps {
-  product: Producto;
-}
-
-export default function ProductCard({ product }: ProductCardProps) {
-  const { id, nombre_es, descripcion_es, precio_ars, categoria, imagen_url } = product;
-  const { addItem } = useCartStore();
-  const [isAdded, setIsAdded] = useState(false);
-
-  const name = nombre_es;
-  const description = descripcion_es || "";
-  const categoryLabel = ETIQUETAS_CATEGORIA[categoria] ?? categoria;
-
-  const handleAddToCart = () => {
-    addItem({
-      id,
-      name,
-      priceArs: precio_ars,
-      quantity: 1
-    });
-    setIsAdded(true);
-    setTimeout(() => setIsAdded(false), 2000);
-  };
-
+/**
+ * Card de producto: única, con estados `ok`, `sin-stock` y `sin-imagen` (HU-2, HU-3,
+ * HU-5). No muestra unidades disponibles — la Home no las publica.
+ *
+ * El control de "agregar al carrito" llega en T4; esta card no promete lo que todavía no
+ * existe.
+ */
+export default function ProductCard({ producto }: { producto: ProductoCatalogo }) {
   return (
-    <motion.div
-      layout
-      whileHover={{ y: -8 }}
-      className="card group flex flex-col overflow-hidden h-full border border-border hover:border-accent/30 transition-all duration-500 shadow-soft hover:shadow-xl hover:shadow-accent/10"
-    >
-      {/* IMAGEN: Contenedor con profundidad */}
-      <div className="relative aspect-square w-full overflow-hidden bg-gray-lt">
-        {imagen_url ? (
-          <motion.img
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
-            src={imagen_url}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-lt to-surface">
-            <div className="w-16 h-16 rounded-3xl bg-accent-lt flex items-center justify-center border border-accent/10 text-accent">
-              <Beaker className="w-8 h-8 opacity-60" />
-            </div>
-            <span className="text-muted/40 text-[10px] font-mono font-bold uppercase tracking-widest">
-              Sin imagen
-            </span>
-          </div>
-        )}
+    <article className="card card-interactive group flex h-full flex-col overflow-hidden">
+      <ImagenProducto url={producto.imagenUrl} nombre={producto.nombre} categoria={producto.categoria} />
 
-        {/* Category Chip - Estilo M3 Assist */}
-        <div className="absolute top-3 left-3 chip shadow-sm uppercase text-[10px] font-bold tracking-wider z-10">
-          {categoryLabel}
-        </div>
+      <div className="flex flex-grow flex-col p-5">
+        <span className="chip w-fit">{producto.categoria}</span>
+        <h3 className="mt-3 text-lg font-bold leading-tight text-text">{producto.nombre}</h3>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{producto.descripcion}</p>
 
-        {/* Overlay de brillo al hacer hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      </div>
-
-      {/* INFO: Contenido con jerarquía clara */}
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="mb-3">
-          <h3 className="text-lg font-bold text-text leading-tight transition-colors group-hover:text-accent duration-300">
-            {name}
-          </h3>
-          <p className="text-sm text-muted line-clamp-2 mt-1 leading-relaxed opacity-80">
-            {description}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-soft pt-4">
+          <p className="font-mono text-xl font-bold tracking-tight text-text">
+            {formatPrice(producto.precio)}{" "}
+            <span className="font-sans text-xs font-normal text-muted">ARS</span>
           </p>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/50">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-muted font-bold uppercase tracking-tighter opacity-60">Precio</span>
-            <span className="font-mono text-xl text-text font-bold tracking-tighter">
-              {formatPrice(precio_ars)}
+          {producto.sinStock ? (
+            <span className="rounded-pill border border-border px-4 py-2 text-xs font-semibold text-muted">
+              Sin stock
             </span>
-          </div>
-
-          {/* BOTÓN: Acción con feedback háptico visual */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleAddToCart}
-            aria-label={`Agregar ${name} al carrito`}
-            className={`relative overflow-hidden flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border shadow-sm ${isAdded
-                ? 'bg-accent text-surface border-accent'
-                : 'bg-surface text-accent border-accent/20 hover:bg-accent hover:text-surface hover:border-accent'
-              }`}
-          >
-            <AnimatePresence mode="wait">
-              {isAdded ? (
-                <motion.div
-                  key="check"
-                  initial={{ scale: 0, rotate: -45 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: 45 }}
-                  className="flex items-center gap-1"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>Añadido</span>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="cart"
-                  initial={{ scale: 0, rotate: 45 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: -45 }}
-                  className="flex items-center gap-1"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Agregar</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Efecto de pulso al añadir */}
-            {isAdded && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0.5 }}
-                animate={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0 bg-white rounded-full"
-              />
-            )}
-          </motion.button>
+          ) : null}
         </div>
       </div>
-    </motion.div>
+    </article>
   );
 }
