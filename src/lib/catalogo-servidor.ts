@@ -1,5 +1,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { consultarCatalogo, type LectorCatalogo, type ResultadoCatalogo } from "@/lib/catalogo";
+import {
+  consultarCatalogo,
+  type ConsultaCatalogo,
+  type LectorCatalogo,
+  type ResultadoCatalogo,
+} from "@/lib/catalogo";
 import type { Database } from "@/lib/database.types";
 
 /**
@@ -39,9 +44,9 @@ export function lectorSupabase(instancia: SupabaseClient<Database>): LectorCatal
  * devuelve `estado: 'error'`: la tienda muestra su estado de error, nunca un catálogo
  * vacío que parezca una tienda sin productos.
  */
-export async function leerCatalogo(): Promise<ResultadoCatalogo> {
+export async function leerCatalogo(consulta: ConsultaCatalogo = {}): Promise<ResultadoCatalogo> {
   try {
-    return await consultarCatalogo(lectorSupabase(clientePublico()));
+    return await consultarCatalogo(lectorSupabase(clientePublico()), consulta);
   } catch (error) {
     return {
       estado: "error",

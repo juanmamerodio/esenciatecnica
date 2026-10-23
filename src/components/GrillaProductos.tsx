@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { PackageOpen, TriangleAlert } from "lucide-react";
 import type { ResultadoCatalogo } from "@/lib/catalogo";
 import ProductCard from "@/components/ProductCard";
@@ -10,9 +11,13 @@ import ProductCard from "@/components/ProductCard";
 export default function GrillaProductos({
   resultado,
   mensajeVacio,
+  detalleVacio,
+  accionVacio,
 }: {
   resultado: ResultadoCatalogo;
   mensajeVacio: string;
+  detalleVacio?: string;
+  accionVacio?: ReactNode;
 }) {
   if (resultado.estado === "error") {
     return (
@@ -39,8 +44,9 @@ export default function GrillaProductos({
         <PackageOpen aria-hidden className="mx-auto h-10 w-10 text-muted" />
         <h3 className="mt-4 text-lg font-semibold text-text">{mensajeVacio}</h3>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
-          La tienda se llena a medida que el Departamento de Química publica sus elaboraciones.
+          {detalleVacio ?? "La tienda se llena a medida que el Departamento de Química publica sus elaboraciones."}
         </p>
+        {accionVacio ? <div className="mt-6 flex justify-center">{accionVacio}</div> : null}
       </div>
     );
   }

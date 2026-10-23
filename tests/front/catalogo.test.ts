@@ -90,7 +90,7 @@ describe('T1 · catálogo público', () => {
     const db = await crearBase({ seed: false });
     const resultado = await consultarCatalogo(lectorDe(db));
 
-    expect(resultado).toEqual({ estado: 'ok', productos: [] });
+    expect(resultado).toEqual({ estado: 'ok', productos: [], categorias: [] });
   });
 
   it('si la lectura falla, devuelve error y no un catálogo vacío', async () => {
