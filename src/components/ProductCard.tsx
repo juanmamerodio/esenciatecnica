@@ -1,13 +1,11 @@
 import { formatPrice } from "@/lib/format";
 import type { ProductoCatalogo } from "@/lib/catalogo";
+import AgregarAlCarrito from "@/components/AgregarAlCarrito";
 import ImagenProducto from "@/components/ImagenProducto";
 
 /**
  * Card de producto: única, con estados `ok`, `sin-stock` y `sin-imagen` (HU-2, HU-3,
  * HU-5). No muestra unidades disponibles — la Home no las publica.
- *
- * El control de "agregar al carrito" llega en T4; esta card no promete lo que todavía no
- * existe.
  */
 export default function ProductCard({ producto }: { producto: ProductoCatalogo }) {
   return (
@@ -28,7 +26,9 @@ export default function ProductCard({ producto }: { producto: ProductoCatalogo }
             <span className="rounded-pill border border-border px-4 py-2 text-xs font-semibold text-muted">
               Sin stock
             </span>
-          ) : null}
+          ) : (
+            <AgregarAlCarrito producto={producto} />
+          )}
         </div>
       </div>
     </article>

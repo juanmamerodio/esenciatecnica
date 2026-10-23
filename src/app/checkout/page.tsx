@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-react';
 import ReceiptUploader from "@/components/ReceiptUploader";
 import { formatPrice } from "@/lib/format";
+import { total as totalDelCarrito } from "@/lib/carrito";
 import { useCartStore } from "@/lib/store";
 
 const TRANSFERENCIA = {
@@ -13,8 +14,8 @@ const TRANSFERENCIA = {
 };
 
 export default function CheckoutPage() {
-  const { items, getTotalPrice, clearCart } = useCartStore();
-  const totalPrice = getTotalPrice();
+  const { items, vaciar } = useCartStore();
+  const totalPrice = totalDelCarrito(items);
 
   const [formData, setFormData] = useState({ nombre: '', email: '' });
   const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export default function CheckoutPage() {
       const verifyData = await verifyResponse.json();
       if (!verifyResponse.ok) throw new Error(verifyData.error || 'Error al subir el comprobante');
 
-      clearCart();
+      vaciar();
       setShowSuccess(true);
     } catch (err) {
       const error = err as Error;
@@ -134,8 +135,8 @@ export default function CheckoutPage() {
                 <div className="space-y-3">
                   {items.map(item => (
                     <div key={item.id} className="flex justify-between text-xs">
-                      <span className="text-text truncate max-w-[140px]">{item.quantity}x {item.name}</span>
-                      <span className="font-mono text-muted">{formatPrice(item.priceArs * item.quantity)}</span>
+                      <span className="text-text truncate max-w-[140px]">{item.cantidad}x {item.nombre}</span>
+                      <span className="font-mono text-muted">{formatPrice(item.precio * item.cantidad)}</span>
                     </div>
                   ))}
                 </div>

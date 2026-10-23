@@ -1,68 +1,45 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+"use client";
 
-export interface CartItem {
-  id: string; // product id
-  name: string;
-  priceArs: number;
-  quantity: number;
-}
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import {
+  CARRITO_VACIO,
+  agregar as agregarAlCarrito,
+  cambiarCantidad as cambiarCantidadDelCarrito,
+  quitar as quitarDelCarrito,
+  type ItemCarrito,
+  type ProductoParaAgregar,
+} from "@/lib/carrito";
 
-interface CartState {
-  items: CartItem[];
-  addItem: (item: CartItem) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
-  getTotalItems: () => number;
-  getTotalPrice: () => number;
-}
+/**
+ * Adaptador de persistencia del carrito (T4 · issue #9).
+ *
+ * Toda la aritmética vive en `src/lib/carrito.ts`; acá sólo se guarda en `localStorage`.
+ * El carrito no escribe en la base ni reserva stock: eso pasa al confirmar el pedido (T5).
+ */
+type EstadoDelCarrito = {
+  items: ItemCarrito[];
+  agregar: (producto: ProductoParaAgregar, cantidad?: number) => void;
+  cambiarCantidad: (id: number, cantidad: number) => void;
+  quitar: (id: number) => void;
+  vaciar: () => void;
+};
 
-export const useCartStore = create<CartState>()(
+export const useCartStore = create<EstadoDelCarrito>()(
   persist(
-    (set, get) => ({
-      items: [],
-      
-      addItem: (item) => {
-        set((state) => {
-          const existingItem = state.items.find((i) => i.id === item.id);
-          if (existingItem) {
-            return {
-              items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
-              ),
-            };
-          }
-          return { items: [...state.items, item] };
-        });
-      },
-      
-      removeItem: (id) => {
-        set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
-        }));
-      },
-      
-      updateQuantity: (id, quantity) => {
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.id === id ? { ...i, quantity } : i
-          ),
-        }));
-      },
-      
-      clearCart: () => set({ items: [] }),
-      
-      getTotalItems: () => {
-        return get().items.reduce((total, item) => total + item.quantity, 0);
-      },
-      
-      getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + item.priceArs * item.quantity, 0);
-      },
+    (set) => ({
+      items: CARRITO_VACIO,
+
+      agregar: (producto, cantidad = 1) =>
+        set((estado) => ({ items: agregarAlCarrito(estado.items, producto, cantidad) })),
+
+      cambiarCantidad: (id, cantidad) =>
+        set((estado) => ({ items: cambiarCantidadDelCarrito(estado.items, id, cantidad) })),
+
+      quitar: (id) => set((estado) => ({ items: quitarDelCarrito(estado.items, id) })),
+
+      vaciar: () => set({ items: CARRITO_VACIO }),
     }),
-    {
-      name: 'quimicashop-cart', // name in localStorage
-    }
-  )
+    { name: "esenciatecnica-carrito" },
+  ),
 );

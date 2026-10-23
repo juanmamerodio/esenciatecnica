@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FlaskConical, ShoppingCart, ShieldCheck } from "lucide-react";
+import { totalUnidades } from "@/lib/carrito";
+import { useCartStore } from "@/lib/store";
 
 /**
  * Shell de navegación: una sola fuente para todas las rutas (issue #3).
@@ -21,6 +24,12 @@ function esRutaActiva(pathname: string, href: string): boolean {
 
 export default function Header() {
   const pathname = usePathname();
+  const unidades = useCartStore((estado) => totalUnidades(estado.items));
+  const [montado, setMontado] = useState(false);
+
+  // El carrito vive en localStorage: hasta hidratar, el contador no puede afirmar nada.
+  useEffect(() => setMontado(true), []);
+  const contador = montado ? unidades : 0;
 
   return (
     <header className="shell-header fixed inset-x-0 top-0 z-50">
@@ -62,9 +71,11 @@ export default function Header() {
           >
             <ShoppingCart aria-hidden className="h-4 w-4" />
             Carrito
-            {/* T4 reemplaza el 0 fijo por el contenido real del carrito. */}
-            <span className="min-w-[1.25rem] rounded-full bg-accent px-1.5 text-center font-mono text-[10px] font-bold text-surface">
-              0
+            <span
+              aria-label={`${contador} ${contador === 1 ? "unidad" : "unidades"} en el carrito`}
+              className="min-w-[1.25rem] rounded-full bg-accent px-1.5 text-center font-mono text-[10px] font-bold text-surface"
+            >
+              {contador}
             </span>
           </Link>
         </nav>

@@ -1,5 +1,5 @@
-import CartClient from "@/components/CartClient";
+import Carrito from "@/components/Carrito";
 
 export default function CartPage() {
-  return <CartClient />;
+  return <Carrito />;
 }
