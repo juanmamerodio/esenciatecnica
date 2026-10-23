@@ -1,25 +1,18 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState } from 'react';
 import { CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-react';
 import ReceiptUploader from "@/components/ReceiptUploader";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
-import type { Dictionary } from "@/lib/types";
 
-import esDict from "@/dictionaries/es.json";
-import enDict from "@/dictionaries/en.json";
+const TRANSFERENCIA = {
+  alias: "quimica.reyes.eest1",
+  cbu: "0140000000000000000000",
+  titular: "Cooperadora E.E.S.T N°1",
+};
 
-const dicts: Record<string, Dictionary> = { es: esDict as unknown as Dictionary, en: enDict as unknown as Dictionary };
-
-export default function CheckoutPage({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}) {
-  const { lang } = use(params);
-  const dict = dicts[lang] ?? dicts.es;
-
+export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const totalPrice = getTotalPrice();
 
@@ -66,7 +59,7 @@ export default function CheckoutPage({
       });
 
       const verifyData = await verifyResponse.json();
-      if (!verifyResponse.ok) throw new Error(verifyData.error || 'Error al verificar pago');
+      if (!verifyResponse.ok) throw new Error(verifyData.error || 'Error al subir el comprobante');
 
       clearCart();
       setShowSuccess(true);
@@ -83,7 +76,7 @@ export default function CheckoutPage({
       <div className="max-w-md mx-auto text-center py-20">
         <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
         <p className="text-muted mb-8 text-sm">Agrega algunos productos antes de proceder al pago.</p>
-        <button onClick={() => window.location.href = `/${lang}/catalog`} className="btn-primary">Ir al Catálogo</button>
+        <button onClick={() => window.location.href = '/catalog'} className="btn-primary">Ir al Catálogo</button>
       </div>
     );
   }
@@ -95,10 +88,12 @@ export default function CheckoutPage({
           <div className="w-24 h-24 bg-accent-lt rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
             <CheckCircle className="w-12 h-12 text-accent" />
           </div>
-          <h2 className="text-4xl font-bold text-text mb-4">{dict.checkout.success.title}</h2>
-          <p className="text-muted mb-8 max-w-sm mx-auto">{dict.checkout.success.text}</p>
-          <button onClick={() => window.location.href = `/${lang}`} className="btn-primary px-10">
-            {dict.checkout.success.backToCatalog}
+          <h2 className="text-4xl font-bold text-text mb-4">¡Comprobante recibido!</h2>
+          <p className="text-muted mb-8 max-w-sm mx-auto">
+            Un Administrador de Química revisa tu pago a mano y te avisamos por email cuando esté validado.
+          </p>
+          <button onClick={() => window.location.href = '/'} className="btn-primary px-10">
+            Volver al catálogo
           </button>
         </div>
       ) : (
@@ -116,19 +111,19 @@ export default function CheckoutPage({
                 </h2>
                 <div className="space-y-4 text-sm font-medium">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{dict.checkout.transfer.alias}</span>
-                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{dict.checkout.transfer.aliasValue}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Alias</span>
+                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{TRANSFERENCIA.alias}</span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{dict.checkout.transfer.cbu}</span>
-                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{dict.checkout.transfer.cbuValue}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">CBU</span>
+                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{TRANSFERENCIA.cbu}</span>
                   </div>
                   <div className="flex flex-col gap-1 pb-4 border-b border-border">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">{dict.checkout.transfer.holder}</span>
-                    <span className="text-text">{dict.checkout.transfer.holderValue}</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Titular</span>
+                    <span className="text-text">{TRANSFERENCIA.titular}</span>
                   </div>
                   <div className="flex justify-between items-end pt-2">
-                    <span className="text-muted">{dict.checkout.transfer.totalLabel}:</span>
+                    <span className="text-muted">Total a transferir:</span>
                     <span className="text-3xl font-bold text-accent font-mono">{formatPrice(totalPrice)}</span>
                   </div>
                 </div>
@@ -191,7 +186,7 @@ export default function CheckoutPage({
                     />
                     <p className="mt-4 flex gap-2 items-start text-[10px] text-muted leading-relaxed">
                       <AlertTriangle className="w-3 h-3 text-accent shrink-0 mt-0.5" />
-                      <span>{dict.checkout.aiNote.replace('<br/>', ' ')}</span>
+                      <span>Un Administrador de Química valida tu comprobante a mano. Asegurate de que la imagen sea nítida y muestre el importe y la fecha.</span>
                     </p>
                   </div>
 
@@ -213,7 +208,7 @@ export default function CheckoutPage({
                     {isSubmitting ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Procesando pedido e IA...
+                        Procesando pedido...
                       </>
                     ) : (
                       <>Finalizar Compra</>

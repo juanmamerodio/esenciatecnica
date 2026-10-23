@@ -37,21 +37,23 @@ ADMIN_PASSWORD=...
 window.QUIMICASHOP_CONFIG = {
   supabaseUrl: "https://uchyattzuhaltsaxazce.supabase.co",
   supabaseAnonKey: "...",
-  notificationsApi: "https://quimicashop.vercel.app/api/notifications",
+  notificationsApi: "https://esenciatecnica.vercel.app/api/notifications",
 };
 ```
 
 - `config.js` solo lleva la **anon key** (pública).
 - La **service role** y `RESEND_API_KEY` nunca van al cliente.
 - `/api/notifications` es el único puente vivo; si se migra a Teams, se borran `TEAMS_*` del e-commerce.
+- Con la tienda en `esenciatecnica.vercel.app`, el `config.js` del Hub tiene que apuntar al dominio nuevo;
+  si no, las notificaciones siguen saliendo al dominio heredado `quimicashop.vercel.app`.
 
 ---
 
 ## Estado de la migración
 
 1. La base nueva del e-commerce ya tiene el DER normalizado y datos de prueba.
-2. El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`) y
-   todavía usa i18n y Gemini.
+2. El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`).
+   i18n y Gemini ya se retiraron (`T0 · Español único` y `a984727`).
 3. El modelo objetivo está en [`MODELO.md`](MODELO.md); la brecha y el plan, en
    [`AUDITORIA.md`](AUDITORIA.md).
 4. El DER académico se adapta al modelo operativo; no al revés.

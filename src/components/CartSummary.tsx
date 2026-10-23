@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, ShoppingCart, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Dictionary } from "@/lib/types";
 import { formatPrice } from "@/lib/format";
 
 interface CartItem {
@@ -14,11 +13,9 @@ interface CartItem {
 
 interface CartSummaryProps {
   items: CartItem[];
-  lang: string;
-  dict: Dictionary;
 }
 
-export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
+export default function CartSummary({ items }: CartSummaryProps) {
   const subtotal = items.reduce((acc, item) => acc + item.priceArs * item.quantity, 0);
   const total = subtotal;
 
@@ -33,7 +30,7 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
           <ShoppingCart className="w-5 h-5" />
         </div>
         <h2 className="text-xl font-bold text-text tracking-tight">
-          {dict.cart.summary.title}
+          Resumen del Pedido
         </h2>
       </div>
 
@@ -41,7 +38,7 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
       <div className="space-y-5 mb-10">
         <div className="flex justify-between items-center group">
           <span className="text-muted font-medium group-hover:text-text transition-colors duration-300">
-            {dict.cart.summary.subtotal}
+            Subtotal
           </span>
           <motion.span
             key={subtotal}
@@ -66,7 +63,7 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
         {/* TOTAL: El elemento hero del componente */}
         <div className="flex justify-between items-end">
           <span className="text-text font-bold text-lg tracking-tight">
-            {dict.cart.summary.total}
+            Total
           </span>
           <div className="flex flex-col items-end">
             <motion.div
@@ -99,10 +96,10 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
             <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 to-accent/0 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500" />
 
             <Link
-              href={`/${lang}/checkout`}
+              href="/checkout"
               className="btn-primary relative w-full flex items-center justify-center gap-3 font-bold text-lg py-4 group overflow-hidden"
             >
-              <span className="relative z-10">{dict.cart.summary.cta}</span>
+              <span className="relative z-10">Proceder al Pago</span>
               <motion.div
                 animate={{ x: [0, 4, 0] }}
                 transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
@@ -125,7 +122,7 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
             animate={{ opacity: 1 }}
             className="p-4 bg-gray-lt rounded-2xl text-center border border-border/50"
           >
-            <p className="text-sm font-medium text-muted">{dict.cart.emptyNotice}</p>
+            <p className="text-sm font-medium text-muted">Agregá productos para continuar</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -135,17 +132,17 @@ export default function CartSummary({ items, lang, dict }: CartSummaryProps) {
         <div className="flex items-start gap-3 p-3 rounded-2xl bg-accent-lt/40 border border-accent/10">
           <ShieldCheck className="w-4 h-4 text-accent shrink-0 mt-0.5" />
           <p className="text-[11px] text-accent font-medium leading-relaxed">
-            {dict.cart.summary.disclaimer}
+            El pago se realiza por transferencia y un Administrador de Química lo valida a mano.
           </p>
         </div>
 
         <div className="flex justify-center items-center gap-2 opacity-40">
           <span className="text-[9px] font-mono font-bold tracking-widest text-muted uppercase">
-            Secure Checkout
+            Compra segura
           </span>
           <div className="w-1 h-1 rounded-full bg-muted" />
           <span className="text-[9px] font-mono font-bold tracking-widest text-muted uppercase">
-            SSL Encrypted
+            Conexión cifrada
           </span>
         </div>
       </div>

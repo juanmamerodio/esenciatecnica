@@ -5,16 +5,12 @@ import { usePathname } from "next/navigation";
 import { ShoppingCart, Beaker } from "lucide-react";
 import { useCartStore } from "@/lib/store";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
-import esDict from "@/dictionaries/es.json";
-import enDict from "@/dictionaries/en.json";
-import type { Dictionary } from "@/lib/types";
 import { useEffect, useState } from "react";
 
-// CORRECCIÓN: Eliminamos el import de zod y aplicamos casting para evitar el error de propiedades faltantes
-const dicts: Record<string, Dictionary> = {
-  es: esDict as unknown as Dictionary,
-  en: enDict as unknown as Dictionary
-};
+const ENLACES = [
+  { nombre: "Inicio", href: "/" },
+  { nombre: "Catálogo", href: "/catalog" },
+];
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -31,21 +27,6 @@ export default function NavBar() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const segments = pathname.split('/').filter(Boolean);
-  const lang = (segments[0] === 'en') ? 'en' : 'es';
-  const dict = dicts[lang] ?? dicts.es;
-  const locales = ['es', 'en'];
-
-  const getTransformedPath = (newLang: string) => {
-    const newSegments = [...segments];
-    if (locales.includes(newSegments[0])) {
-      newSegments[0] = newLang;
-    } else {
-      newSegments.unshift(newLang);
-    }
-    return `/${newSegments.join('/')}`;
-  };
 
   const itemCount = mounted ? getTotalItems() : 0;
 
@@ -66,7 +47,7 @@ export default function NavBar() {
         {/* LOGO SECTION */}
         <div className="flex items-center gap-8">
           <Link
-            href={`/${lang}`}
+            href="/"
             className="flex items-center gap-2 group transition-opacity hover:opacity-80"
           >
             <Beaker className="w-6 h-6 text-accent" strokeWidth={2.5} />
@@ -79,19 +60,16 @@ export default function NavBar() {
 
           {/* NAV LINKS */}
           <nav className="hidden md:flex items-center gap-1">
-            {[
-              { name: dict.nav.title, path: `/${lang}` },
-              { name: dict.nav.titleAccent, path: `/${lang}/cart` },
-            ].map((link) => {
-              const isActive = pathname === link.path;
+            {ENLACES.map((link) => {
+              const isActive = pathname === link.href;
               return (
                 <Link
-                  key={link.path}
-                  href={link.path}
+                  key={link.href}
+                  href={link.href}
                   className="relative px-4 py-2 text-sm font-medium transition-colors group"
                 >
                   <span className={`relative z-10 transition-colors duration-300 ${isActive ? 'text-accent' : 'text-muted group-hover:text-text'}`}>
-                    {link.name}
+                    {link.nombre}
                   </span>
                   {isActive && (
                     <motion.div
@@ -111,44 +89,17 @@ export default function NavBar() {
                 : 'text-accent hover:bg-gray-lt border-accent/20'
                 }`}
             >
-              Admin
+              Gestión
             </Link>
           </nav>
         </div>
 
         {/* ACTIONS SECTION */}
         <div className="flex items-center gap-4">
-
-          {/* LANGUAGE SWITCHER */}
-          <div className="relative flex items-center p-1 bg-gray-lt rounded-full border border-border overflow-hidden">
-            <motion.div
-              className="absolute h-[calc(100%-8px)] top-1 rounded-full bg-white shadow-sm"
-              animate={{
-                x: lang === 'es' ? 0 : '100%',
-                width: '50%'
-              }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            />
-
-            <Link
-              href={getTransformedPath('es')}
-              className={`relative z-10 px-3 py-1 text-[10px] font-bold rounded-full transition-colors duration-300 ${lang === 'es' ? 'text-accent' : 'text-muted hover:text-text'
-                }`}
-            >
-              ES
-            </Link>
-            <Link
-              href={getTransformedPath('en')}
-              className={`relative z-10 px-3 py-1 text-[10px] font-bold rounded-full transition-colors duration-300 ${lang === 'en' ? 'text-accent' : 'text-muted hover:text-text'
-                }`}
-            >
-              EN
-            </Link>
-          </div>
-
           {/* CART BUTTON */}
           <Link
-            href={`/${lang}/cart`}
+            href="/cart"
+            aria-label="Ver carrito"
             className="relative p-2.5 rounded-full bg-surface/50 border border-border text-text hover:bg-surface hover:shadow-soft transition-all duration-300 group"
           >
             <motion.div
@@ -177,4 +128,4 @@ export default function NavBar() {
       </div>
     </motion.header>
   );
-} 
+}

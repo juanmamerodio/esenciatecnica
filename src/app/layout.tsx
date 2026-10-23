@@ -19,8 +19,8 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Química Shop | E.E.S.T N°1 Luciano Reyes",
-  description: "Tienda educativa del Departamento de Química - Campana, Buenos Aires",
+  title: "Esencia Técnica | E.E.S.T N°1 Luciano Reyes",
+  description: "Cosmética e higiene elaboradas por el Departamento de Química - Campana, Buenos Aires",
 };
 
 // En Next.js 15+, viewport se exporta por separado

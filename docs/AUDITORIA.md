@@ -230,7 +230,7 @@ Ya ejecutado: `README.md` y `AGENTS.md` reescritos; `docs/SEPARACION.md` corregi
 
 Pendiente de código:
 
-1. Eliminar `src/app/[lang]/`, `src/dictionaries/`, middleware i18n y `src/app/[lang]/ProductCard.tsx`.
+1. ~~Eliminar `src/app/[lang]/`, `src/dictionaries/`, middleware i18n y `src/app/[lang]/ProductCard.tsx`.~~ ✅ Hecho: `T0 · Español único` (issue #2). Las rutas viven en la raíz y el guardián es `tests/front/espanol-unico.test.ts`.
 2. Retirar `src/lib/gemini.ts`, `verify-payment` con IA y `GEMINI_API_KEY`.
 3. Unificar tipos: `src/lib/types.ts`, `src/lib/schemas.ts` y `src/lib/supabase.ts` deben salir del modelo de `docs/MODELO.md`.
 4. Migrar servicios y `/admin` a las tablas y estados canónicos.

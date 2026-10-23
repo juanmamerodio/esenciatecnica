@@ -5,28 +5,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Check, Beaker } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
-import { type Producto } from "@/lib/supabase";
-import type { Dictionary } from "@/lib/types";
+import { type Producto, type ProductCategory } from "@/lib/supabase";
+
+const ETIQUETAS_CATEGORIA: Record<ProductCategory, string> = {
+  reactivos: "Reactivos",
+  materiales: "Materiales",
+  equipos: "Equipos",
+};
 
 interface ProductCardProps {
   product: Producto;
-  lang: string;
-  dict: Dictionary;
 }
 
-export default function ProductCard({
-  product,
-  lang,
-  dict,
-}: ProductCardProps) {
-  const { id, nombre_es, nombre_en, descripcion_es, descripcion_en, precio_ars, categoria, imagen_url } = product;
+export default function ProductCard({ product }: ProductCardProps) {
+  const { id, nombre_es, descripcion_es, precio_ars, categoria, imagen_url } = product;
   const { addItem } = useCartStore();
   const [isAdded, setIsAdded] = useState(false);
 
-  const name = lang === 'en' ? nombre_en : nombre_es;
-  const description = lang === 'en' ? (descripcion_en || "") : (descripcion_es || "");
-  const categoryLabel = dict.catalog.categories[categoria] || categoria;
-  const addToCartText = dict.catalog.addToCart;
+  const name = nombre_es;
+  const description = descripcion_es || "";
+  const categoryLabel = ETIQUETAS_CATEGORIA[categoria] ?? categoria;
 
   const handleAddToCart = () => {
     addItem({
@@ -61,7 +59,7 @@ export default function ProductCard({
               <Beaker className="w-8 h-8 opacity-60" />
             </div>
             <span className="text-muted/40 text-[10px] font-mono font-bold uppercase tracking-widest">
-              Lab Sample {id.substring(0, 4)}
+              Sin imagen
             </span>
           </div>
         )}
@@ -98,6 +96,7 @@ export default function ProductCard({
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleAddToCart}
+            aria-label={`Agregar ${name} al carrito`}
             className={`relative overflow-hidden flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 border shadow-sm ${isAdded
                 ? 'bg-accent text-surface border-accent'
                 : 'bg-surface text-accent border-accent/20 hover:bg-accent hover:text-surface hover:border-accent'
@@ -124,7 +123,7 @@ export default function ProductCard({
                   className="flex items-center gap-1"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  <span>{addToCartText}</span>
+                  <span>Agregar</span>
                 </motion.div>
               )}
             </AnimatePresence>

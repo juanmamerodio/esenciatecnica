@@ -54,9 +54,9 @@ El **Hub de documentación** y el **entorno Teams** (Kanban, reuniones, minutas,
 | Emails | Resend |
 | Validación de pago | **Manual, por los Administradores de Química** (flujo oficial) |
 | Carrito | Cliente (cookie/localStorage); sin persistencia en Supabase en el MVP |
-| Admin | Basic Auth con `ADMIN_PASSWORD`; Supabase Auth queda para fase 2 |
-| Idioma | **Español único** (decisión vigente; el código todavía tiene i18n) |
-| Tests | Vitest (a incorporar en la primera implementación) |
+| Admin | **Sin protección desde `T0`**: el login con `ADMIN_PASSWORD` llega en `T7 · Admin` (issue #13); Supabase Auth queda para fase 2 |
+| Idioma | **Español único**: rutas en la raíz, textos en el código, sin diccionarios ni selector `es/en` |
+| Tests | Vitest + PGlite: `tests/db/` y `tests/front/` (`npm test`) |
 | Deploy | Vercel |
 
 ---
@@ -102,8 +102,8 @@ cp .env.example .env.local   # completar con las claves del proyecto ECOMM
 npm run dev
 ```
 
-- Tienda: `http://localhost:3000/es` (el prefijo `/es` se retira en la migración).
-- Admin: `http://localhost:3000/admin` (Basic Auth con `ADMIN_PASSWORD`).
+- Tienda: `http://localhost:3000/` (sin prefijo de idioma; `/es` y `/en` ya no existen).
+- Admin: `http://localhost:3000/admin` (**todavía sin autenticación**: el login se implementa en `T7`).
 - Typecheck: `npm run typecheck`.
 - Build: `npm run build`.
 
@@ -116,7 +116,7 @@ npm run dev
 | `NEXT_PUBLIC_SUPABASE_URL` / `ANON_KEY` | Vercel + `.env.local` | Proyecto Supabase del e-commerce |
 | `SUPABASE_SERVICE_ROLE_KEY` | Solo servidor / Vercel | RPC de stock, Storage, panel admin |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Solo servidor / Vercel | Remito y confirmaciones |
-| `ADMIN_PASSWORD` | Solo servidor / Vercel | Basic Auth de `/admin` |
+| `ADMIN_PASSWORD` | Solo servidor / Vercel | Login de `/admin` (lo implementa `T7`) |
 | `SHEETS_WEBHOOK_URL` | Solo servidor (opcional) | Sincronización con Google Sheets |
 | `TEAMS_SUPABASE_URL` / `ANON_KEY` | Solo servidor (puente temporal) | `/api/notifications` |
 | `TEAMS_HUB_URL` / `RESEND_FROM` | Solo servidor (puente temporal) | Links y remitente de Teams |
@@ -130,9 +130,10 @@ La `anon key` es pública por diseño, pero **no** debe ser la misma para el e-c
 ## 🧪 Verificación
 
 ```bash
-npm run typecheck   # hoy falla con 13 errores preexistentes
+npm run typecheck
 npm run lint
-npm run build       # no valida tipos: next.config.ts tiene ignoreBuildErrors: true
+npm test
+npm run build       # requiere RESEND_API_KEY; no valida tipos: next.config.ts tiene ignoreBuildErrors: true
 ```
 
 El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR.
@@ -144,8 +145,8 @@ El estado real de la deuda está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA
 ## ☁️ Deploy
 
 1. Push a `main` del repo `esenciatecnica`.
-2. En Vercel, el proyecto conectado a este repo conserva el dominio
-   `quimicashop.vercel.app` para la tienda.
+2. El proyecto de Vercel conectado a este repo sirve la tienda en
+   `esenciatecnica.vercel.app`. El dominio heredado `quimicashop.vercel.app` ya no es la URL de la tienda.
 3. Cargar las variables de `.env.example` en **Project Settings → Environment Variables**.
 4. Redeploy. El Hub/Teams queda en GitHub Pages
    (`https://juanmamerodio.github.io/quimicashop/`).

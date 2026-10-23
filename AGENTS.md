@@ -3,7 +3,7 @@
 > **Proyecto:** tienda, checkout, panel `/admin` y APIs del e-commerce **Esencia Técnica**.
 > **Institución:** E.E.S.T N°1 Luciano Reyes · Campana, Buenos Aires · 7mo Año Programación 2026.
 > **Equipo:** Isabella Infante, Juan Manuel Merodio, Celeste Cáceres, Enzo Queipo.
-> **Última actualización:** 2026-10-22.
+> **Última actualización:** 2026-10-23.
 
 Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/brain.md`](docs/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
 
@@ -184,14 +184,16 @@ Comandos:
 npm run typecheck
 npm run lint
 npm run build
-npm test          # cuando Vitest esté instalado
+npm test          # suite de base de datos (Vitest + PGlite)
+npm run db:types  # regenera src/lib/database.types.ts desde el SQL
 ```
 
-Estado actual (2026-10-22):
+Estado actual (2026-10-23, tras `T0 · Español único`):
 
-- `npm run typecheck` falla con 13 errores preexistentes.
-- No hay `npm test`.
-- `npm run build` está configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
+- `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
+- `npm run lint` → 0 errores (quedan 2 warnings de `<img>` en el carrito legacy).
+- `npm test` → 65 tests: 59 de base de datos y 6 de estructura del front (`tests/front/`), sin red ni Docker.
+- `npm run build` exige `RESEND_API_KEY` en el entorno: `src/app/api/notifications/route.ts` instancia Resend al importar. Está configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
 
@@ -208,7 +210,7 @@ Un ticket está terminado solo si:
 ## 9. Deuda y orden de migración
 
 1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md).
-2. Eliminar i18n (`[lang]`, diccionarios, middleware).
+2. Eliminar i18n (`[lang]`, diccionarios, middleware). ✅ Hecho: `T0 · Español único` (issue #2).
 3. Retirar Gemini (`src/lib/gemini.ts`, `verify-payment` con IA, `GEMINI_API_KEY`).
 4. Migrar tipos, servicios y `/admin` al modelo aprobado.
 5. Corregir `.env.local`/Vercel (service role, `ADMIN_PASSWORD`, Resend) y RLS.

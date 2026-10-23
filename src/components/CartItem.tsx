@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Trash2, Minus, Plus, Beaker } from "lucide-react";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
-import type { Dictionary } from "@/lib/types";
 
 interface CartItemProps {
   item: {
@@ -14,11 +13,9 @@ interface CartItemProps {
     quantity: number;
     image?: string; // Añadido soporte para imagen real
   };
-
-  dict: Dictionary;
 }
 
-export default function CartItem({ item, dict }: CartItemProps) {
+export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCartStore();
 
   const handleIncrement = () => updateQuantity(item.id, item.quantity + 1);
@@ -49,7 +46,7 @@ export default function CartItem({ item, dict }: CartItemProps) {
             ) : (
               <div className="flex flex-col items-center gap-1">
                 <Beaker className="w-8 h-8 text-accent opacity-60" />
-                <span className="text-[10px] font-bold text-accent/60 font-mono uppercase">Lab</span>
+                <span className="text-[10px] font-bold text-accent/60 font-mono uppercase">Sin foto</span>
               </div>
             )}
           </div>
@@ -65,7 +62,7 @@ export default function CartItem({ item, dict }: CartItemProps) {
           </h3>
           <p className="text-sm font-mono text-muted mt-1 flex items-center justify-center sm:justify-start gap-1">
             <span className="text-text font-medium">{formatPrice(item.priceArs)}</span>
-            <span className="opacity-50 text-[11px] uppercase tracking-tighter">{dict.cart.each}</span>
+            <span className="opacity-50 text-[11px] uppercase tracking-tighter">c/u</span>
           </p>
         </div>
       </div>
@@ -79,7 +76,7 @@ export default function CartItem({ item, dict }: CartItemProps) {
             whileTap={{ scale: 0.8 }}
             onClick={handleDecrement}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-lt rounded-full transition-all duration-200"
-            aria-label="Decrease quantity"
+            aria-label="Quitar una unidad"
           >
             <Minus className="w-3.5 h-3.5" />
           </motion.button>
@@ -97,7 +94,7 @@ export default function CartItem({ item, dict }: CartItemProps) {
             whileTap={{ scale: 0.8 }}
             onClick={handleIncrement}
             className="w-8 h-8 flex items-center justify-center text-muted hover:text-accent hover:bg-accent-lt rounded-full transition-all duration-200"
-            aria-label="Increase quantity"
+            aria-label="Agregar una unidad"
           >
             <Plus className="w-3.5 h-3.5" />
           </motion.button>
@@ -121,7 +118,8 @@ export default function CartItem({ item, dict }: CartItemProps) {
             whileTap={{ scale: 0.9 }}
             onClick={() => removeItem(item.id)}
             className="p-3 text-muted transition-all duration-200 rounded-2xl hover:bg-red-50 border border-transparent hover:border-red-100"
-            title={dict.cart.remove}
+            aria-label={`Eliminar ${item.name} del carrito`}
+            title="Eliminar"
           >
             <Trash2 className="w-5 h-5" />
           </motion.button>

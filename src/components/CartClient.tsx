@@ -6,14 +6,8 @@ import Link from "next/link";
 import CartSummary from "@/components/CartSummary";
 import CartItem from "@/components/CartItem";
 import { useCartStore } from "@/lib/store";
-import type { Dictionary } from "@/lib/types";
 
-interface CartClientProps {
-  dict: Dictionary;
-  lang: string;
-}
-
-export default function CartClient({ dict, lang }: CartClientProps) {
+export default function CartClient() {
   const { items } = useCartStore();
   const isEmpty = items.length === 0;
 
@@ -27,19 +21,19 @@ export default function CartClient({ dict, lang }: CartClientProps) {
         className="flex flex-col gap-6"
       >
         <Link
-          href={`/${lang}`}
+          href="/"
           className="inline-flex items-center gap-2 text-muted hover:text-accent font-medium transition-all group w-fit"
         >
           <div className="p-2 rounded-full bg-gray-lt group-hover:bg-accent-lt transition-colors">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           </div>
-          <span className="text-sm">{dict.cart.continueShopping}</span>
+          <span className="text-sm">Continuar comprando</span>
         </Link>
 
         <div className="space-y-2">
           <h1 className="text-4xl md:text-5xl font-bold text-text tracking-tight">
-            {dict.cart.title} <span className="text-accent relative">
-              {dict.cart.titleAccent}
+            Tu <span className="text-accent relative">
+              Carrito
               <motion.span
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
@@ -76,16 +70,16 @@ export default function CartClient({ dict, lang }: CartClientProps) {
                   <ShoppingBag className="w-12 h-12 text-accent opacity-60" />
                 </motion.div>
 
-                <h2 className="text-2xl font-bold text-text mb-3">{dict.cart.emptyTitle}</h2>
+                <h2 className="text-2xl font-bold text-text mb-3">Tu carrito está vacío</h2>
                 <p className="text-muted max-w-sm mb-10 leading-relaxed">
-                  {dict.cart.emptyDescription}
+                  Todavía no agregaste productos. Explorá el catálogo para armar tu pedido.
                 </p>
 
                 <Link
-                  href={`/${lang}`}
+                  href="/"
                   className="btn-primary flex items-center gap-2 px-8 py-4 text-lg shadow-lg shadow-accent/20 active:scale-95 transition-all"
                 >
-                  {dict.cart.exploreProducts}
+                  Explorar productos
                 </Link>
               </motion.div>
             ) : (
@@ -104,8 +98,6 @@ export default function CartClient({ dict, lang }: CartClientProps) {
                       priceArs: item.priceArs,
                       quantity: item.quantity
                     }}
-                    lang={lang}
-                    dict={dict}
                   />
                 ))}
               </motion.div>
@@ -115,11 +107,7 @@ export default function CartClient({ dict, lang }: CartClientProps) {
 
         {/* PANEL LATERAL DE RESUMEN */}
         <aside className="w-full lg:w-[420px] shrink-0 sticky top-24 space-y-6">
-          <CartSummary
-            items={items}
-            lang={lang}
-            dict={dict}
-          />
+          <CartSummary items={items} />
 
           {/* AVISO INSTITUCIONAL - Estilo M3 Alert */}
           <motion.div

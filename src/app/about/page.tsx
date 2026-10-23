@@ -1,19 +1,12 @@
 import { GraduationCap, Beaker, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-interface AboutPageProps {
-   params: Promise<{ lang: string }>;
-}
-
-export default async function AboutPage({ params }: AboutPageProps) {
-   const { lang } = await params;
-
-
+export default function AboutPage() {
    return (
       <div className="max-w-4xl mx-auto py-12 px-4 space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
          <section className="space-y-6 text-center">
             <Link
-               href={`/${lang}`}
+               href="/"
                className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-medium transition-colors group mb-4"
             >
                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
