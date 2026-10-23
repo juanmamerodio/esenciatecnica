@@ -1,7 +1,7 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { RAIZ, archivosFuente, leer } from './ayudantes';
 
 /**
  * T0 · Español único (issue #2)
@@ -10,8 +10,10 @@ import { describe, expect, it } from 'vitest';
  * los textos en español dentro del código. Lo que sí es observable —y por eso se
  * testea— es la estructura que el ticket promete: no hay rutas por idioma, no hay
  * middleware, no hay diccionarios y ningún módulo del front los importa.
+ *
+ * F0 (#3) renombró `NavBar.tsx` a `Header.tsx`; la aserción sobre la navegación sigue
+ * siendo la misma, solo cambió el archivo que la contiene.
  */
-const RAIZ = fileURLToPath(new URL('../..', import.meta.url));
 
 /** Artefactos que T0 retira: ninguno debe sobrevivir en el repo. */
 const RETIRADOS = [
@@ -23,18 +25,6 @@ const RETIRADOS = [
 
 /** Paquetes que sólo existían para negociar idioma. */
 const PAQUETES_DE_I18N = ['@formatjs/intl-localematcher', 'negotiator', '@types/negotiator'];
-
-function archivosFuente(directorio: string): string[] {
-  return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
-    const ruta = join(directorio, entrada.name);
-    if (entrada.isDirectory()) return archivosFuente(ruta);
-    return /\.(ts|tsx)$/.test(entrada.name) ? [ruta] : [];
-  });
-}
-
-function leer(rutaRelativa: string): string {
-  return readFileSync(join(RAIZ, rutaRelativa), 'utf8');
-}
 
 describe('T0 · Español único', () => {
   it('no conserva las rutas por idioma, el middleware ni los diccionarios', () => {
@@ -74,7 +64,7 @@ describe('T0 · Español único', () => {
 
   it('el documento declara lang="es" y no hay selector de idioma', () => {
     expect(leer('src/app/layout.tsx')).toMatch(/<html[^>]*lang="es"/);
-    const navbar = leer('src/components/NavBar.tsx');
-    expect(navbar).not.toMatch(/\blang\b|locales|getTransformedPath/);
+    const header = leer('src/components/Header.tsx');
+    expect(header).not.toMatch(/locales\b|\[lang\]|dictionaries|@\/lib\/i18n/);
   });
 });

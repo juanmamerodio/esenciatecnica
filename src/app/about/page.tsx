@@ -44,11 +44,9 @@ export default function AboutPage() {
             </div>
          </section>
 
-         <footer className="text-center pt-8">
-            <p className="text-sm text-muted">
-               Desarrollado con ❤️ por la promoción 2026.
-            </p>
-         </footer>
+         <p className="text-center pt-8 text-sm text-muted">
+            Desarrollado con ❤️ por la promoción 2026.
+         </p>
       </div>
    );
 }

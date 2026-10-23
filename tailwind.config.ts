@@ -1,5 +1,12 @@
-// tailwind.config.ts
 import type { Config } from "tailwindcss";
+
+/**
+ * El tema **no** declara valores: los referencia desde `src/app/globals.css`,
+ * que es la única fuente de la identidad (issue #3, spec §3.1).
+ * Los colores se exponen como canales RGB para conservar los modificadores de
+ * opacidad de Tailwind (`bg-accent/10`, `border-accent/20`).
+ */
+const canal = (variable: string): string => `rgb(var(${variable}) / <alpha-value>)`;
 
 const config: Config = {
   content: [
@@ -10,27 +17,36 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: "#f7f7f5",
-        surface: "#ffffff",
-        glass: "rgba(255, 255, 255, 0.62)",
+        bg: canal("--color-bg"),
+        surface: canal("--color-surface"),
+        glass: "var(--color-glass)",
+        navbar: "var(--color-navbar)",
         accent: {
-          DEFAULT: "#3d8c6e",
-          lt: "#e8f3ef",
+          DEFAULT: canal("--color-accent"),
+          lt: canal("--color-accent-lt"),
         },
-        text: "#1c1c1e",
+        text: canal("--color-text"),
         gray: {
-          DEFAULT: "#6b7280",
-          lt: "#f0f0ee",
+          DEFAULT: canal("--color-gray"),
+          lt: canal("--color-gray-lt"),
         },
-        muted: "#8e8e93",
-        border: "rgba(0, 0, 0, 0.08)",
+        muted: canal("--color-muted"),
+        border: {
+          DEFAULT: "var(--color-line)",
+          soft: "var(--color-line-soft)",
+        },
       },
       fontFamily: {
-        sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-dm-mono)", "ui-monospace", "monospace"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
+      },
+      borderRadius: {
+        card: "var(--radio-card)",
+        pill: "var(--radio-control)",
       },
       boxShadow: {
-        'soft': '0 2px 12px rgba(0, 0, 0, 0.06)',
+        soft: "var(--shadow-soft)",
+        lift: "var(--shadow-lift)",
       },
     },
   },
