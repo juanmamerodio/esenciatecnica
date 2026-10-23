@@ -1,133 +1,79 @@
-# Runbook · Separación de `quimicashop` y `esenciatecnica`
+# Separación de repos y proyectos Supabase
 
-Este documento describe cómo pasar del repo único actual a dos repositorios con claves separadas.
+> **Estado:** vigente al 2026-10-22.
+> Reemplaza al runbook histórico, que describía la separación al revés. La copia vieja vive en
+> `quimicashop/diagrams/SEPARACION.md` y no debe usarse como guía.
 
-## Resultado esperado
+---
+
+## Resultado real
 
 | Repo | Contenido | Deploy | Supabase |
 |---|---|---|---|
-| `quimicashop` | Hub (`index.html`), Teams (`tasks.html`, `tasks.js`), `style.css`, `diagrams/` | GitHub Pages | Proyecto **Teams** (tablas `team_*`) |
-| `esenciatecnica` | Next.js: tienda, `/admin`, APIs | Vercel | Proyecto **E-Commerce / Química** |
+| `esenciatecnica` (este) | Tienda Next.js, `/admin`, APIs, tests | Vercel | Proyecto **e-commerce** `otjphjnrwihqzzhbfnmh` |
+| `quimicashop` | Hub (`index.html`), Teams (`tasks.html`, `tasks.js`), `style.css`, `diagrams/` | GitHub Pages | Proyecto **Teams** `uchyattzuhaltsaxazce` (`team_*`) |
 
-> Criterio acordado: el proyecto Supabase actual (`uchyattzuhaltsaxazce`) queda como **e-commerce / química**.
-> Se crea un proyecto nuevo para **Teams**.
-
----
-
-## 1. Crear el proyecto Supabase de Teams
-
-1. Supabase Dashboard → **New project** → nombre `quimicashop-teams`.
-2. Guardar:
-   - `Project URL` → `TEAMS_SUPABASE_URL`
-   - `anon public key` → `TEAMS_SUPABASE_ANON_KEY`
-   - `service_role key` → solo para migraciones, nunca al frontend.
-3. En **SQL Editor**, ejecutar en orden:
-   - `diagrams/supabase_teams_schema.sql`
-   - `diagrams/create_team_discussions.sql`
-4. Migrar datos existentes (si hay):
-   ```sql
-   -- En el proyecto viejo: exportar CSV de team_members, team_tasks, task_notes,
-   -- team_meetings, team_discussions, team_discussion_comments.
-   -- En el proyecto nuevo: importar esos CSV con el Table Editor.
-   ```
-5. Verificar RLS. Las políticas actuales son permisivas (`USING (true)`), lo que permite escritura
-   con la anon key. Para producción, restringir escritura a los DNIs/perfiles del equipo.
+El proyecto viejo `uchyattzuhaltsaxazce` conserva además el esquema legacy del e-commerce
+(`productos`, `pedidos`, `verificaciones`) y el catálogo de laboratorio. Es historia: **no** se usa para
+el e-commerce nuevo.
 
 ---
 
-## 2. Actualizar el repo `quimicashop`
+## Variables
 
-1. Editar `config.js`:
-   ```js
-   window.QUIMICASHOP_CONFIG = {
-     supabaseUrl: "https://TU-PROYECTO-TEAMS.supabase.co",
-     supabaseAnonKey: "TU_ANON_KEY_DE_TEAMS",
-     notificationsApi: "https://TU-ECOMM.vercel.app/api/notifications",
-   };
-   ```
-2. `index.html` y `tasks.html` cargan `config.js` antes de su script.
-3. `tasks.js` lee la configuración desde `window.QUIMICASHOP_CONFIG`.
-4. Deploy: GitHub Pages (workflow `.github/workflows/pages.yml`).
-5. Si el proyecto Vercel `quimicashop` estaba conectado a este repo, desconectarlo o cambiar el
-   framework preset a estático. El dominio del ecomm se configura en el proyecto nuevo.
+### E-commerce (`esenciatecnica/.env.local` y Vercel)
 
----
-
-## 3. Actualizar el repo `esenciatecnica`
-
-1. `.env.local` con el proyecto Supabase **e-commerce** (el actual `uchyattzuhaltsaxazce`):
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=https://uchyattzuhaltsaxazce.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   SUPABASE_SERVICE_ROLE_KEY=...
-   ```
-2. Para que `/api/notifications` siga leyendo `team_members` del proyecto Teams:
-   ```
-   TEAMS_SUPABASE_URL=https://TU-PROYECTO-TEAMS.supabase.co
-   TEAMS_SUPABASE_ANON_KEY=...
-   ```
-   Sin estas variables, el endpoint cae al proyecto e-commerce (comportamiento anterior).
-3. Cargar las mismas variables en Vercel → **Project Settings → Environment Variables**.
-4. `RESEND_API_KEY` se mantiene como está (decisión actual: una sola cuenta para Química).
-   Si más adelante se quiere aislar, crear una key nueva para Teams y mover el endpoint.
-
----
-
-## 4. Crear y conectar el repo nuevo
-
-El repo local ya está inicializado y commiteado en `../esenciatecnica`. Solo falta crear el repo vacío
-en GitHub y pushear:
-
-```bash
-cd ../esenciatecnica
-git remote -v          # origin -> https://github.com/juanmamerodio/esenciatecnica.git
-git push -u origin main
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://otjphjnrwihqzzhbfnmh.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+RESEND_API_KEY=...
+ADMIN_PASSWORD=...
 ```
 
-En Vercel, para **no romper** `quimicashop.vercel.app`:
-1. Abrir el proyecto Vercel `quimicashop` → **Settings → Git**.
-2. Desconectar el repo `quimicashop` y conectar `esenciatecnica`.
-3. Mantener el dominio `quimicashop.vercel.app` en ese proyecto.
-4. Cargar las env vars de `.env.example` y redeploy.
+### Teams (`quimicashop/config.js`)
 
-Así el e-commerce conserva la URL oficial y el Hub/Teams passa a GitHub Pages:
-`https://juanmamerodio.github.io/quimicashop/`.
-
-Si en cambio se prefiere un dominio nuevo (`esenciatecnica.vercel.app`), actualizar
-`quimicashop/config.js → notificationsApi` con la URL nueva.
-
----
-
-## 5. Limpieza de claves
-
-- [ ] Rotar `SUPABASE_SERVICE_ROLE_KEY` del proyecto viejo si estuvo alguna vez en un `.env` compartido.
-- [ ] Confirmar que `.env.local` está ignorado en ambos repos.
-- [ ] Confirmar que `config.js` solo contiene la **anon key** (pública).
-- [ ] Retirar `GEMINI_API_KEY` cuando se elimine `src/lib/gemini.ts`.
-- [ ] Revisar que ningún HTML/JS del Hub tenga la service role key.
-
----
-
-## 6. Verificación post-split
-
-```bash
-# Ecomm
-cd esenciatecnica
-npm install
-npm run typecheck
-npm run build
-
-# Teams/Hub
-cd ../quimicashop
-node --check tasks.js
-# Abrir index.html y tasks.html con un servidor local:
-# npx serve .
+```js
+window.QUIMICASHOP_CONFIG = {
+  supabaseUrl: "https://uchyattzuhaltsaxazce.supabase.co",
+  supabaseAnonKey: "...",
+  notificationsApi: "https://quimicashop.vercel.app/api/notifications",
+};
 ```
 
-Checklist funcional:
-- [ ] `/es` lista productos.
-- [ ] Checkout crea pedido y sube comprobante.
-- [ ] `/admin` lista pedidos y stock bajo.
-- [ ] Teams carga tareas, reuniones y minutas desde el proyecto Supabase de Teams.
-- [ ] Una convocatoria de Teams dispara el email vía `/api/notifications`.
-- [ ] El Hub muestra el progreso del sprint.
+- `config.js` solo lleva la **anon key** (pública).
+- La **service role** y `RESEND_API_KEY` nunca van al cliente.
+- `/api/notifications` es el único puente vivo; si se migra a Teams, se borran `TEAMS_*` del e-commerce.
+
+---
+
+## Estado de la migración
+
+1. La base nueva del e-commerce ya tiene el DER normalizado y datos de prueba.
+2. El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`) y
+   todavía usa i18n y Gemini.
+3. El modelo objetivo está en [`MODELO.md`](MODELO.md); la brecha y el plan, en
+   [`AUDITORIA.md`](AUDITORIA.md).
+4. El DER académico se adapta al modelo operativo; no al revés.
+
+---
+
+## SQL de Teams
+
+Los DDL de Teams viven en el repo `quimicashop`:
+
+- `diagrams/supabase_teams_schema.sql`
+- `diagrams/create_team_discussions.sql`
+
+No se copian a este repo.
+
+---
+
+## Checklist de verificación
+
+- [ ] `.env.local` apunta al proyecto e-commerce.
+- [ ] `config.js` apunta al proyecto Teams.
+- [ ] La service role no está en el cliente ni en Git.
+- [ ] `/api/notifications` responde con las claves de Teams.
+- [ ] La tienda no consulta tablas `team_*`.
+- [ ] El panel `/admin` no consulta el catálogo legacy.

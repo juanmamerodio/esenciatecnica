@@ -1,5 +1,10 @@
 # Deuda técnica detectada al separar los repos
 
+> **Nota 2026-10-22:** este documento se escribió contra el esquema legacy (`productos`, `pedidos`,
+> `verificaciones`). El modelo vigente es [`MODELO.md`](MODELO.md) y la brecha completa está en
+> [`AUDITORIA.md`](AUDITORIA.md). Los puntos 1–4 siguen siendo ciertos para el código actual, pero
+> los nombres de tablas son legacy y no deben usarse en código nuevo.
+
 Estos puntos **no se tocaron** en la separación para no cambiar el comportamiento de las APIs
 (decisión acordada). Quedan documentados con archivo y línea para resolverlos en el próximo sprint.
 
@@ -44,14 +49,15 @@ hacer `update({ estado: status, ...patch })`.
 
 ---
 
-## 3. 🟠 Gemini sigue activo aunque el flujo oficial es manual
+## 3. 🟠 Gemini sigue en el código legacy, pero en el sistema final no existe
 
 - `src/lib/gemini.ts` y `src/app/api/verify-payment/route.ts` usan `GEMINI_API_KEY`.
 - El checkout muestra "Procesando pedido e IA..." y usa `dict.checkout.aiNote`.
-- `AGENTS.md` y el informe de cátedra definen **validación manual por el Administrador**.
+- El flujo oficial es **validación manual por los Administradores de Química**. La validación por IA
+  no existe en el sistema final; el código que la menciona se retira.
 
 **Fix:** eliminar `gemini.ts`, el import y el bloque de análisis; subir el comprobante, guardar
-`comprobante_url` y dejar el pedido en `comprobante_subido` para revisión humana. Recién después
+`comprobante_url` y dejar el pedido en `Comprobante Subido` para revisión humana. Recién después
 borrar `GEMINI_API_KEY` de Vercel y del `.env.example`.
 
 ---
@@ -83,8 +89,8 @@ propia key de Resend, y borrar `TEAMS_*` del ecomm.
 
 ## 6. 🟡 RLS permisivas en Supabase de Teams
 
-`diagrams/supabase_teams_schema.sql` crea políticas `USING (true)` para lectura y escritura. La anon
-key es pública (`config.js`), así que cualquiera puede escribir en `team_*`.
+`quimicashop/diagrams/supabase_teams_schema.sql` crea políticas `USING (true)` para lectura y
+escritura. La anon key es pública (`config.js`), así que cualquiera puede escribir en `team_*`.
 
 **Fix:** restringir escritura por perfil/DNI, idealmente con Supabase Auth y JWT en lugar de la
 anon key suelta.
