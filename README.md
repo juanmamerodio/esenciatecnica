@@ -146,7 +146,8 @@ El estado real de la deuda está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA
 
 1. Push a `main` del repo `esenciatecnica`.
 2. El proyecto de Vercel conectado a este repo sirve la tienda en
-   `esenciatecnica.vercel.app`. El dominio heredado `quimicashop.vercel.app` ya no es la URL de la tienda.
+   `esenciatecnica.vercel.app`. El dominio heredado `quimicashop.vercel.app` sigue resolviendo por
+   compatibilidad con el Hub; se retira cuando su `config.js` apunte al dominio nuevo.
 3. Cargar las variables de `.env.example` en **Project Settings → Environment Variables**.
 4. Redeploy. El Hub/Teams queda en GitHub Pages
    (`https://juanmamerodio.github.io/quimicashop/`).
