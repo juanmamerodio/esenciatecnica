@@ -135,11 +135,15 @@ El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR
 ## ☁️ Deploy
 
 1. Crear el repo `esenciatecnica` en GitHub y pushear `main`.
-2. Importarlo en Vercel como proyecto Next.js.
+2. En Vercel, abrir el proyecto existente `quimicashop` → **Settings → Git** y cambiar el repo
+   conectado de `quimicashop` a `esenciatecnica`. Así se conserva el dominio
+   `quimicashop.vercel.app` para la tienda.
 3. Cargar las variables de `.env.example` en **Project Settings → Environment Variables**.
-4. Asignar el dominio (por ejemplo `esenciatecnica.vercel.app`). Si el dominio oficial
-   `quimicashop.vercel.app` se mueve a este repo, actualizalo también en
-   `quimicashop/config.js` (`notificationsApi`).
+4. Redeploy. El Hub/Teams queda en GitHub Pages
+   (`https://juanmamerodio.github.io/quimicashop/`).
+
+Si se usa un dominio nuevo (`esenciatecnica.vercel.app`), actualizar
+`quimicashop/config.js → notificationsApi` con la URL nueva.
 
 ---
 

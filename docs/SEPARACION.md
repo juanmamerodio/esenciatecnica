@@ -75,24 +75,26 @@ Este documento describe cómo pasar del repo único actual a dos repositorios co
 
 ## 4. Crear y conectar el repo nuevo
 
+El repo local ya está inicializado y commiteado en `../esenciatecnica`. Solo falta crear el repo vacío
+en GitHub y pushear:
+
 ```bash
-# En GitHub: crear repo vacío `esenciatecnica` (sin README).
 cd ../esenciatecnica
-git init
-git add -A
-git commit -m "chore: repo inicial del e-commerce separado de quimicashop"
-git branch -M main
-git remote add origin https://github.com/juanmamerodio/esenciatecnica.git
+git remote -v          # origin -> https://github.com/juanmamerodio/esenciatecnica.git
 git push -u origin main
 ```
 
-En Vercel:
-1. **Add New Project** → importar `esenciatecnica`.
-2. Framework: Next.js (autodetectado).
-3. Cargar env vars.
-4. Deploy.
-5. Asignar dominio. Opción A: mantener `quimicashop.vercel.app` (cambiar el proyecto conectado).
-   Opción B: usar `esenciatecnica.vercel.app` y actualizar `quimicashop/config.js`.
+En Vercel, para **no romper** `quimicashop.vercel.app`:
+1. Abrir el proyecto Vercel `quimicashop` → **Settings → Git**.
+2. Desconectar el repo `quimicashop` y conectar `esenciatecnica`.
+3. Mantener el dominio `quimicashop.vercel.app` en ese proyecto.
+4. Cargar las env vars de `.env.example` y redeploy.
+
+Así el e-commerce conserva la URL oficial y el Hub/Teams passa a GitHub Pages:
+`https://juanmamerodio.github.io/quimicashop/`.
+
+Si en cambio se prefiere un dominio nuevo (`esenciatecnica.vercel.app`), actualizar
+`quimicashop/config.js → notificationsApi` con la URL nueva.
 
 ---
 
