@@ -78,6 +78,7 @@ La regla del proyecto es **una clave por repo, un proyecto Supabase por dominio*
 | `ADMIN_PASSWORD` | Solo Vercel | Basic Auth de `/admin` |
 | `SHEETS_WEBHOOK_URL` | Solo Vercel (opcional) | Sincronización con Google Sheets |
 | `TEAMS_SUPABASE_URL` / `ANON_KEY` | Solo Vercel (puente temporal) | `/api/notifications` mientras siga en este repo |
+| `TEAMS_HUB_URL` / `RESEND_FROM` | Solo Vercel (puente temporal) | Link del Hub en los emails y remitente de Teams |
 | `GEMINI_API_KEY` | Solo Vercel (legado) | Endpoint viejo de IA, pendiente de retiro |
 
 **Nunca** commitees `.env.local`, la service role key ni la API key de Resend.
