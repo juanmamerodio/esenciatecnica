@@ -114,18 +114,20 @@ Las tablas `team_*` **no** pertenecen a este proyecto Supabase: son del repo `qu
 7. Cron de los viernes: reintegra el stock reservado no ejecutado.
 ```
 
-> ⚠️ **Deuda técnica conocida:** `/api/verify-payment` todavía llama a Gemini (`src/lib/gemini.ts`) y el
-> checkout muestra textos de "IA". El flujo oficial de cátedra es **validación manual**, así que ese código
-> debe retirarse en el próximo sprint. Mientras exista, `GEMINI_API_KEY` sigue siendo necesaria en Vercel.
+> ⚠️ **Deuda técnica conocida:** el detalle completo está en
+> [`docs/DEUDA_TECNICA.md`](./docs/DEUDA_TECNICA.md). Lo más urgente:
+> `OrderService.isProcessed` no existe y `updateStatus` descarta `comprobante_url`; el checkout
+> falla al subir el comprobante. Además, `/api/verify-payment` todavía usa Gemini aunque el flujo
+> oficial es validación manual.
 
 ---
 
 ## 🧪 Verificación
 
 ```bash
-npm run typecheck
+npm run typecheck   # hoy falla por deuda preexistente (ver docs/DEUDA_TECNICA.md)
 npm run lint
-npm run build
+npm run build       # pasa porque next.config.ts tiene ignoreBuildErrors: true
 ```
 
 El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR.
