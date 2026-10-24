@@ -67,15 +67,17 @@ export default function Header() {
             href="/cart"
             className="nav-pill gap-2"
             aria-current={esRutaActiva(pathname, "/cart") ? "page" : undefined}
-            aria-label="Carrito"
           >
             <ShoppingCart aria-hidden className="h-4 w-4" />
             Carrito
             <span
-              aria-label={`${contador} ${contador === 1 ? "unidad" : "unidades"} en el carrito`}
+              aria-hidden
               className="min-w-[1.25rem] rounded-full bg-accent px-1.5 text-center font-mono text-[10px] font-bold text-surface"
             >
               {contador}
+            </span>
+            <span className="sr-only">
+              {contador === 1 ? "1 unidad en el carrito" : `${contador} unidades en el carrito`}
             </span>
           </Link>
         </nav>

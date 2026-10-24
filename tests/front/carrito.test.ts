@@ -5,7 +5,7 @@ import {
   agregar,
   cambiarCantidad,
   quitar,
-  total,
+  totalDelPedido,
   totalUnidades,
   type ItemCarrito,
 } from '../../src/lib/carrito';
@@ -89,19 +89,19 @@ describe('T4 · totales', () => {
   it('el total es la suma de precio por cantidad', () => {
     const items = carritoCon([CREMA, 2], [JABON, 3]);
 
-    expect(total(items)).toBe(2500 * 2 + 1800 * 3);
+    expect(totalDelPedido(items)).toBe(2500 * 2 + 1800 * 3);
   });
 
   it('redondea a dos decimales, como el dinero del modelo', () => {
     const items = agregar([], { ...CREMA, precio: 1000.55, disponible: 10 }, 3);
 
-    expect(total(items)).toBe(3001.65);
+    expect(totalDelPedido(items)).toBe(3001.65);
   });
 
   it('el contador cuenta unidades, no líneas', () => {
     expect(totalUnidades(carritoCon([CREMA, 2], [JABON, 3]))).toBe(5);
     expect(totalUnidades([])).toBe(0);
-    expect(total([])).toBe(0);
+    expect(totalDelPedido([])).toBe(0);
   });
 });
 
@@ -133,7 +133,8 @@ describe('T4 · página del carrito', () => {
   it('los controles de cantidad tienen nombre accesible y tope por disponibilidad', () => {
     expect(pagina).toMatch(/aria-label=\{`Agregar una unidad de/);
     expect(pagina).toMatch(/aria-label=\{[^}]*Quitar/);
-    expect(pagina).toMatch(/disabled=\{item\.cantidad >= item\.disponible\}/);
+    // El tope sale de la disponibilidad del item; la regla en sí se testea en el módulo.
+    expect(pagina).toMatch(/disabled=\{[^}]*disponible[^}]*\}/);
     expect(pagina).toMatch(/aria-live="polite"/);
   });
 

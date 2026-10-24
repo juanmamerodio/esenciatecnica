@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, Search, X } from "lucide-react";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
@@ -10,13 +11,38 @@ export const dynamic = "force-dynamic";
 type Busqueda = { q?: string; categoria?: string };
 
 /** La URL es el estado del filtro: se puede compartir y el "atrás" funciona. */
-function urlDe(q: string, categoria: string): string {
+function urlDelFiltro(q: string, categoria: string): string {
   const parametros = new URLSearchParams();
   if (q.trim()) parametros.set("q", q.trim());
   if (categoria) parametros.set("categoria", categoria);
 
   const consulta = parametros.toString();
   return consulta ? `/catalog?${consulta}` : "/catalog";
+}
+
+/** Chip de categoría: el activo se marca por color y por `aria-current` (HU-2). */
+function ChipCategoria({
+  href,
+  activo,
+  children,
+}: {
+  href: string;
+  activo: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={activo ? "true" : undefined}
+      className={`rounded-pill border px-5 py-2 text-sm font-medium transition-colors ${
+        activo
+          ? "border-accent bg-accent text-surface"
+          : "border-border bg-surface text-muted hover:border-accent hover:text-accent"
+      }`}
+    >
+      {children}
+    </Link>
+  );
 }
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<Busqueda> }) {
@@ -56,40 +82,24 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <button type="submit" className="btn-primary py-3 text-sm">
           Buscar
         </button>
-        {hayConsulta ? (
-          <Link href="/catalog" className="btn-secondary gap-2 py-3 text-sm">
+        {/* Limpiar la búsqueda conserva la categoría (HU-3). */}
+        {q.trim() ? (
+          <Link href={urlDelFiltro("", categoria)} className="btn-secondary gap-2 py-3 text-sm">
             <X aria-hidden className="h-4 w-4" />
-            Limpiar
+            Limpiar búsqueda
           </Link>
         ) : null}
       </form>
 
       {categorias.length > 0 ? (
         <nav aria-label="Filtrar por categoría" className="flex flex-wrap gap-2">
-          <Link
-            href={urlDe(q, "")}
-            aria-current={categoria ? undefined : "true"}
-            className={`rounded-pill border px-5 py-2 text-sm font-medium transition-colors ${
-              categoria
-                ? "border-border bg-surface text-muted hover:border-accent hover:text-accent"
-                : "border-accent bg-accent text-surface"
-            }`}
-          >
+          <ChipCategoria href={urlDelFiltro(q, "")} activo={!categoria}>
             Todos
-          </Link>
+          </ChipCategoria>
           {categorias.map((nombre) => (
-            <Link
-              key={nombre}
-              href={urlDe(q, nombre)}
-              aria-current={categoria === nombre ? "true" : undefined}
-              className={`rounded-pill border px-5 py-2 text-sm font-medium transition-colors ${
-                categoria === nombre
-                  ? "border-accent bg-accent text-surface"
-                  : "border-border bg-surface text-muted hover:border-accent hover:text-accent"
-              }`}
-            >
+            <ChipCategoria key={nombre} href={urlDelFiltro(q, nombre)} activo={categoria === nombre}>
               {nombre}
-            </Link>
+            </ChipCategoria>
           ))}
         </nav>
       ) : null}

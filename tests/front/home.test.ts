@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { RAIZ, leer } from './ayudantes';
+import { RAIZ, archivosFuente, leer } from './ayudantes';
 
 /**
  * T1 · Home canónica (issue #5) — criterios que se verifican en el código, no en el DOM.
@@ -76,19 +76,10 @@ describe('T1 · estructura del catálogo', () => {
   });
 
   it('ninguna fuente importa ya el servicio de productos retirado', () => {
-    const ofensores: string[] = [];
-    const recorrer = (directorio: string) => {
-      for (const entrada of readdirSync(directorio, { withFileTypes: true })) {
-        const ruta = join(directorio, entrada.name);
-        if (entrada.isDirectory()) {
-          recorrer(ruta);
-          continue;
-        }
-        if (!/\.(ts|tsx)$/.test(entrada.name)) continue;
-        if (/product\.service/.test(readFileSync(ruta, 'utf8'))) ofensores.push(relative(RAIZ, ruta));
-      }
-    };
-    recorrer(join(RAIZ, 'src'));
+    const ofensores = archivosFuente(join(RAIZ, 'src'))
+      .filter((ruta) => /product\.service/.test(readFileSync(ruta, 'utf8')))
+      .map((ruta) => relative(RAIZ, ruta));
+
     expect(ofensores).toEqual([]);
   });
 });

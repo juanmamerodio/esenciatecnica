@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-react';
 import ReceiptUploader from "@/components/ReceiptUploader";
 import { formatPrice } from "@/lib/format";
-import { total as totalDelCarrito } from "@/lib/carrito";
+import { totalDelPedido } from "@/lib/carrito";
 import { useCartStore } from "@/lib/store";
 
 const TRANSFERENCIA = {
@@ -15,7 +15,7 @@ const TRANSFERENCIA = {
 
 export default function CheckoutPage() {
   const { items, vaciar } = useCartStore();
-  const totalPrice = totalDelCarrito(items);
+  const totalPrice = totalDelPedido(items);
 
   const [formData, setFormData] = useState({ nombre: '', email: '' });
   const [imageBase64, setImageBase64] = useState<string | null>(null);

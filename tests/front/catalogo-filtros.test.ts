@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { consultarCatalogo, type ConsultaCatalogo, type LectorCatalogo } from '../../src/lib/catalogo';
-import type { VistaCatalogo } from '../../src/lib/database.types';
-import { crearBase, crearProducto, type Base } from '../db/ayudantes';
+import type { ConsultaCatalogo } from '../../src/lib/catalogo';
+import { crearProducto } from '../db/ayudantes';
+import { catalogoConSeed } from './ayudantes';
 
 /**
  * T2 · Catálogo (issue #6) — seam: la función pública del catálogo con `consulta`.
@@ -10,23 +10,6 @@ import { crearBase, crearProducto, type Base } from '../db/ayudantes';
  * devuelve la búsqueda, qué alcanza, cómo combina con la categoría y qué pasa cuando no
  * hay resultados. El render de `/catalog` se verifica en el navegador (spec §4).
  */
-
-function lectorDe(db: Base): LectorCatalogo {
-  return {
-    async leer() {
-      const { rows } = await db.query<VistaCatalogo>('select * from public.vista_catalogo');
-      return { filas: rows, error: null };
-    },
-  };
-}
-
-async function catalogoConSeed() {
-  const db = await crearBase({ seed: true });
-  return {
-    db,
-    consultar: (consulta?: ConsultaCatalogo) => consultarCatalogo(lectorDe(db), consulta),
-  };
-}
 
 async function nombres(consulta?: ConsultaCatalogo) {
   const { consultar } = await catalogoConSeed();

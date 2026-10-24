@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { total as totalDelCarrito, totalUnidades } from "@/lib/carrito";
+import { totalDelPedido, totalUnidades } from "@/lib/carrito";
 import { useCartStore } from "@/lib/store";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 
@@ -43,7 +43,7 @@ export default function Carrito() {
     );
   }
 
-  const total = totalDelCarrito(items);
+  const total = totalDelPedido(items);
   const unidades = totalUnidades(items);
 
   return (

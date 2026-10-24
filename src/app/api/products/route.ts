@@ -10,7 +10,12 @@ export async function GET() {
   const resultado = await leerCatalogo();
 
   if (resultado.estado === "error") {
-    return NextResponse.json({ error: resultado.mensaje }, { status: 503 });
+    // En producción no se filtra el detalle interno: el motivo queda en el log del server.
+    console.error("Catálogo no disponible:", resultado.mensaje);
+    return NextResponse.json(
+      { error: "El catálogo no está disponible en este momento." },
+      { status: 503 },
+    );
   }
 
   return NextResponse.json({ productos: resultado.productos });

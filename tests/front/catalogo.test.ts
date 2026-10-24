@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { consultarCatalogo, type LectorCatalogo } from '../../src/lib/catalogo';
-import type { VistaCatalogo } from '../../src/lib/database.types';
-import { crearBase, crearProducto, type Base } from '../db/ayudantes';
+import { consultarCatalogo } from '../../src/lib/catalogo';
+import { crearBase, crearProducto } from '../db/ayudantes';
+import { catalogoConSeed, lectorDe } from './ayudantes';
 
 /**
  * T1 · Home canónica (issue #5) — seam: la función pública del módulo de catálogo.
@@ -12,41 +12,26 @@ import { crearBase, crearProducto, type Base } from '../db/ayudantes';
  * query ni detalles internos. La Home no se testea con DOM en esta tajada (spec §7).
  */
 
-/** Adaptador de lectura sobre PGlite: es el mismo puerto que implementa Supabase. */
-function lectorDe(db: Base): LectorCatalogo {
-  return {
-    async leer() {
-      const { rows } = await db.query<VistaCatalogo>('select * from public.vista_catalogo');
-      return { filas: rows, error: null };
-    },
-  };
-}
-
-async function catalogoConSeed(): Promise<{ db: Base; leer: () => ReturnType<typeof consultarCatalogo> }> {
-  const db = await crearBase({ seed: true });
-  return { db, leer: () => consultarCatalogo(lectorDe(db)) };
-}
-
-async function nombresDe(leer: () => ReturnType<typeof consultarCatalogo>): Promise<string[]> {
-  const resultado = await leer();
+async function nombresDe(consultar: () => ReturnType<typeof consultarCatalogo>): Promise<string[]> {
+  const resultado = await consultar();
   if (resultado.estado !== 'ok') throw new Error(`se esperaba catálogo ok, llegó ${resultado.estado}`);
   return resultado.productos.map((producto) => producto.nombre);
 }
 
 describe('T1 · catálogo público', () => {
   it('sólo expone productos activos', async () => {
-    const { db, leer } = await catalogoConSeed();
+    const { db, consultar } = await catalogoConSeed();
     await db.query(`update public.producto set activo = false where nombre = 'Jabón Líquido Neutro'`);
 
-    expect(await nombresDe(leer)).toEqual(['Crema Hidratante Facial']);
+    expect(await nombresDe(consultar)).toEqual(['Crema Hidratante Facial']);
   });
 
   it('ordena por nombre ascendente', async () => {
-    const { db, leer } = await catalogoConSeed();
+    const { db, consultar } = await catalogoConSeed();
     await crearProducto(db, { nombre: 'Zinc tópico', precio: 900, cantidad: 4 });
     await crearProducto(db, { nombre: 'Aloe en gel', precio: 900, cantidad: 4 });
 
-    expect(await nombresDe(leer)).toEqual([
+    expect(await nombresDe(consultar)).toEqual([
       'Aloe en gel',
       'Crema Hidratante Facial',
       'Jabón Líquido Neutro',
@@ -55,12 +40,12 @@ describe('T1 · catálogo público', () => {
   });
 
   it('resuelve la disponibilidad y marca sin stock, incluso sin fila de stock', async () => {
-    const { db, leer } = await catalogoConSeed();
+    const { db, consultar } = await catalogoConSeed();
     const agotado = await crearProducto(db, { nombre: 'Acondicionador sólido', precio: 1200, cantidad: 3, reservada: 3 });
     const sinFila = await crearProducto(db, { nombre: 'Bálsamo labial', precio: 700, cantidad: 5 });
     await db.query('delete from public.stock where id_producto = $1', [sinFila]);
 
-    const resultado = await leer();
+    const resultado = await consultar();
     if (resultado.estado !== 'ok') throw new Error('se esperaba catálogo ok');
 
     const porNombre = new Map(resultado.productos.map((producto) => [producto.nombre, producto]));
@@ -72,8 +57,8 @@ describe('T1 · catálogo público', () => {
   });
 
   it('no inventa campos: precio numérico, descripción y categoría tal como están en el modelo', async () => {
-    const { leer } = await catalogoConSeed();
-    const resultado = await leer();
+    const { consultar } = await catalogoConSeed();
+    const resultado = await consultar();
     if (resultado.estado !== 'ok') throw new Error('se esperaba catálogo ok');
 
     expect(resultado.productos[0]).toMatchObject({

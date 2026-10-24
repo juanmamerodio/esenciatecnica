@@ -6,6 +6,7 @@
  * `src/lib/store.ts`. El carrito del MVP vive en el cliente (AGENTS §5.2): la reserva de
  * stock ocurre recién al confirmar el pedido (T5).
  */
+import type { ProductoCatalogo } from "@/lib/catalogo";
 
 /** Una línea del carrito: un producto, una sola vez. */
 export type ItemCarrito = {
@@ -17,13 +18,8 @@ export type ItemCarrito = {
   disponible: number;
 };
 
-/** Lo que necesita el carrito para agregar un producto del catálogo. */
-export type ProductoParaAgregar = {
-  id: number;
-  nombre: string;
-  precio: number;
-  disponible: number;
-};
+/** Lo que necesita el carrito para agregar: los datos del producto, sin la cantidad. */
+export type ProductoParaAgregar = Pick<ProductoCatalogo, "id" | "nombre" | "precio" | "disponible">;
 
 export const CARRITO_VACIO: ItemCarrito[] = [];
 
@@ -72,7 +68,7 @@ export function quitar(items: ItemCarrito[], id: number): ItemCarrito[] {
 }
 
 /** Total del pedido: la suma de los subtotales, en pesos con dos decimales. */
-export function total(items: ItemCarrito[]): number {
+export function totalDelPedido(items: ItemCarrito[]): number {
   const suma = items.reduce((acumulado, item) => acumulado + item.precio * item.cantidad, 0);
   return Math.round((suma + Number.EPSILON) * 100) / 100;
 }

@@ -49,19 +49,30 @@ export interface LectorCatalogo {
 
 /**
  * Validación del borde: la vista expone columnas nulables y PostgREST/PGlite no
- * coinciden en el formato de `numeric`, así que se coerciona y se descarta la fila
- * que no identifica un producto.
+ * coinciden en el formato de `numeric`, así que se coerciona.
+ *
+ * Sin valores de relleno: si un campo del dominio viene vacío o inválido, la fila se
+ * descarta — antes que inventar una categoría o un precio, el producto no se publica.
+ * Sólo dos tolerancias, las que ya define el modelo: `imagen_url` nula es "sin imagen"
+ * (HU-5) y un producto sin fila en `stock` vale `disponible = 0` (HU-3).
  */
 const FILA_DE_CATALOGO = z.object({
   id_producto: z.number().int().positive(),
   nombre: z.string().trim().min(1),
-  categoria: z.string().trim().min(1).catch("Sin categoría"),
-  tipo: z.string().trim().catch(""),
-  descripcion: z.string().catch(""),
-  precio: z.coerce.number().finite().nonnegative().catch(0),
-  tiempo_produccion: z.coerce.number().int().nonnegative().catch(0),
-  imagen_url: z.string().trim().min(1).nullable().catch(null),
-  disponible: z.coerce.number().int().catch(0),
+  categoria: z.string().trim().min(1),
+  tipo: z.string().trim(),
+  descripcion: z.string(),
+  precio: z.coerce.number().finite().nonnegative(),
+  tiempo_produccion: z.coerce.number().int().nonnegative(),
+  imagen_url: z
+    .string()
+    .nullish()
+    .transform((valor) => (valor && valor.trim() ? valor.trim() : null)),
+  disponible: z
+    .coerce.number()
+    .int()
+    .nullish()
+    .transform((valor) => Math.max(0, valor ?? 0)),
 });
 
 export async function consultarCatalogo(
