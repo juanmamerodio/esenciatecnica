@@ -45,6 +45,44 @@ Specs nuevas: `docs/specs/detalle-producto`, `sobre-el-proyecto`, `admin`, `remi
    y `/admin` (con las claves y las migraciones puestas).
 5. Push a `main` (Vercel) para que producción deje de servir el Home legacy.
 
+## Revisión de código (2026-10-25) · hallazgos abiertos
+
+Revisión de contexto limpio sobre `1e91c03...HEAD`, en dos ejes. **AGENTS §6.5: los hallazgos no se
+parchean en la sesión que escribió el código**; van a la próxima, con su test.
+
+**Eje Spec (verificado a mano):**
+1. 🔴 `buscarCliente` usa `ilike` y el email que Zod admite puede traer `%`/`_`, que en LIKE son comodines:
+   un email como `%@ejemplo.com` reutilizaría el Cliente de otra persona o rompería por múltiples filas.
+   Fix: igualdad sobre `lower(email)` —o escapar `%`, `_` y `*`— y un test que lo fije.
+2. 🟠 El `aviso` de fallo de correo **nunca llega** al Administrador: `pedirAlPanel` descarta el cuerpo y
+   `PanelDePedidos` afirma siempre “quedó aprobado y la base emitió el remito”. Fix: devolver el cuerpo en
+   `pedirAlPanel` y mostrar el `aviso` (el test actual sólo busca la palabra en la ruta).
+3. 🟡 `tiempo_produccion` no aparece en `/catalog`: la spec del front §6.2 lo pide “en catálogo y detalle,
+   **no** en la Home”. Hoy sólo está en el detalle y en el panel.
+4. 🟡 `urlFirmadaDelComprobante` (`src/lib/admin.ts`) es superficie pública sin consumidor ni borde HTTP:
+   código muerto (AGENTS §7.5); el panel firma dentro de `pedidos()`.
+5. 🟡 Tras un `monto-no-coincide` se corrige el campo, pero el sidebar sigue mostrando el total del carrito
+   cuando el de la base difiere (la spec del checkout dice que manda el de la base).
+6. 🟡 La spec de admin se contradice sobre la alerta: §HU dice que la genera la base y no se recalcula; la
+   tabla de seams pide “alerta recalculada”. El front la recalcula: decidir una sola fuente.
+7. 🟡 Límites propios del módulo de checkout que la spec no pide (nombre ≥ 2, teléfono ≤ 30, máximo 50 líneas).
+
+**Eje Estándares** (el revisor confirmó verde `typecheck`, `lint` y 227 tests; sin `any`, sin `catch {}`
+vacíos y sin secretos en el cliente):
+8. 🟠 **Duplicación de "archivo subido" (AGENTS §7.4).** `claveDelComprobante` ≡ `claveDeLaFoto`,
+   `revisarArchivo` ≡ `revisarArchivoDeFoto` ≡ `revisar` (tres límites distintos) y las constantes gemelas
+   `LIMITES` / `LIMITES_DE_FOTO`. Además verbatim: `camposDe`, `codigoDeError`, `fechaLegible`, `esArchivo`
+   y los dos mapas `ESTADO_HTTP`. Fix: un `archivo-subido.ts` y un `errores-de-base.ts` compartidos.
+9. 🟠 `sinConfiguracion()` responde 503 “falta `SUPABASE_SERVICE_ROLE_KEY`” ante **cualquier** error
+   inesperado de cinco rutas: diagnóstico falso (AGENTS §7.10). Hay que distinguir la falta de
+   configuración de una falla real.
+10. 🟡 Los bordes de cliente **castean** la respuesta (`as ResultadoCheckout` en el checkout y `as {...}` en
+    `comun.ts`) en vez de validarla con Zod (AGENTS §7.7).
+11. 🟡 Juicios del baseline, para tener a mano: `describirError` repetido en `checkout.ts` y `admin.ts`
+    (Repeated Switches); dinero como `number` con redondeo ad-hoc (Primitive Obsession); `BUCKET_COMPROBANTES`
+    exportado por el adaptador de checkout y consumido por el panel (acoplamiento — usarlo, en realidad, sí
+    lo usa `admin-servidor.ts`); `comun.ts` mezcla llamadas HTTP con formato de fecha.
+
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit. TDD. Español único. Sin IA. Sin envío.
 - Dinero `NUMERIC(12,2)`; total derivado; un remito por comprobante; un comprobante pendiente por pedido.
