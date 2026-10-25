@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatPrice } from "@/lib/format";
 import type { ProductoCatalogo } from "@/lib/catalogo";
 import AgregarAlCarrito from "@/components/AgregarAlCarrito";
@@ -5,16 +6,25 @@ import ImagenProducto from "@/components/ImagenProducto";
 
 /**
  * Card de producto: única, con estados `ok`, `sin-stock` y `sin-imagen` (HU-2, HU-3,
- * HU-5). No muestra unidades disponibles — la Home no las publica.
+ * HU-5). No muestra unidades disponibles — la Home no las publica. La imagen y el título
+ * llevan al detalle (T3), que es donde está la descripción completa.
  */
 export default function ProductCard({ producto }: { producto: ProductoCatalogo }) {
+  const urlDelDetalle = `/producto/${producto.id}`;
+
   return (
     <article className="card card-interactive group flex h-full flex-col overflow-hidden">
-      <ImagenProducto url={producto.imagenUrl} nombre={producto.nombre} categoria={producto.categoria} />
+      <Link href={urlDelDetalle} aria-label={`Ver el detalle de ${producto.nombre}`} className="block">
+        <ImagenProducto url={producto.imagenUrl} nombre={producto.nombre} categoria={producto.categoria} />
+      </Link>
 
       <div className="flex flex-grow flex-col p-5">
         <span className="chip w-fit">{producto.categoria}</span>
-        <h3 className="mt-3 text-lg font-bold leading-tight text-text">{producto.nombre}</h3>
+        <h3 className="mt-3 text-lg font-bold leading-tight text-text">
+          <Link href={urlDelDetalle} className="underline-offset-4 hover:text-accent hover:underline">
+            {producto.nombre}
+          </Link>
+        </h3>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{producto.descripcion}</p>
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-soft pt-4">
