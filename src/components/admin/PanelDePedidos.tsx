@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, ExternalLink, FileText, Loader2, ShieldQuestion, X } from "lucide-react";
+import { Check, ExternalLink, FileText, Loader2, Send, ShieldQuestion, X } from "lucide-react";
 import type { DecisionSobreComprobante, PedidoDelPanel } from "@/lib/admin";
 import type { EstadoPedido } from "@/lib/database.types";
 import { formatPrice } from "@/lib/format";
@@ -32,6 +33,27 @@ export default function PanelDePedidos({ pedidos }: { pedidos: PedidoDelPanel[] 
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  // T8: el remito se reenvía a mano cuando el email de la aprobación no salió.
+  const [enviandoRemito, setEnviandoRemito] = useState<number | null>(null);
+  const [avisoRemito, setAvisoRemito] = useState<string | null>(null);
+
+  const reenviar = async (idComprobante: number) => {
+    setEnviandoRemito(idComprobante);
+    setAvisoRemito(null);
+
+    const resultado = await pedirAlPanel("/api/admin/remito", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ idComprobante }),
+    });
+
+    setEnviandoRemito(null);
+    setAvisoRemito(
+      resultado.ok
+        ? "El remito se reenvió al Cliente por email."
+        : `No se pudo reenviar el remito: ${resultado.mensaje}`,
+    );
+  };
 
   const decidir = async () => {
     if (!confirmacion) return;
@@ -90,10 +112,20 @@ export default function PanelDePedidos({ pedidos }: { pedidos: PedidoDelPanel[] 
         </p>
       ) : null}
 
+      {avisoRemito ? (
+        <p role="alert" className="card border-accent/30 bg-accent-lt p-4 text-sm text-accent">
+          {avisoRemito}
+        </p>
+      ) : null}
+
       <ul className="space-y-4">
         {pedidos.map((pedido) => {
           const pendiente = pedido.comprobantes.find(
             (comprobante) => comprobante.estado === "Comprobante Subido",
+          );
+          // El comprobante aprobado es el que tiene el remito: su id abre la página imprimible.
+          const aprobado = pedido.comprobantes.find(
+            (comprobante) => comprobante.estado === "Aprobado por Admin",
           );
           const puedeDecidir = Boolean(pendiente) && pedido.estado === "Pendiente de Pago";
 
@@ -208,10 +240,39 @@ export default function PanelDePedidos({ pedidos }: { pedidos: PedidoDelPanel[] 
                 )}
 
                 {pedido.remito ? (
-                  <p className="flex items-center gap-2 text-sm text-text">
-                    <FileText aria-hidden className="h-4 w-4 text-accent" />
-                    Remito {pedido.remito.numero} · {formatPrice(pedido.remito.total)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-3 text-sm text-text">
+                    <p className="flex items-center gap-2">
+                      <FileText aria-hidden className="h-4 w-4 text-accent" />
+                      Remito {pedido.remito.numero} · {formatPrice(pedido.remito.total)}
+                    </p>
+
+                    {aprobado ? (
+                      <Link
+                        href={`/admin/remito/${aprobado.id}`}
+                        className="btn-secondary gap-2 px-4 py-2 text-xs"
+                      >
+                        <ExternalLink aria-hidden className="h-4 w-4" />
+                        Ver el remito
+                      </Link>
+                    ) : null}
+
+                    {aprobado ? (
+                      <button
+                        type="button"
+                        onClick={() => reenviar(aprobado.id)}
+                        disabled={enviandoRemito !== null}
+                        className="btn-secondary gap-2 px-4 py-2 text-xs disabled:opacity-60"
+                        aria-label={`Reenviar el remito ${pedido.remito.numero} al Cliente`}
+                      >
+                        {enviandoRemito === aprobado.id ? (
+                          <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Send aria-hidden className="h-4 w-4" />
+                        )}
+                        Reenviar el remito
+                      </button>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
 

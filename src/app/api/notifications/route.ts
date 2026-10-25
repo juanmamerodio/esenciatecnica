@@ -2,8 +2,14 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-// Inicialización de clientes
-const resend = new Resend(process.env.RESEND_API_KEY || '');
+// El cliente de correo se arma por llamada y no al importar: instanciarlo arriba ataba
+// `npm run build` a que RESEND_API_KEY existiera en el entorno (AGENTS §8).
+let clienteDeCorreo: Resend | null = null;
+
+function correo(): Resend {
+  if (!clienteDeCorreo) clienteDeCorreo = new Resend(process.env.RESEND_API_KEY || '');
+  return clienteDeCorreo;
+}
 
 // Este endpoint es un puente temporal hacia el proyecto Supabase de Teams.
 // Si TEAMS_SUPABASE_* no está definido, cae al proyecto del e-commerce para no romper el flujo actual.
@@ -291,7 +297,7 @@ export async function POST(req: Request) {
     // 5. Envío mediante Resend con dominio verificado ascender.uno
     const fromSender = process.env.RESEND_FROM || 'QuimicaShop Teams <notificaciones@ascender.uno>';
 
-    const resendResponse = await resend.emails.send({
+    const resendResponse = await correo().emails.send({
       from: fromSender,
       to: recipientEmails,
       subject: subject,
