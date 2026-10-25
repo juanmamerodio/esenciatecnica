@@ -208,19 +208,25 @@ información institucional.
 
 ---
 
-## 6. Decisiones de UX (propuesta; requiere OK de Diseño UX/UI)
+## 6. Decisiones de UX (aprobadas el 2026-10-25)
 
-Propuestas que este spec deja sobre la mesa y que **Celeste Cáceres valida antes de implementar T1**
-([AGENTS.md](../../../AGENTS.md) §10):
+> **Gate G1 ([#4](https://github.com/juanmamerodio/esenciatecnica/issues/4)): cerrado.** Las cinco propuestas
+> de abajo quedan **aprobadas tal cual**, y las decisiones abiertas 3, 4 y 5 se cierran en §10. El texto
+> institucional definitivo del footer es el que ya está en `src/components/Footer.tsx` (contacto
+> `proyectos@esenciatecnica.edu.ar`, “Ciclo Lectivo 2026”), que es el que G1 aprobó por escrito.
 
 1. **Confianza primero**: alias/CBU y plazo visibles en el camino al checkout, con el mensaje de
-   transferencia validada a mano.
+   transferencia validada a mano. **Límite explícito:** el sistema **no inventa** datos bancarios. Los
+   publica desde `NEXT_PUBLIC_TRANSFERENCIA_*` y, si no están configurados, el checkout dice que los
+   confirma la Cooperadora en vez de mostrar un CBU de mentira (gate **G4**).
 2. **Promesa de entrega**: `tiempo_produccion` como dato de producción (no de envío), visible en catálogo
-   y detalle; **no** en la Home.
+   y detalle; **no** en la Home. Lo implementa T3.
 3. **Retiro/entrega a acordar**: se comunica como acuerdo posterior, porque el MVP no incluye envío.
 4. **Trazabilidad de lote**: lenguaje institucional (“elaborado por alumnos de 7mo año”), sin inventar
    campos de lote en el modelo.
 5. **Mobile-first** y **estados diseñados** (vacío, error, sin stock, sin imagen), no estados por defecto.
+6. **Plazo de la reserva**: el camino al checkout comunica que la reserva se libera el **viernes** si el
+   comprobante no está aprobado (`AGENTS.md` §5.6), porque es una regla del dominio y no una promesa.
 
 ---
 
@@ -260,11 +266,13 @@ formas de query ni detalles de implementación.
 
 | Blocker | Afecta | Estado |
 |---|---|---|
-| T0 sin terminar | T1 | Abierto |
-| OK de UX/UI de Celeste sobre §6 | Implementar T1 | Abierto |
-| Migraciones del MVP sin aplicar en `otjph…` | Ver la Home **con datos en producción** | Abierto (gate de despliegue, no de desarrollo) |
-| `.env.local` sin `SUPABASE_SERVICE_ROLE_KEY` | Aplicar migraciones | Abierto |
-| Fotos reales de producto | Calidad visual en producción | Depende de T7 |
+| T0 sin terminar | T1 | **Cerrado**: T0/F0/T1/T2/T4 implementados y en verde. |
+| OK de UX/UI sobre §6 | Implementar T1 | **Cerrado** (G1/G2/G3, 2026-10-25). |
+| Migraciones del MVP sin aplicar en `otjph…` | Ver la tienda **con datos en producción** | **Abierto** (gate de despliegue, no de desarrollo). |
+| `.env.local` sin `SUPABASE_SERVICE_ROLE_KEY` | Aplicar migraciones, checkout y panel | **Abierto** (Enzo). |
+| `.env.local` sin `ADMIN_PASSWORD` ni `RESEND_API_KEY` | Entrar al panel y enviar el remito | **Abierto** (Enzo). |
+| Fotos reales de producto | Calidad visual en producción | Depende del panel (T7). |
+| Datos bancarios reales (alias/CBU) | Mostrar la transferencia en el checkout | **Abierto** (G4, Cooperadora). |
 
 Nada de esto se maquilla: **no** se leen tablas legacy ni se siembran datos de muestra para aparentar
 catálogo. En desarrollo se usa el seed (`supabase/seed.sql`); en producción la Home muestra el estado
@@ -272,14 +280,31 @@ vacío hasta que se apliquen las migraciones.
 
 ---
 
-## 10. Decisiones abiertas (no bloquean T0 ni T1)
+## 10. Decisiones cerradas (2026-10-25)
 
-1. **T3 · Detalle de producto**: ¿página propia, o una variante ampliada de la card? El modelo no tiene
-   galería ni variantes, así que el primer detalle debería ser chico.
-2. **T6 · Nombre de la página institucional**: ¿“Sobre el proyecto” (como hoy) o “Investigación” (como el
-   prototipo)? “Investigación” describe otro contenido y puede confundir con insumos de laboratorio.
-3. **Copy institucional**: quién valida el email de contacto, el “Ciclo Lectivo 2026” y el texto
-   institucional del footer.
-4. **Título de la grilla del slice 1**: “Nuestros productos” como opción canónica.
-5. **Franja de valores** (“Ciencia Aplicada”, “Sin Fines de Lucro”, “Formación Técnica”): ¿queda en la Home
-   o se muda a “Sobre el proyecto”?
+Los gates **G1** ([#4](https://github.com/juanmamerodio/esenciatecnica/issues/4)), **G2**
+([#7](https://github.com/juanmamerodio/esenciatecnica/issues/7)) y **G3**
+([#11](https://github.com/juanmamerodio/esenciatecnica/issues/11)) se resolvieron antes de implementar las
+tajadas que bloqueaban. Quedan acá y en la spec de cada tajada:
+
+1. **T3 · Detalle de producto (G2):** **página propia** en `/producto/[id]`. El modelo no tiene galería ni
+   variantes, así que el detalle es chico: imagen (o placeholder), categoría, nombre, descripción, precio y
+   `tiempo_produccion` como dato de producción. Un producto inactivo **no** es accesible por URL directa:
+   el filtro de activos vive en `vista_catalogo`, no en el cliente. Detalle en
+   [`specs/detalle-producto/spec.md`](../detalle-producto/spec.md).
+2. **T6 · Página institucional (G3):** se llama **“Sobre el proyecto”** y vive en **`/about`**, como hoy.
+   “Investigación” describe otro contenido y confunde con insumos de laboratorio, que no son el Producto.
+   Detalle en [`specs/sobre-el-proyecto/spec.md`](../sobre-el-proyecto/spec.md).
+3. **Copy institucional (G1, decisión 3):** contacto `proyectos@esenciatecnica.edu.ar`, institución
+   E.E.S.T N°1 Luciano Reyes (Campana, Buenos Aires) y “Ciclo Lectivo 2026”. No se inventa texto nuevo:
+   es el que ya está en el footer y en la Home.
+4. **Título de la grilla del slice 1 (G1, decisión 4):** **“Nuestros productos”**, como quedó en T1.
+5. **Franja de valores (G1, decisión 5):** se **muda** a la página institucional (T6). La Home no la repite:
+   una sola fuente por concepto (`AGENTS.md` §7.4). La consecuencia en la Home es que su bloque de pago
+   deja de repetir “Sin fines de lucro”, que pasa a la franja de valores.
+
+### Gate nuevo
+
+- **G4 · Datos de la transferencia:** alias, CBU y titular reales los confirma la Cooperadora. Hasta
+  entonces el checkout **no** muestra datos bancarios inventados: publica lo que haya en
+  `NEXT_PUBLIC_TRANSFERENCIA_*` y, si falta, lo dice.
