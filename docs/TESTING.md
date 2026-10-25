@@ -1,7 +1,7 @@
 # Testing con Vitest · guía corta
 
-> **Para:** Celeste Cáceres (Testing QA) y quien implemente el primer ticket.
-> **Estado:** Vitest todavía no está instalado. Se agrega en el primer ticket de implementación.
+> **Para:** Celeste Cáceres (Testing QA) y quien implemente el próximo ticket.
+> **Estado:** Vitest instalado. La suite actual cubre la base de datos (59 tests, sin red).
 > **Regla:** TDD obligatorio: primero el test que falla, después el código.
 
 ---
@@ -14,41 +14,37 @@ bundler de producción. Next sigue compilando con su propio pipeline (SWC/Turbop
 
 ---
 
-## 2. Instalación propuesta
+## 2. Instalación
 
-Cuando arranque el primer ticket:
+Ya instalado:
 
 ```bash
-npm i -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom
+npm i -D vitest @electric-sql/pglite
 ```
 
-`jsdom` y Testing Library son para tests de componentes. Si el primer test es de una función pura, se
-pueden agregar después.
+`@electric-sql/pglite` es PostgreSQL real compilado a WASM: permite correr las migraciones y probar
+constraints, triggers y RLS sin Docker, sin red y sin tocar Supabase.
+
+Cuando haga falta testear componentes, se agregan `jsdom`, `@testing-library/react` y
+`@testing-library/jest-dom` en ese ticket, no antes.
 
 ---
 
-## 3. Configuración mínima
+## 3. Configuración actual
 
 `vitest.config.ts`:
 
 ```ts
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react()],
   test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./vitest.setup.ts'],
+    include: ['tests/**/*.test.ts'],
+    environment: 'node',
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
   },
 });
-```
-
-`vitest.setup.ts`:
-
-```ts
-import '@testing-library/jest-dom/vitest';
 ```
 
 `package.json`:
@@ -57,14 +53,48 @@ import '@testing-library/jest-dom/vitest';
 {
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:types": "node scripts/generar-tipos-bd.mjs"
   }
 }
 ```
 
+Cuando se agreguen tests de componentes, se cambia `environment` a `jsdom` para esos archivos con el
+comentario `// @vitest-environment jsdom` en la cabecera, sin romper los tests de base.
+
 ---
 
-## 4. Primer test (rojo → verde)
+## 4. Tests de base de datos
+
+Los tests viven en `tests/db/`. Cada uno levanta una base limpia y aplica `supabase/migrations/*.sql`
+en orden con `crearBase()` (`tests/db/ayudantes.ts`).
+
+```ts
+const db = await crearBase();                 // base vacía + migraciones
+const db = await crearBase({ seed: true });   // + supabase/seed.sql
+```
+
+Reglas:
+
+- **Se testea el comportamiento**, no los internals: se usan las tablas y las RPC (`crear_pedido`,
+  `aprobar_comprobante`, …), no los nombres de los triggers.
+- **RLS**: `comoAnon(db, () => db.query(...))` ejecuta como el rol `anon`, que es el de la clave pública.
+- **Nunca** se apunta a la base real: no hay credenciales en los tests y no deben agregarse.
+
+Comandos:
+
+```bash
+npm test          # corre todo una vez
+npm run test:watch
+npm run db:types  # regenera los tipos desde el SQL después de cambiar una migración
+```
+
+Qué cubre hoy: contrato de tablas, reserva de stock, aprobación/rechazo/vencimiento, remito único,
+RLS de la anon key, migración sobre el esquema legacy y seed idempotente.
+
+---
+
+## 5. Primer test de una feature
 
 `src/lib/format.test.ts`:
 
@@ -79,35 +109,25 @@ describe('formatPrice', () => {
 });
 ```
 
-Comandos:
-
-```bash
-npm test          # corre una vez
-npm run test:watch
-```
-
 El test debe fallar antes de implementar el cambio y pasar después. Si no falla, no está probando lo
 que creés.
 
 ---
 
-## 5. Qué testear primero
+## 6. Orden sugerido
 
-Orden sugerido:
-
-1. Funciones puras de formato y cálculos (`formatPrice`, totales, subtotales).
-2. Reglas de stock: reservar, aprobar, liberar.
-3. Validación del comprobante: monto contra total.
-4. Servicios de pedido con Supabase mockeado.
-5. Componentes críticos: checkout y `/admin` (Testing Library).
+1. Reglas de base y RPC (ya cubierto en `tests/db/`).
+2. Funciones puras de formato y cálculos (`formatPrice`, totales, subtotales).
+3. Servicios de pedido con Supabase mockeado (validar el mapeo de errores `ET00x`).
+4. Componentes críticos: checkout y `/admin` (Testing Library).
 
 No testees implementación interna; testea comportamiento observable.
 
 ---
 
-## 6. Convenciones
+## 7. Convenciones
 
-- Un archivo `*.test.ts` al lado del archivo que prueba.
+- Un archivo `*.test.ts` por unidad; en base, un archivo por área (`pedidos`, `aprobacion`, `rls`).
 - Nombres en español, claros: `reserva stock al confirmar el pedido`.
 - Un `describe` por unidad; un `it` por comportamiento.
 - Sin `any`; sin mocks de más.
@@ -115,7 +135,7 @@ No testees implementación interna; testea comportamiento observable.
 
 ---
 
-## 7. Responsabilidad
+## 8. Responsabilidad
 
-Celeste es la responsable de testing/QA. Esta guía es un punto de partida; si prefiere Jest, se cambia
-antes de instalar y se actualiza este documento.
+Celeste es la responsable de testing/QA. Si prefiere Jest, se cambia antes de escribir el próximo test
+y se actualiza este documento.

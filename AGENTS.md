@@ -188,11 +188,11 @@ npm test          # suite de base de datos (Vitest + PGlite)
 npm run db:types  # regenera src/lib/database.types.ts desde el SQL
 ```
 
-Estado actual (2026-10-23, tras `T0 · Español único`):
+Estado actual (2026-10-25, tras `T4 · Carrito` y el paquete de base):
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
-- `npm run lint` → 0 errores (quedan 2 warnings de `<img>` en el carrito legacy).
-- `npm test` → 65 tests: 59 de base de datos y 6 de estructura del front (`tests/front/`), sin red ni Docker.
+- `npm run lint` → 0 errores (queda 1 warning de `<img>` en `src/components/ReceiptUploader.tsx`, que se retira en `T5`).
+- `npm test` → 122 tests en 14 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (estructura del front), sin red ni Docker.
 - `npm run build` exige `RESEND_API_KEY` en el entorno: `src/app/api/notifications/route.ts` instancia Resend al importar. Está configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
@@ -214,7 +214,7 @@ Un ticket está terminado solo si:
 3. Retirar Gemini (`src/lib/gemini.ts`, `verify-payment` con IA, `GEMINI_API_KEY`).
 4. Migrar tipos, servicios y `/admin` al modelo aprobado.
 5. Corregir `.env.local`/Vercel (service role, `ADMIN_PASSWORD`, Resend) y RLS.
-6. Agregar Vitest y el primer test.
+6. Agregar Vitest y el primer test. ✅ Hecho: `tests/db/` + `vitest.config.ts` (ver [`docs/AUDITORIA_BD.md`](docs/AUDITORIA_BD.md)).
 7. Recién entonces, features nuevas.
 
 La deuda detallada está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md), pero ese documento asume el esquema viejo: corregilo contra el modelo.
@@ -253,7 +253,21 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 - [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) — roles de triage.
 - [`docs/agents/domain.md`](docs/agents/domain.md) — cómo consumir glosario y ADRs.
 - [`GLOSSARY.md`](GLOSSARY.md) — vocabulario.
+- `.agents/skills/` — skills propias del proyecto (anatomía en [`docs/brain.md`](docs/brain.md) §4.1).
 - `docs/adr/` — decisiones de arquitectura.
+
+**Skills del proyecto.** Las skills propias de Esencia Técnica viven en el repo, en
+`.agents/skills/<nombre-kebab>/SKILL.md`, para que todo el equipo las tenga; las globales de la máquina
+quedan para las genéricas de la agencia. Reglas que impone el entorno real (DeepSeek Harness), no el gusto:
+
+- El archivo se llama **`SKILL.md`** y el descubrimiento es de **un solo nivel**: `skills/<categoría>/<skill>/SKILL.md` **no** se carga.
+- El frontmatter leído es `name` (kebab-case obligatorio), `description` (obligatorio), `whenToUse`, `metadata`, `disable-model-invocation` y `user-invocable`. **No** se escriben `model:` ni `tools:`.
+- El nombre canónico sale del frontmatter, no del directorio.
+- Las skills del proyecto **pisan** a las globales del mismo nombre.
+
+No se instalan colecciones de skills de terceros completas: si una tajada necesita una skill puntual, se
+adapta a esta regla, en español y con guardrails propios. Escribir una skill que el entorno no carga es
+código muerto.
 
 ---
 

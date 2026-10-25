@@ -275,3 +275,28 @@ El detalle de los cambios de DDL, constraints, índices, RLS y limpieza de datos
 | Remito | HTML por email con Resend | Enzo |
 | Tests | Vitest | Celeste |
 | Validación | Manual por Administradores de Química | Enzo / Admin |
+
+---
+
+## 9. Implementación (2026-10-22)
+
+El DDL ejecutable vive en `supabase/migrations/` y los tipos del front en `src/lib/database.types.ts`
+(generados con `npm run db:types`). La auditoría y el runbook están en
+[`AUDITORIA_BD.md`](AUDITORIA_BD.md); la decisión de reconstruir, en
+[`adr/0004-reconstruccion-esquema-mvp.md`](adr/0004-reconstruccion-esquema-mvp.md).
+
+Ajustes de implementación sobre este modelo. La columna *Cobertura* dice qué test lo fija; los que
+dicen “decisión” son acuerdos de implementación, no invariantes que la base haga cumplir:
+
+| Tema | Modelo | Implementación | Por qué | Cobertura |
+|---|---|---|---|---|
+| Historial `fecha` | `date` | `timestamptz` | Un `date` no permite ordenar dos cambios del mismo día. | `aprobacion.test.ts` (historial) |
+| `cliente.email` | sin definir | único (`lower(email)`) | Evita clientes duplicados en checkout invitado. El DNI **no** es clave de identidad: solo valida formato (`^[0-9]{7,8}$`). | `contrato.test.ts` |
+| Nombres físicos | lógicos en singular | plural actual (`estados_pedidos`, `remitos_de_venta`, `alerta_de_estado`) | Reduce la migración. | `contrato.test.ts` |
+| `detalle_carrito` | fase 2 | se elimina (vacía) | El MVP no persiste carrito. | `contrato.test.ts` |
+| `subtotal` / `total` | derivados | `subtotal` generado + trigger en `pedido` | La base garantiza el invariante. | `pedidos.test.ts` |
+| Lectura del catálogo | — | vista `vista_catalogo` con `disponible` | Una sola forma de leer stock disponible. | `rls.test.ts` (HU-1) |
+| Operaciones | — | RPC `crear_pedido`, `aprobar_comprobante`, `rechazar_comprobante`, `cancelar_pedidos_vencidos` | Transacciones atómicas y permisos por función. |
+| Identidad del Cliente | — | el checkout lo resuelve por `email` desde el servidor (upsert con service role), sin RPC nueva | No hay RPC de Cliente en el contrato aprobado (4 RPC) y el único real es `email`. | decisión — spec `checkout` §6.1 |
+| `comprobante.foto_url` | `string` | clave del objeto dentro del bucket privado; la signed URL se genera al leer | El bucket es privado: no hay URL pública que guardar. | decisión — spec `checkout` §6.2 |
+

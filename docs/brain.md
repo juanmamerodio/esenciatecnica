@@ -96,15 +96,16 @@ El ciclo de desarrollo en NexoBow sigue estrictamente 3 fases desglosadas en pas
 
 ## 4. ESTÁNDAR DE AGENT SKILLS Y ARQUITECTURA DE SUBAGENTES
 
-### 4.1 Anatomía Estándar de una Agent Skill (`.md`)
-Todas las skills en NexoBow deben ubicarse en `/.agents/skills/{skill-name}/` y cumplir la siguiente estructura:
+### 4.1 Anatomía Estándar de una Agent Skill (`SKILL.md`)
+Todas las skills en NexoBow deben ubicarse en `.agents/skills/{skill-name}/SKILL.md` y cumplir la siguiente estructura.
+
+> **Verificado contra el runtime de DeepSeek Harness (2026-10-23).** El archivo se llama `SKILL.md`, en mayúsculas, y el descubrimiento es de **un solo nivel**: `skills/<categoría>/<skill>/SKILL.md` **no** se carga. El frontmatter que el entorno lee es `name` (kebab-case obligatorio), `description` (obligatorio), `whenToUse`, `metadata`, `disable-model-invocation` y `user-invocable`; **`model:` y `tools:` no forman parte del contrato y no se escriben**. El nombre canónico sale del frontmatter, no del directorio. Las skills del proyecto pisan a las globales de la máquina.
 
 ```markdown
 ---
 name: nombre-de-la-skill
 description: "Descripción ultra-concisa de cuándo la IA debe invocar esta skill."
-model: "opencode/deepseek-v4-flash | gemini-3.8-flash"
-tools: ["bash", "read_file", "write_file"]
+whenToUse: "Criterio adicional opcional para invocarla."
 ---
 
 # SKILL: [Nombre de la Skill]

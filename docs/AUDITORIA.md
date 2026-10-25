@@ -118,7 +118,7 @@ Es el que usa `../quimicashop/config.js`:
 
 | Grupo | Tablas | Filas | Uso |
 |---|---|---|---|
-| Teams | `team_members`, `team_tasks`, `task_notes`, `team_meetings`, `team_discussions`, `team_discussion_comments` | 4 miembros, 16 tareas, 1 reunión | Hub/Teams |
+| Teams | `team_members`, `team_tasks`, `task_notes`, `team_meetings`, `team_discussions`, `team_discussion_comments` | 4 miembros, 32 tareas, 2 discusiones | Hub/Teams |
 | Legacy e-commerce | `productos`, `pedidos`, `verificaciones` | 9 productos, 0 pedidos, 0 verificaciones | Esquema que consulta el código Next.js |
 | Auditoría | `task_audit_logs` | — | Teams |
 
@@ -203,7 +203,7 @@ Roles leídos de `team_members` (solo lectura):
 | Celeste Cáceres | Diseño UX/UI & Testing QA | Igual |
 | Enzo Queipo | Backend, Admin Panel & Relaciones | Igual |
 
-Estado del tablero (`team_tasks`): 16 tareas; 7 `done`, 2 `in_progress`, 2 `review`, 5 `backlog`. Las prioridades activas son alertas/notificaciones y automatización de comprobante/remito (Enzo), diagrama de clases y traducción de diagramas a SQL (Isabella), estructura main de producción, carrito y remito (Juanma), documentación y presentación (Celeste).
+Estado del tablero (`team_tasks`), leído el **2026-10-25**: 32 tareas; 11 `done`, 3 `review`, 2 `in_progress`, 16 `backlog`. Las prioridades activas son aplicar el DDL del MVP y cerrar RLS/Storage —ambas en `review` y verificadas como **incompletas**— (Isabella), automatización de comprobante/remito y alertas (Enzo), el paquete de base sin versionar y la spec de checkout (Juanma), DFD y documentación de cátedra (Celeste).
 
 Observaciones:
 
@@ -234,7 +234,7 @@ Pendiente de código:
 2. Retirar `src/lib/gemini.ts`, `verify-payment` con IA y `GEMINI_API_KEY`.
 3. Unificar tipos: `src/lib/types.ts`, `src/lib/schemas.ts` y `src/lib/supabase.ts` deben salir del modelo de `docs/MODELO.md`.
 4. Migrar servicios y `/admin` a las tablas y estados canónicos.
-5. Agregar Vitest y el primer test cuando se implemente el primer ticket.
+5. Agregar Vitest y el primer test cuando se implemente el primer ticket. ✅ Hecho: `tests/db/` (59 tests) y `docs/AUDITORIA_BD.md`.
 
 ---
 
