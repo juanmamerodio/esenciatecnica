@@ -10,9 +10,8 @@ import type { Database } from "@/lib/database.types";
 /**
  * Lector de catálogo contra el contrato canónico (`vista_catalogo`).
  *
- * Es la única deuda de transición: `src/lib/supabase.ts` sigue siendo el cliente legacy
- * de `/admin` y las APIs viejas, que se retiran en T5/T7. Este cliente habla sólo del
- * esquema aprobado (`src/lib/database.types.ts`).
+ * Habla sólo del esquema aprobado (`src/lib/database.types.ts`) con la anon key: el cliente del
+ * esquema legacy se retiró en T7.
  */
 
 let cliente: SupabaseClient<Database> | null = null;

@@ -65,8 +65,11 @@ describe('T1 · estructura del catálogo', () => {
   });
 
   it('el tipo legacy de producto ya no existe en el cliente viejo', () => {
-    const clienteLegacy = leer('src/lib/supabase.ts');
-    expect(clienteLegacy).not.toMatch(/export type Producto\b|nombre_es|precio_ars/);
+    // T7 (#13) cerró la deuda: `src/lib/supabase.ts` se retiró del repo, así que el tipo legacy
+    // de producto no puede volver. La intención de esta aserción sigue siendo la misma (el
+    // catálogo no pasa por el cliente viejo); `admin.test.ts` verifica además que ninguna
+    // fuente lo importe.
+    expect(() => leer('src/lib/supabase.ts')).toThrow();
   });
 
   it('el servicio de productos legacy se retiró: quedó el módulo de catálogo', () => {

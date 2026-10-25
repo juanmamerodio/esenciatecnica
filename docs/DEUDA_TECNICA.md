@@ -116,9 +116,9 @@ en el servidor.
 
 ---
 
-## 8. 🟡 `sync-sheets` usa la service role key como bearer token
+## 8. ✅ `sync-sheets` usa la service role key como bearer token — cerrado en `T7` (#13)
 
-`src/app/api/sync-sheets/route.ts` compara el header con `SUPABASE_SERVICE_ROLE_KEY`. Si esa key se
-filtra, el atacante ya tiene acceso total a la base.
-
-**Fix:** crear un secreto dedicado (`SHEETS_SYNC_TOKEN`) y rotarlo por separado.
+`src/app/api/sync-sheets/route.ts` comparaba el header con `SUPABASE_SERVICE_ROLE_KEY` y su único
+consumidor era la tabla legacy `pedidos`. T7 retiró la ruta y el cliente legacy que la sostenía, así
+que no queda una segunda vía de acceso con la clave de servicio: el panel la usa server-side detrás
+de Basic Auth y el navegador nunca la recibe.

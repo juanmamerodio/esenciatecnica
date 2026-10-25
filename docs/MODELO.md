@@ -299,4 +299,5 @@ dicen “decisión” son acuerdos de implementación, no invariantes que la bas
 | Operaciones | — | RPC `crear_pedido`, `aprobar_comprobante`, `rechazar_comprobante`, `cancelar_pedidos_vencidos` | Transacciones atómicas y permisos por función. |
 | Identidad del Cliente | — | el checkout lo resuelve por `email` desde el servidor (upsert con service role), sin RPC nueva | No hay RPC de Cliente en el contrato aprobado (4 RPC) y el único real es `email`. | decisión — spec `checkout` §6.1 |
 | `comprobante.foto_url` | `string` | clave del objeto dentro del bucket privado; la signed URL se genera al leer | El bucket es privado: no hay URL pública que guardar. | decisión — spec `checkout` §6.2 |
+| `producto.imagen_url` | `string` | URL pública del objeto en el bucket público `productos` (PNG/JPEG/WebP, 5 MB) | La foto es contenido público de la tienda y la sube el Administrador desde el panel: no hay dato sensible que firmar. La clave queda bajo `productos/<id_producto>/`. | `admin.test.ts` (clave saneada) · decisión — spec `admin` §6.5 y migración `05` |
 

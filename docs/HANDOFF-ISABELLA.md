@@ -103,6 +103,50 @@ La base nueva tiene datos inconsistentes. Si son de prueba, se pueden resetear; 
 
 ---
 
-## 8. Mensaje listo para enviar
+## 8. Anexo · T7 (2026-10-25): bucket público de fotos de producto
+
+La migración `04` sólo crea el bucket **privado** `comprobantes`. El panel `/admin` (T7 · issue #13) también
+sube las **fotos de producto**, que son contenido público de la tienda: la migración
+`supabase/migrations/20261023090500_05_storage_productos.sql` crea el bucket `productos`. **Es DDL para tu
+revisión: no lo aplicamos a producción desde acá.**
+
+```sql
+-- 05 · Bucket público de fotos de producto (solo Supabase: el esquema `storage` no existe en PGlite).
+-- La foto es contenido público de la tienda: se sirve por URL pública y `producto.imagen_url` la guarda.
+
+do $$
+begin
+  if exists (select 1 from pg_namespace where nspname = 'storage') then
+    insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+    values (
+      'productos',
+      'productos',
+      true,
+      5242880,
+      array['image/png', 'image/jpeg', 'image/webp']
+    )
+    on conflict (id) do update
+      set public = true,
+          file_size_limit = excluded.file_size_limit,
+          allowed_mime_types = excluded.allowed_mime_types;
+  end if;
+end
+$$;
+```
+
+Qué falta de tu lado:
+
+1. **Convención de clave:** `productos/<id_producto>/<nombre-saneado>.<ext>`, con `upsert` en la misma clave
+   (reemplaza la foto, no acumula objetos sueltos).
+2. **Políticas de Storage:** la subida pasa **siempre** por el servidor con la service role (no hay política
+   de escritura para `anon`); la lectura se resuelve con el bucket público. Si preferís una política explícita
+   de lectura para `anon`, decilo y la agregamos.
+3. **`producto.imagen_url`** guarda la URL pública del objeto (decisión registrada en
+   [`MODELO.md`](MODELO.md) §9 y en [`specs/admin/spec.md`](specs/admin/spec.md) §6.5). El bucket
+   `comprobantes` **sigue privado** y con signed URL: no se toca.
+
+---
+
+## 9. Mensaje listo para enviar
 
 > Isabella: aprobamos el modelo normalizado del e-commerce. Está en `docs/MODELO.md` y el brief de DDL en `docs/HANDOFF-ISABELLA.md`. Necesitamos que revises tablas, constraints, índices, RLS y limpieza de datos del proyecto `otjph...`. El MVP termina en Pago Validado + remito, sin envío; carrito en cliente y admin con Basic Auth. Cuando tengas el DDL, avisá y migramos el código. Gracias.
