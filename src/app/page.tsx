@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, GraduationCap, HandHeart, Info, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { ArrowRight, Clock, GraduationCap, Info, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 import GrillaProductos from "@/components/GrillaProductos";
 import ImagenProducto from "@/components/ImagenProducto";
@@ -110,10 +110,11 @@ export default async function HomePage() {
             </span>
           </li>
           <li className="flex gap-3">
-            <HandHeart aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+            <Clock aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
             <span>
-              <strong className="block font-semibold text-text">Sin fines de lucro</strong>
-              Lo recaudado se reinvierte en los materiales que necesitan las prácticas del taller.
+              <strong className="block font-semibold text-text">Reserva con plazo</strong>
+              Tu pedido reserva el stock desde que lo confirmás. Si el comprobante no queda aprobado antes
+              del cierre del viernes, la reserva se libera.
             </span>
           </li>
           <li className="flex gap-3">
