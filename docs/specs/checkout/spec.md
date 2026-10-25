@@ -153,8 +153,8 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
 - El remito y su email: **T8**.
 - RLS, políticas y bucket: [`bd-mvp`](../bd-mvp/spec.md) (tarea de Isabella en el tablero).
 - Cuentas de Cliente, carrito persistido, cupones, envío y seguimiento: fuera del MVP.
-- `/api/products` (huérfano desde T1) y `/api/sync-sheets`: se retiran en su propio ticket de limpieza,
-  no acá.
+- `/api/products` (catálogo canónico en JSON) sigue en pie: es la única API del catálogo. `/api/sync-sheets`
+  se retiró con **T7**, junto con el cliente legacy `src/lib/supabase.ts` que lo alimentaba.
 
 ## 6. Decisiones tomadas
 

@@ -4,6 +4,12 @@
 > `verificaciones`). El modelo vigente es [`MODELO.md`](MODELO.md) y la brecha completa está en
 > [`AUDITORIA.md`](AUDITORIA.md). Los puntos 1–4 siguen siendo ciertos para el código actual, pero
 > los nombres de tablas son legacy y no deben usarse en código nuevo.
+>
+> **Nota 2026-10-25:** los puntos **1 a 4 quedaron cerrados** al retirarse el camino legacy de compra en
+> `T5` (#10): `api/verify-payment`, `services/order.service.ts`, `lib/schemas.ts` y `ReceiptUploader.tsx`
+> ya no existen, `typecheck` da 0 errores y la validación es manual. Lo que sigue abierto es el puente
+> `/api/notifications` (§5, decisión vigente de `AGENTS.md` §3) y lo que es del proyecto de Teams
+> (§6 y §7), que no vive en este repo.
 
 Estos puntos **no se tocaron** en la separación para no cambiar el comportamiento de las APIs
 (decisión acordada). Quedan documentados con archivo y línea para resolverlos en el próximo sprint.

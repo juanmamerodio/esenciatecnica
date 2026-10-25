@@ -3,7 +3,7 @@
 > **Proyecto:** tienda, checkout, panel `/admin` y APIs del e-commerce **Esencia Técnica**.
 > **Institución:** E.E.S.T N°1 Luciano Reyes · Campana, Buenos Aires · 7mo Año Programación 2026.
 > **Equipo:** Isabella Infante, Juan Manuel Merodio, Celeste Cáceres, Enzo Queipo.
-> **Última actualización:** 2026-10-23.
+> **Última actualización:** 2026-10-25.
 
 Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/brain.md`](docs/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
 
@@ -188,12 +188,12 @@ npm test          # suite de base de datos (Vitest + PGlite)
 npm run db:types  # regenera src/lib/database.types.ts desde el SQL
 ```
 
-Estado actual (2026-10-25, tras `T4 · Carrito` y el paquete de base):
+Estado actual (2026-10-25, tras `T3`, `T5`, `T6`, `T7` y `T8`):
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
-- `npm run lint` → 0 errores (queda 1 warning de `<img>` en `src/components/ReceiptUploader.tsx`, que se retira en `T5`).
-- `npm test` → 122 tests en 14 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (estructura del front), sin red ni Docker.
-- `npm run build` exige `RESEND_API_KEY` en el entorno: `src/app/api/notifications/route.ts` instancia Resend al importar. Está configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
+- `npm run lint` → 0 errores y 0 warnings. El warning de `<img>` se fue con `ReceiptUploader.tsx` en `T5`.
+- `npm test` → 227 tests en 19 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker.
+- `npm run build` → compila **sin** `RESEND_API_KEY`: desde `T8` Resend se instancia por llamada y no al importar. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
 
@@ -210,12 +210,19 @@ Un ticket está terminado solo si:
 ## 9. Deuda y orden de migración
 
 1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md).
-2. Eliminar i18n (`[lang]`, diccionarios, middleware). ✅ Hecho: `T0 · Español único` (issue #2).
-3. Retirar Gemini (`src/lib/gemini.ts`, `verify-payment` con IA, `GEMINI_API_KEY`).
-4. Migrar tipos, servicios y `/admin` al modelo aprobado.
-5. Corregir `.env.local`/Vercel (service role, `ADMIN_PASSWORD`, Resend) y RLS.
+   **Abierto:** en `otjph…` faltan `vista_catalogo`, las RPC de `02`, la RLS de `03` y los buckets de `04`
+   y `05` (ver el estado en [`memory.md`](memory.md)).
+2. Eliminar i18n (`[lang]`, diccionarios, middleware de idioma). ✅ Hecho: `T0 · Español único` (issue #2).
+   `src/middleware.ts` volvió en `T7` **solo** para el Basic Auth del panel (ADR 0005).
+3. Retirar Gemini (`src/lib/gemini.ts`, `verify-payment` con IA, `GEMINI_API_KEY`). ✅ Hecho: la validación
+   es manual y el camino legacy de compra se retiró en `T5`.
+4. Migrar tipos, servicios y `/admin` al modelo aprobado. ✅ Hecho: catálogo (`T1`/`T2`), checkout (`T5`) y
+   panel (`T7`); `src/lib/supabase.ts` y `/api/sync-sheets` ya no existen.
+5. Corregir `.env.local`/Vercel (service role, `ADMIN_PASSWORD`, Resend, datos de transferencia) y RLS.
+   **Abierto**: es de Enzo y de Isabella, y es lo único que separa al MVP de una demo en producción.
 6. Agregar Vitest y el primer test. ✅ Hecho: `tests/db/` + `vitest.config.ts` (ver [`docs/AUDITORIA_BD.md`](docs/AUDITORIA_BD.md)).
-7. Recién entonces, features nuevas.
+7. Recién entonces, features nuevas. ✅ Hechas las tajadas del front (`T3`, `T5`, `T6`, `T7`, `T8`); falta la
+   **verificación manual en navegador** con la base migrada y las claves puestas.
 
 La deuda detallada está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md), pero ese documento asume el esquema viejo: corregilo contra el modelo.
 
