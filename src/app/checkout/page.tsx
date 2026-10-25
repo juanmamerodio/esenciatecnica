@@ -1,226 +1,391 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { CheckCircle, Info, AlertTriangle, Loader2 } from 'lucide-react';
-import ReceiptUploader from "@/components/ReceiptUploader";
-import { formatPrice } from "@/lib/format";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Info,
+  Loader2,
+  ShieldCheck,
+  ShoppingBag,
+  Wallet,
+} from "lucide-react";
+import EncabezadoSeccion from "@/components/EncabezadoSeccion";
+import SubirComprobante from "@/components/SubirComprobante";
 import { totalDelPedido } from "@/lib/carrito";
+import type { ResultadoCheckout } from "@/lib/checkout";
+import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
+import { datosDeTransferencia } from "@/lib/transferencia";
 
-const TRANSFERENCIA = {
-  alias: "quimica.reyes.eest1",
-  cbu: "0140000000000000000000",
-  titular: "Cooperadora E.E.S.T N°1",
-};
+/**
+ * Checkout — T5 · issue #10.
+ *
+ * Confirmar el pedido (reserva de stock en la base), declarar el monto transferido y subir el
+ * comprobante. La validación es manual: acá no se aprueba nada. Si el pedido ya se creó y algo
+ * falla después, se conserva su `idPedido` para que el reintento no duplique la reserva.
+ */
+
+type Confirmacion = { idPedido: number; total: number };
 
 export default function CheckoutPage() {
-  const { items, vaciar } = useCartStore();
-  const totalPrice = totalDelPedido(items);
+  const items = useCartStore((estado) => estado.items);
+  const vaciar = useCartStore((estado) => estado.vaciar);
 
-  const [formData, setFormData] = useState({ nombre: '', email: '' });
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
-  const [mimeType, setMimeType] = useState<string>('image/jpeg');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [montado, setMontado] = useState(false);
+  const [cliente, setCliente] = useState({ nombre: "", email: "", dni: "", telefono: "" });
+  const [monto, setMonto] = useState("");
+  const [montoEditado, setMontoEditado] = useState(false);
+  const [archivo, setArchivo] = useState<File | null>(null);
+  const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [campos, setCampos] = useState<Record<string, string>>({});
+  const [idPedido, setIdPedido] = useState<number | null>(null);
+  const [confirmacion, setConfirmacion] = useState<Confirmacion | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!imageBase64 || items.length === 0) return;
+  const total = totalDelPedido(items);
+  const transferencia = datosDeTransferencia();
 
-    setIsSubmitting(true);
+  // El carrito vive en localStorage: hasta hidratar no se puede afirmar que esté vacío.
+  useEffect(() => setMontado(true), []);
+
+  // El monto llega precargado con el total del carrito; si el Cliente lo editó, se respeta.
+  useEffect(() => {
+    if (montado && !montoEditado) setMonto(total > 0 ? total.toFixed(2) : "");
+  }, [montado, montoEditado, total]);
+
+  const enviar = async (evento: React.FormEvent) => {
+    evento.preventDefault();
+    if (!archivo) {
+      setError("Adjuntá la imagen del comprobante de la transferencia.");
+      return;
+    }
+
+    setEnviando(true);
     setError(null);
+    setCampos({});
 
     try {
-      const orderResponse = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre_cliente: formData.nombre,
-          email: formData.email,
-          items: items,
-          total_ars: totalPrice
+      const formulario = new FormData();
+      formulario.set(
+        "datos",
+        JSON.stringify({
+          cliente: {
+            nombre: cliente.nombre,
+            email: cliente.email,
+            dni: cliente.dni,
+            telefono: cliente.telefono,
+          },
+          items: items.map((item) => ({ id_producto: item.id, cantidad: item.cantidad })),
+          monto: Number(monto.replace(",", ".")),
+          idPedido,
         }),
-      });
+      );
+      formulario.set("archivo", archivo);
 
-      const orderData = await orderResponse.json();
-      if (!orderResponse.ok) throw new Error(orderData.error || 'Error al crear pedido');
+      const respuesta = await fetch("/api/checkout", { method: "POST", body: formulario });
+      const cuerpo = (await respuesta.json()) as ResultadoCheckout;
 
-      const pedidoId = orderData.order.id;
+      if (cuerpo.estado === "ok") {
+        vaciar();
+        setConfirmacion({ idPedido: cuerpo.idPedido, total: cuerpo.total });
+        return;
+      }
 
-      const verifyResponse = await fetch('/api/verify-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64,
-          mimeType,
-          pedidoId,
-          totalEsperado: totalPrice
-        }),
-      });
-
-      const verifyData = await verifyResponse.json();
-      if (!verifyResponse.ok) throw new Error(verifyData.error || 'Error al subir el comprobante');
-
-      vaciar();
-      setShowSuccess(true);
-    } catch (err) {
-      const error = err as Error;
-      setError(error.message || "Ocurrió un problema procesando tu pedido.");
+      setError(cuerpo.mensaje);
+      setCampos(cuerpo.campos ?? {});
+      if (cuerpo.idPedido) setIdPedido(cuerpo.idPedido);
+      if (cuerpo.motivo === "monto-no-coincide" && typeof cuerpo.total === "number") {
+        setMonto(cuerpo.total.toFixed(2));
+        setMontoEditado(false);
+      }
+    } catch {
+      setError("No pudimos enviar el pedido. Revisá tu conexión y volvé a intentar.");
     } finally {
-      setIsSubmitting(false);
+      setEnviando(false);
     }
   };
 
-  if (items.length === 0 && !showSuccess) {
+  if (!montado) {
+    return <p className="py-24 text-center text-sm text-muted">Cargando tu pedido…</p>;
+  }
+
+  if (confirmacion) {
     return (
-      <div className="max-w-md mx-auto text-center py-20">
-        <h2 className="text-2xl font-bold mb-4">Tu carrito está vacío</h2>
-        <p className="text-muted mb-8 text-sm">Agrega algunos productos antes de proceder al pago.</p>
-        <button onClick={() => window.location.href = '/catalog'} className="btn-primary">Ir al Catálogo</button>
+      <div className="mx-auto max-w-lg space-y-6 py-20 text-center">
+        <CheckCircle2 aria-hidden className="mx-auto h-14 w-14 text-accent" />
+        <h1 className="text-3xl font-bold tracking-tight text-text">
+          Pedido #{confirmacion.idPedido} registrado
+        </h1>
+        <p className="font-mono text-2xl font-bold text-accent">{formatPrice(confirmacion.total)}</p>
+        <p className="text-sm leading-relaxed text-muted">
+          Ya reservamos tus productos. Un Administrador de Química revisa el comprobante a mano y te
+          avisamos por email cuando el pago quede validado. El retiro o la entrega se coordinan después de
+          la aprobación: el proyecto no incluye envío ni seguimiento.
+        </p>
+        <Link href="/catalog" className="btn-primary gap-2">
+          Volver al catálogo
+          <ArrowRight aria-hidden className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="mx-auto max-w-lg space-y-6 py-20 text-center">
+        <ShoppingBag aria-hidden className="mx-auto h-12 w-12 text-accent" />
+        <h1 className="text-2xl font-bold tracking-tight text-text">Tu carrito está vacío</h1>
+        <p className="text-sm leading-relaxed text-muted">
+          Agregá productos antes de confirmar un pedido.
+        </p>
+        <Link href="/catalog" className="btn-primary gap-2">
+          Ver el catálogo
+          <ArrowRight aria-hidden className="h-4 w-4" />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {showSuccess ? (
-        <div className="card p-12 text-center mt-10">
-          <div className="w-24 h-24 bg-accent-lt rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
-            <CheckCircle className="w-12 h-12 text-accent" />
-          </div>
-          <h2 className="text-4xl font-bold text-text mb-4">¡Comprobante recibido!</h2>
-          <p className="text-muted mb-8 max-w-sm mx-auto">
-            Un Administrador de Química revisa tu pago a mano y te avisamos por email cuando esté validado.
-          </p>
-          <button onClick={() => window.location.href = '/'} className="btn-primary px-10">
-            Volver al catálogo
+    <div className="space-y-10 pb-20">
+      <EncabezadoSeccion
+        titulo="Confirmar pedido"
+        subtitulo="Al confirmar reservamos el stock. El pago es por transferencia y lo valida a mano un Administrador de Química."
+      />
+
+      {idPedido ? (
+        <p className="card border-dashed p-4 text-sm text-muted">
+          Tu pedido <strong className="font-semibold text-text">#{idPedido}</strong> ya quedó registrado con
+          su reserva: solo falta subir el comprobante.
+        </p>
+      ) : null}
+
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_380px]">
+        <form onSubmit={enviar} className="card space-y-8 p-6 sm:p-8" noValidate>
+          <fieldset className="space-y-5">
+            <legend className="text-lg font-bold tracking-tight text-text">Tus datos</legend>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Campo
+                id="nombre"
+                etiqueta="Nombre y apellido"
+                valor={cliente.nombre}
+                error={campos.nombre}
+                autoComplete="name"
+                onCambio={(valor) => setCliente({ ...cliente, nombre: valor })}
+              />
+              <Campo
+                id="email"
+                etiqueta="Email de contacto"
+                tipo="email"
+                valor={cliente.email}
+                error={campos.email}
+                autoComplete="email"
+                ayuda="Ahí te llega el aviso cuando el pago quede validado."
+                onCambio={(valor) => setCliente({ ...cliente, email: valor })}
+              />
+              <Campo
+                id="dni"
+                etiqueta="DNI"
+                valor={cliente.dni}
+                error={campos.dni}
+                inputMode="numeric"
+                autoComplete="off"
+                ayuda="7 u 8 dígitos, sin puntos."
+                onCambio={(valor) => setCliente({ ...cliente, dni: valor })}
+              />
+              <Campo
+                id="telefono"
+                etiqueta="Teléfono (opcional)"
+                tipo="tel"
+                valor={cliente.telefono}
+                error={campos.telefono}
+                autoComplete="tel"
+                requerido={false}
+                onCambio={(valor) => setCliente({ ...cliente, telefono: valor })}
+              />
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-4">
+            <legend className="text-lg font-bold tracking-tight text-text">Monto y comprobante</legend>
+
+            <Campo
+              id="monto"
+              etiqueta="Monto transferido (ARS)"
+              valor={monto}
+              error={campos.monto}
+              inputMode="decimal"
+              ayuda="Tiene que coincidir con el total del pedido: es lo que el Administrador compara con la imagen."
+              onCambio={(valor) => {
+                setMonto(valor);
+                setMontoEditado(true);
+              }}
+            />
+
+            <SubirComprobante onCambio={setArchivo} error={campos.archivo} />
+          </fieldset>
+
+          {error ? (
+            <p
+              role="alert"
+              className="flex items-start gap-3 rounded-card border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+            >
+              <AlertTriangle aria-hidden className="mt-0.5 h-5 w-5 shrink-0" />
+              {error}
+            </p>
+          ) : null}
+
+          <button type="submit" disabled={enviando} className="btn-primary w-full gap-2 disabled:opacity-60">
+            {enviando ? (
+              <>
+                <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+                Confirmando el pedido…
+              </>
+            ) : (
+              <>
+                Confirmar pedido y subir el comprobante
+                <ArrowRight aria-hidden className="h-4 w-4" />
+              </>
+            )}
           </button>
-        </div>
-      ) : (
-        <>
-          <h1 className="text-4xl font-bold text-text mb-10 tracking-tight">
-            Confirmar <span className="text-accent underline decoration-accent/10 underline-offset-8">Pedido</span>
-          </h1>
+        </form>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="card p-8 border-accent/10 bg-accent-lt/30">
-                <h2 className="text-xl font-bold mb-6 text-text flex items-center gap-2">
-                  <Info className="w-5 h-5 text-accent" />
-                  Paso 1: Transferencia
-                </h2>
-                <div className="space-y-4 text-sm font-medium">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Alias</span>
-                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{TRANSFERENCIA.alias}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">CBU</span>
-                    <span className="text-text font-mono bg-white rounded-lg p-2 border border-border">{TRANSFERENCIA.cbu}</span>
-                  </div>
-                  <div className="flex flex-col gap-1 pb-4 border-b border-border">
-                    <span className="text-[10px] uppercase tracking-wider text-muted font-bold">Titular</span>
-                    <span className="text-text">{TRANSFERENCIA.titular}</span>
-                  </div>
-                  <div className="flex justify-between items-end pt-2">
-                    <span className="text-muted">Total a transferir:</span>
-                    <span className="text-3xl font-bold text-accent font-mono">{formatPrice(totalPrice)}</span>
-                  </div>
-                </div>
-              </div>
+        <aside className="space-y-6">
+          <section className="card space-y-4 p-6">
+            <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-text">
+              <Wallet aria-hidden className="h-5 w-5 text-accent" />
+              Transferencia
+            </h2>
 
-              <div className="card p-6 bg-surface border-dashed">
-                <h3 className="text-sm font-bold mb-4 uppercase tracking-widest text-muted">Resumen de Compra</h3>
-                <div className="space-y-3">
-                  {items.map(item => (
-                    <div key={item.id} className="flex justify-between text-xs">
-                      <span className="text-text truncate max-w-[140px]">{item.cantidad}x {item.nombre}</span>
-                      <span className="font-mono text-muted">{formatPrice(item.precio * item.cantidad)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {transferencia ? (
+              <dl className="space-y-3 text-sm">
+                <Dato etiqueta="Alias" valor={transferencia.alias} mono />
+                <Dato etiqueta="CBU" valor={transferencia.cbu} mono />
+                <Dato etiqueta="Titular" valor={transferencia.titular} />
+              </dl>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted">
+                Los datos de la transferencia los confirma la Cooperadora de la escuela. Escribinos a{" "}
+                <a href="mailto:proyectos@esenciatecnica.edu.ar" className="underline underline-offset-4">
+                  proyectos@esenciatecnica.edu.ar
+                </a>{" "}
+                y te los pasamos junto con el número de pedido.
+              </p>
+            )}
 
-            <div className="lg:col-span-3">
-              <form onSubmit={handleSubmit} className="card p-8 space-y-8 bg-surface shadow-xl shadow-black/5 relative overflow-hidden">
-                <div className="space-y-6 relative z-10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Nombre Completo</label>
-                      <input
-                        required
-                        type="text"
-                        className="w-full px-4 py-3 rounded-2xl bg-gray-lt border border-border focus:ring-2 focus:ring-accent/20 outline-none transition-all"
-                        placeholder="Ej: Juan Pérez"
-                        value={formData.nombre}
-                        onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Email de Contacto</label>
-                      <input
-                        required
-                        type="email"
-                        className="w-full px-4 py-3 rounded-2xl bg-gray-lt border border-border focus:ring-2 focus:ring-accent/20 outline-none transition-all"
-                        placeholder="juan@ejemplo.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
+            <p className="flex items-center justify-between border-t border-border-soft pt-4">
+              <span className="font-semibold text-text">Total a transferir</span>
+              <span className="font-mono text-2xl font-bold tracking-tight text-text">
+                {formatPrice(total)}
+              </span>
+            </p>
+          </section>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-muted mb-3">Subir Comprobante</label>
-                    <ReceiptUploader
-                      onFileSelect={(base64: string, file: File) => {
-                        setImageBase64(base64);
-                        setMimeType(file.type);
-                      }}
-                      texts={{
-                        clickToUpload: "Haz clic para subir",
-                        dragHint: "o arrastra el comprobante",
-                        formats: "PNG, JPG, JPEG (Máx 4MB)",
-                        change: "Cambiar imagen"
-                      }}
-                    />
-                    <p className="mt-4 flex gap-2 items-start text-[10px] text-muted leading-relaxed">
-                      <AlertTriangle className="w-3 h-3 text-accent shrink-0 mt-0.5" />
-                      <span>Un Administrador de Química valida tu comprobante a mano. Asegurate de que la imagen sea nítida y muestre el importe y la fecha.</span>
-                    </p>
-                  </div>
+          <section className="card space-y-3 p-6">
+            <h2 className="text-sm font-bold uppercase tracking-[0.14em] text-muted">Resumen</h2>
+            <ul className="space-y-2 text-sm">
+              {items.map((item) => (
+                <li key={item.id} className="flex justify-between gap-3">
+                  <span className="min-w-0 truncate text-muted">
+                    {item.cantidad}× {item.nombre}
+                  </span>
+                  <span className="shrink-0 font-mono text-text">
+                    {formatPrice(item.precio * item.cantidad)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-                  {error && (
-                    <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-600 text-sm flex items-center gap-3">
-                      <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                      <p>{error}</p>
-                    </div>
-                  )}
+          <p className="flex items-start gap-3 text-xs leading-relaxed text-muted">
+            <ShieldCheck aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <span>
+              La reserva se libera si el comprobante no queda aprobado antes del cierre del viernes.
+            </span>
+          </p>
 
-                  <button
-                    type="submit"
-                    disabled={!imageBase64 || isSubmitting}
-                    className={`w-full py-5 px-4 font-bold rounded-full transition-all duration-300 flex justify-center items-center gap-2 transform active:scale-95 shadow-lg ${!imageBase64 || isSubmitting
-                      ? 'bg-gray-lt text-muted cursor-not-allowed opacity-50 shadow-none'
-                      : 'bg-accent text-surface hover:bg-accent/90 shadow-accent/20 hover:shadow-accent/40'
-                      }`}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Procesando pedido...
-                      </>
-                    ) : (
-                      <>Finalizar Compra</>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </>
-      )}
+          <p className="flex items-start gap-3 text-xs leading-relaxed text-muted">
+            <Info aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <span>
+              El comprobante lo revisa una persona: no hay validación automática ni lectura de la imagen por
+              un sistema.
+            </span>
+          </p>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function Campo({
+  id,
+  etiqueta,
+  valor,
+  error,
+  ayuda,
+  tipo = "text",
+  inputMode,
+  autoComplete,
+  requerido = true,
+  onCambio,
+}: {
+  id: string;
+  etiqueta: string;
+  valor: string;
+  error?: string;
+  ayuda?: string;
+  tipo?: string;
+  inputMode?: "numeric" | "decimal" | "text";
+  autoComplete?: string;
+  requerido?: boolean;
+  onCambio: (valor: string) => void;
+}) {
+  const idAyuda = ayuda ? `${id}-ayuda` : undefined;
+  const idError = error ? `${id}-error` : undefined;
+
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="block font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+        {etiqueta}
+      </label>
+      <input
+        id={id}
+        name={id}
+        type={tipo}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        value={valor}
+        required={requerido}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={[idAyuda, idError].filter(Boolean).join(" ") || undefined}
+        onChange={(evento) => onCambio(evento.target.value)}
+        className={`w-full rounded-2xl border bg-surface px-4 py-3 text-sm text-text outline-none transition-colors focus:border-accent ${
+          error ? "border-red-300" : "border-border"
+        }`}
+      />
+      {ayuda ? (
+        <p id={idAyuda} className="text-xs leading-relaxed text-muted">
+          {ayuda}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={idError} role="alert" className="text-xs text-red-600">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function Dato({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono?: boolean }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted">{etiqueta}</dt>
+      <dd className={`break-all text-text ${mono ? "font-mono text-sm" : "text-sm"}`}>{valor}</dd>
     </div>
   );
 }

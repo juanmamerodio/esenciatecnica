@@ -42,10 +42,13 @@ El borde es una única ruta `POST /api/checkout` (Server-side, con `SUPABASE_SER
 adaptador real vive en `src/lib/checkout-servidor.ts`, igual que `catalogo-servidor.ts` con el catálogo.
 
 **Se retira el camino legacy de compra** en la misma tajada: `src/app/api/orders/`,
-`src/app/api/verify-payment/`, `src/services/order.service.ts` y los esquemas
-`OrderItem`/`CreateOrder`/`VerifyPayment` de `src/lib/schemas.ts` (`AGENTS.md` §7.5 y §9.4). Consecuencia
-declarada: la página legacy `src/app/admin/page.tsx` (que hace `fetch('/api/orders')`) queda sin endpoint
-hasta `T7`; hoy ya no muestra datos porque consulta `pedidos`, que no existe. No se maquilla.
+`src/app/api/verify-payment/`, `src/services/order.service.ts`, los esquemas
+`OrderItem`/`CreateOrder`/`VerifyPayment` de `src/lib/schemas.ts` y `src/components/ReceiptUploader.tsx`
+(cuyo efecto de “escaneo” sugería una validación automática que no existe, y que aportaba el único
+warning de lint del repo) (`AGENTS.md` §7.5 y §9.4). Consecuencia declarada: la página legacy
+`src/app/admin/page.tsx` consultaba `pedidos` y `fetch('/api/orders')`, que ya no existen, así que queda
+como **aviso honesto de migración** hasta `T7` en lugar de una pantalla que promete datos que no puede
+leer. No se maquilla con datos de muestra.
 
 ## 3. Historias y criterios de aceptación
 
