@@ -12,7 +12,7 @@ El repositorio no contiene un sistema final coherente: contiene **tres sistemas 
 
 1. **Base nueva del e-commerce** (`otjphjnrwihqzzhbfnmh`): 13 tablas normalizadas del DER, 3 productos cosméticos, 4 pedidos y 3 comprobantes de prueba.
 2. **Base vieja** (`uchyattzuhaltsaxazce`): tablas `team_*` del Hub/Teams **más** el esquema legacy `productos` / `pedidos` / `verificaciones`, que es el que consulta el código Next.js.
-3. **Prototipo HTML** (`docs/prototype1.html`): una tercera propuesta visual con productos biotecnológicos que no coinciden con ninguna de las dos bases.
+3. **Prototipo HTML** (`docs/academico/prototype1.html`): una tercera propuesta visual con productos biotecnológicos que no coinciden con ninguna de las dos bases.
 
 La decisión tomada con el equipo es:
 
@@ -20,7 +20,7 @@ La decisión tomada con el equipo es:
 - El negocio canónico es **cosmética e higiene** (jabones, shampoo, cremas), no los insumos de laboratorio del catálogo viejo ni las películas biotecnológicas del prototipo.
 - El idioma canónico es **español único**; se elimina el diccionario y la selección `es/en`.
 - La representación canónica de la estructura será un **ERD en Mermaid** (`docs/MODELO.md`), no el CSV de Lucidchart.
-- `brain.md` se adapta como filosofía de trabajo, no se copia literal; vive en `docs/brain.md`.
+- `brain.md` se adapta como filosofía de trabajo, no se copia literal; vive en `docs/metodo/brain.md`.
 
 ---
 
@@ -30,10 +30,10 @@ La decisión tomada con el equipo es:
 
 | Artefacto | Qué es | Estado | Destino |
 |---|---|---|---|
-| `AGENTS.md` | System prompt del e-commerce | Trackeado, con cambio sin commit (sección “Agent skills”) | Reescribir como contrato operativo adaptado a `docs/brain.md` |
+| `AGENTS.md` | System prompt del e-commerce | Trackeado, con cambio sin commit (sección “Agent skills”) | Reescribir como contrato operativo adaptado a `docs/metodo/brain.md` |
 | `CLAUDE.md` | Puntero a `@AGENTS.md` | Trackeado | Se mantiene |
 | `README.md` | Presentación del repo | Trackeado, desactualizado (habla del esquema viejo y de i18n) | Reescribir al cerrar la migración |
-| `brain.md` | Manual de agencia NexoBow | Untracked | **Movido a `docs/brain.md`** |
+| `brain.md` | Manual de agencia NexoBow | Untracked | **Movido a `docs/metodo/brain.md`** |
 | `.env.example` | Variables de entorno | Trackeado; `GEMINI_API_KEY` quedó comentado como legacy | Se retira con `src/lib/gemini.ts` |
 | `.env.local` | Entorno local | Ignorado; solo URL, anon key y Vercel OIDC | Completar service role/admin/Resend al implementar |
 | `package.json` | Scripts y dependencias | Trackeado; no hay script de test | Agregar Vitest en la primera implementación |
@@ -46,16 +46,16 @@ La decisión tomada con el equipo es:
 
 | Artefacto | Qué es | Destino |
 |---|---|---|
-| `docs/DER-quimica.csv` | DER académico de 13 entidades | Mantener como fuente académica; el modelo operativo es Mermaid |
-| `docs/DCU-Quimica.csv` | Diagrama de casos de uso | Mantener como documento académico |
-| `docs/DFD1-Quimica.csv`, `DFD2`, `DFD3` | DFD niveles 1–3 | **Movidos desde `diagrams/2209D/`**; mantener |
-| `docs/informe_Escencia_Tecnica.md` | Informe de cátedra | Mantener |
-| `docs/prototype1.html` | Prototipo visual HTML | **Movido desde `diagrams/`**; referencia visual, no catálogo |
-| `docs/DEUDA_TECNICA.md` | Deuda detectada en la separación | Reescribir: hoy asume el esquema viejo |
-| `docs/SEPARACION.md` | Runbook de separación | Corregir: describe la separación al revés |
+| `docs/academico/DER-quimica.csv` | DER académico de 13 entidades | Mantener como fuente académica; el modelo operativo es Mermaid |
+| `docs/academico/DCU-Quimica.csv` | Diagrama de casos de uso | Mantener como documento académico |
+| `docs/academico/DFD1-Quimica.csv`, `DFD2`, `DFD3` | DFD niveles 1–3 | **Movidos desde `diagrams/2209D/`**; mantener |
+| `docs/academico/informe_Escencia_Tecnica.md` | Informe de cátedra | Mantener |
+| `docs/academico/prototype1.html` | Prototipo visual HTML | **Movido desde `diagrams/`**; referencia visual, no catálogo |
+| `docs/estado/DEUDA_TECNICA.md` | Deuda detectada en la separación | Reescribir: hoy asume el esquema viejo |
+| `docs/estado/SEPARACION.md` | Runbook de separación | Corregir: describe la separación al revés |
 | `docs/agents/` | Configuración de skills (issue tracker, triage, domain docs) | Mantener |
 | `docs/adr/` | Decisiones de arquitectura | Crear cuando se aprueben las decisiones |
-| `docs/brain.md` | Manual de agencia | **Movido desde la raíz**; referencia filosófica |
+| `docs/metodo/brain.md` | Manual de agencia | **Movido desde la raíz**; referencia filosófica |
 
 ### 2.3 Código
 
@@ -80,10 +80,10 @@ Comparación por SHA-256:
 
 | Archivo | Duplicado | Resultado |
 |---|---|---|
-| `docs/DER-quimica.csv` | `../quimicashop/diagrams/2209D/DER-quimica.csv` | Idéntico |
-| `docs/DCU-Quimica.csv` | `../quimicashop/diagrams/2209D/DCU-Quimica.csv` | Idéntico |
-| `docs/informe_Escencia_Tecnica.md` | `../quimicashop/diagrams/informe_Escencia_Tecnica.md` | Idéntico |
-| `docs/SEPARACION.md` | `../quimicashop/diagrams/SEPARACION.md` | Casi idéntico; difiere en pocas líneas |
+| `docs/academico/DER-quimica.csv` | `../quimicashop/diagrams/2209D/DER-quimica.csv` | Idéntico |
+| `docs/academico/DCU-Quimica.csv` | `../quimicashop/diagrams/2209D/DCU-Quimica.csv` | Idéntico |
+| `docs/academico/informe_Escencia_Tecnica.md` | `../quimicashop/diagrams/informe_Escencia_Tecnica.md` | Idéntico |
+| `docs/estado/SEPARACION.md` | `../quimicashop/diagrams/SEPARACION.md` | Casi idéntico; difiere en pocas líneas |
 | `diagrams/` (15 archivos) | `../quimicashop/diagrams/` (15 archivos) | **Idéntico, 15/15** |
 
 Consecuencia: la copia local de `diagrams/` no aportaba nada. Se conservaron en `docs/` los cuatro artefactos e-commerce únicos (DFD 1–3 y `prototype1.html`) y se eliminó la carpeta.
@@ -124,7 +124,7 @@ Es el que usa `../quimicashop/config.js`:
 
 ### 4.3 Contradicción documental
 
-`docs/SEPARACION.md` dice:
+`docs/estado/SEPARACION.md` dice:
 
 > El proyecto Supabase actual (`uchy...`) queda como e-commerce / química. Se crea un proyecto nuevo para Teams.
 
@@ -159,7 +159,7 @@ La realidad es la inversa:
 | Validación de pago | Minuta e informe: manual por Admin | `verify-payment` y `gemini.ts`: IA | Retirar Gemini; validación manual |
 | Alertas de stock | Minuta 21-10: popup en el panel; email solo al cliente | Código y planes: emails de alerta | Popup para Admin; email solo para el Cliente |
 | Marca | Changelog: “Esencia Técnica” | Código y emails: “QuimicaShop” | Esencia Técnica |
-| Separación de repos | `docs/SEPARACION.md`: viejo = e-commerce | Realidad: viejo = Teams; nuevo = e-commerce | Corregir el runbook |
+| Separación de repos | `docs/estado/SEPARACION.md`: viejo = e-commerce | Realidad: viejo = Teams; nuevo = e-commerce | Corregir el runbook |
 | Rol de Juanma | `AGENTS.md`, README y `tasks.js`: Frontend & JS Lead | `team_members`: Full-Stack & Arquitectura | La base de Teams manda en roles |
 
 ---
@@ -184,7 +184,7 @@ Estas inconsistencias se resuelven en `docs/MODELO.md`, no parcheando datos.
 ## 8. Seguridad y entorno
 
 - La anon key del proyecto nuevo **lee las tablas** (no se probaron escrituras). RLS parece permisiva o ausente. Hay que restringir lectura de `cliente` y `admin` y escritura de pedidos.
-- La anon key del proyecto viejo lee `team_members` (incluye DNI y email). Ya está documentado como deuda en `docs/DEUDA_TECNICA.md`.
+- La anon key del proyecto viejo lee `team_members` (incluye DNI y email). Ya está documentado como deuda en `docs/estado/DEUDA_TECNICA.md`.
 - `.env.local` solo tiene `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `VERCEL_OIDC_TOKEN`. Faltan `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` y `RESEND_API_KEY`; sin eso no se pueden probar altas, Storage ni `/admin`.
 - `src/app/api/sync-sheets/route.ts` usa la service role como bearer token: si se filtra, da acceso total.
 - `admin.contrasenia` no se usa: el panel autentica con `ADMIN_PASSWORD` por Basic Auth. Hay que decidir si el Admin vive en la base o en Auth.
@@ -215,9 +215,9 @@ Observaciones:
 
 ## 10. Limpieza ejecutada en esta sesión
 
-- `brain.md` → `docs/brain.md`.
+- `brain.md` → `docs/metodo/brain.md`.
 - `diagrams/2209D/DFD1-3` → `docs/DFD1-3`.
-- `diagrams/prototype1.html` → `docs/prototype1.html`.
+- `diagrams/prototype1.html` → `docs/academico/prototype1.html`.
 - `diagrams/` eliminado: los 11 archivos restantes eran idénticos a `../quimicashop/diagrams` (15/15 verificados antes de borrar).
 
 No se modificó código ni la base de datos. No se borró ningún archivo trackeado.
@@ -226,7 +226,7 @@ No se modificó código ni la base de datos. No se borró ningún archivo tracke
 
 ## 11. Limpieza pendiente
 
-Ya ejecutado: `README.md` y `AGENTS.md` reescritos; `docs/SEPARACION.md` corregido; `docs/DEUDA_TECNICA.md` marcado como histórico; `diagrams/` eliminado; `brain.md` movido.
+Ya ejecutado: `README.md` y `AGENTS.md` reescritos; `docs/estado/SEPARACION.md` corregido; `docs/estado/DEUDA_TECNICA.md` marcado como histórico; `diagrams/` eliminado; `brain.md` movido.
 
 Pendiente de código:
 
@@ -234,7 +234,7 @@ Pendiente de código:
 2. Retirar `src/lib/gemini.ts`, `verify-payment` con IA y `GEMINI_API_KEY`.
 3. Unificar tipos: `src/lib/types.ts`, `src/lib/schemas.ts` y `src/lib/supabase.ts` deben salir del modelo de `docs/MODELO.md`.
 4. Migrar servicios y `/admin` a las tablas y estados canónicos.
-5. Agregar Vitest y el primer test cuando se implemente el primer ticket. ✅ Hecho: `tests/db/` (59 tests) y `docs/AUDITORIA_BD.md`.
+5. Agregar Vitest y el primer test cuando se implemente el primer ticket. ✅ Hecho: `tests/db/` (59 tests) y `docs/estado/AUDITORIA_BD.md`.
 
 ---
 
@@ -249,4 +249,4 @@ Pendiente de código:
 | Remito | HTML por email con Resend. |
 | Tests | Vitest; Celeste es la responsable. |
 | Validación | Manual por los Administradores de Química; sin IA. |
-| Base de datos | La revisa Isabella Infante; brief en `docs/HANDOFF-ISABELLA.md`. |
+| Base de datos | La revisa Isabella Infante; brief en `docs/entrega/HANDOFF-ISABELLA.md`. |

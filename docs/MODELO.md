@@ -2,7 +2,7 @@
 
 > **Estado:** aprobado el 2026-10-22.
 > **Decisiones:** modelo normalizado; MVP sin envío; carrito en cliente con cookies; Admin con Basic Auth; remito HTML; tests con Vitest; validación manual sin IA.
-> **Responsable de la base:** Isabella Infante (SQL). El brief para ella está en [`HANDOFF-ISABELLA.md`](HANDOFF-ISABELLA.md).
+> **Responsable de la base:** Isabella Infante (SQL). El brief para ella está en [`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md).
 > **Criterio:** el código es la realidad operativa; el DER académico se adapta al código y ambos convergen en este modelo.
 
 ---
@@ -32,7 +32,7 @@
 
 > Los nombres del ERD son lógicos. La tabla física puede conservar el plural actual
 > (`estados_pedidos`, `estados_comprobante`, `remitos_de_venta`, `alerta_de_estado`); el mapeo está en
-> [`HANDOFF-ISABELLA.md`](HANDOFF-ISABELLA.md).
+> [`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md).
 
 ```mermaid
 erDiagram
@@ -248,7 +248,7 @@ Ventaja: es lo que hoy funciona contra el proyecto viejo. Desventajas: no hay `C
 ## 7. Handoff a Isabella
 
 El detalle de los cambios de DDL, constraints, índices, RLS y limpieza de datos está en
-[`HANDOFF-ISABELLA.md`](HANDOFF-ISABELLA.md). Resumen:
+[`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md). Resumen:
 
 1. Eliminar FKs recíprocas (`producto.id_stock`, `cliente.id_carrito`, `pedido.id_estado`).
 2. Agregar `estado_actual` a `pedido` y `comprobante`; conservar las tablas de historial.
@@ -282,7 +282,7 @@ El detalle de los cambios de DDL, constraints, índices, RLS y limpieza de datos
 
 El DDL ejecutable vive en `supabase/migrations/` y los tipos del front en `src/lib/database.types.ts`
 (generados con `npm run db:types`). La auditoría y el runbook están en
-[`AUDITORIA_BD.md`](AUDITORIA_BD.md); la decisión de reconstruir, en
+[`AUDITORIA_BD.md`](./estado/AUDITORIA_BD.md); la decisión de reconstruir, en
 [`adr/0004-reconstruccion-esquema-mvp.md`](adr/0004-reconstruccion-esquema-mvp.md).
 
 Ajustes de implementación sobre este modelo. La columna *Cobertura* dice qué test lo fija; los que

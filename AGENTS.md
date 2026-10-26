@@ -5,7 +5,7 @@
 > **Equipo:** Isabella Infante, Juan Manuel Merodio, Celeste Cáceres, Enzo Queipo.
 > **Última actualización:** 2026-10-26.
 
-Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/brain.md`](docs/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
+Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/metodo/brain.md`](docs/metodo/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
 
 ---
 
@@ -15,9 +15,9 @@ Leer, en este orden:
 
 1. [`GLOSSARY.md`](GLOSSARY.md) — vocabulario canónico.
 2. [`docs/MODELO.md`](docs/MODELO.md) — ERD Mermaid y reglas de integridad.
-3. [`docs/AUDITORIA.md`](docs/AUDITORIA.md) — inventario, duplicados y contradicciones.
-4. [`docs/brain.md`](docs/brain.md) — filosofía de trabajo de la agencia.
-5. [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) — deuda conocida (desactualizada; corregir contra el modelo).
+3. [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md) — inventario, duplicados y contradicciones.
+4. [`docs/metodo/brain.md`](docs/metodo/brain.md) — filosofía de trabajo de la agencia.
+5. [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) — deuda conocida (desactualizada; corregir contra el modelo).
 
 Si hay conflicto entre documentos, manda el orden anterior. El modelo del MVP está aprobado; si falta un campo o una regla, **no lo inventes**: documentalo en `docs/MODELO.md` y consultá antes de codificar.
 
@@ -44,10 +44,10 @@ Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** de `es
 | Estructura | [`docs/MODELO.md`](docs/MODELO.md) | ERD Mermaid aprobado (MVP). Es la representación consensuada del dominio. |
 | Implementación | Proyecto Supabase `otjphjnrwihqzzhbfnmh` | Base del e-commerce; nunca la base vieja `uchy...`. |
 | Código | `src/` | Realidad operativa. Si se desvía del modelo, se corrige el código o se actualiza el modelo con una decisión explícita. |
-| Académico | [`docs/DER-quimica.csv`](docs/DER-quimica.csv), [`docs/DCU-Quimica.csv`](docs/DCU-Quimica.csv), [`docs/DFD1-Quimica.csv`](docs/DFD1-Quimica.csv), [`docs/DFD2-Quimica.csv`](docs/DFD2-Quimica.csv), [`docs/DFD3-Quimica.csv`](docs/DFD3-Quimica.csv), [`docs/informe_Escencia_Tecnica.md`](docs/informe_Escencia_Tecnica.md) | Se adapta al código/modelo; no manda sobre la implementación. |
-| Referencia visual | [`docs/prototype1.html`](docs/prototype1.html) | Solo diseño/UX; sus productos son contenido de muestra, no catálogo. |
+| Académico | [`docs/academico/DER-quimica.csv`](docs/academico/DER-quimica.csv), [`docs/academico/DCU-Quimica.csv`](docs/academico/DCU-Quimica.csv), [`docs/academico/DFD1-Quimica.csv`](docs/academico/DFD1-Quimica.csv), [`docs/academico/DFD2-Quimica.csv`](docs/academico/DFD2-Quimica.csv), [`docs/academico/DFD3-Quimica.csv`](docs/academico/DFD3-Quimica.csv), [`docs/academico/informe_Escencia_Tecnica.md`](docs/academico/informe_Escencia_Tecnica.md) | Se adapta al código/modelo; no manda sobre la implementación. |
+| Referencia visual | [`docs/academico/prototype1.html`](docs/academico/prototype1.html) | Solo diseño/UX; sus productos son contenido de muestra, no catálogo. |
 | Historia | `quimicashop/diagrams/minutas/`, `CHANGELOG.md` | Evidencia de decisiones; no es spec vigente. |
-| Filosofía | [`docs/brain.md`](docs/brain.md) | Principios de trabajo; no estructura de agencia. |
+| Filosofía | [`docs/metodo/brain.md`](docs/metodo/brain.md) | Principios de trabajo; no estructura de agencia. |
 
 **Jerarquía operativa:** el código y la base nueva son la realidad; el modelo Mermaid es la representación acordada; el DER académico se adapta. Nunca convivan dos esquemas: si algo no está en el modelo, se decide y se documenta antes de codificar.
 
@@ -103,7 +103,7 @@ El dominio completo está en [`GLOSSARY.md`](GLOSSARY.md) y [`docs/MODELO.md`](d
 10. **Estado actual + historial:** el panel lee el estado actual; las tablas de historial son la auditoría. Se actualizan en la misma transacción.
 11. **Total:** `PEDIDO.total = SUM(DETALLE_PEDIDO.subtotal)`. El comprobante debe coincidir con el total para aprobar.
 12. **Borrado lógico:** `PRODUCTO.activo = false`; no se borran productos con historial.
-13. **Base de datos:** los cambios de DDL los revisa Isabella Infante; el brief está en [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md).
+13. **Base de datos:** los cambios de DDL los revisa Isabella Infante; el brief está en [`docs/entrega/HANDOFF-ISABELLA.md`](docs/entrega/HANDOFF-ISABELLA.md).
 
 ---
 
@@ -120,7 +120,7 @@ Antes de codificar una feature no trivial:
 
 ### 6.2 Spec y tickets
 
-- La spec vive en un issue de GitHub (ver [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md)). Si necesita detalle, se adjunta `docs/specs/<feature>/spec.md` y el issue lo linkea.
+- La spec vive en un issue de GitHub (ver [`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md)). Si necesita detalle, se adjunta `docs/specs/<feature>/spec.md` y el issue lo linkea.
 - Cada ticket es una **tajada vertical**: base + API + UI + test en un entregable mínimo.
 - Prohibido dividir por capas horizontales (“ticket de toda la base”, “ticket de toda la API”).
 - Cada ticket declara sus **blockers**; se trabaja blockers-first.
@@ -137,7 +137,7 @@ Antes de codificar una feature no trivial:
 2. **Green:** el mínimo código para pasarlo.
 3. **Refactor:** limpiar sin romper el verde.
 
-- Runner: **Vitest**. Celeste es la responsable de testing/QA. Guía corta: [`docs/TESTING.md`](docs/TESTING.md).
+- Runner: **Vitest**. Celeste es la responsable de testing/QA. Guía corta: [`docs/metodo/TESTING.md`](docs/metodo/TESTING.md).
 - El primer ticket de implementación agrega Vitest y el primer test real.
 - No se considera terminado un cambio sin test que lo cubra, salvo documentación o configuración.
 
@@ -210,7 +210,7 @@ Un ticket está terminado solo si:
 
 ## 9. Deuda y orden de migración
 
-1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md).
+1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/entrega/HANDOFF-ISABELLA.md`](docs/entrega/HANDOFF-ISABELLA.md).
    **Abierto:** la migración de `otjph` está a medio aplicar (13 desajustes medidos con `npm run bd:viva`).
    El cierre es la spec [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md), **issue #15**,
    y el criterio es `npm run bd:viva` en verde. Estado al día en [`memory.md`](memory.md).
@@ -222,11 +222,11 @@ Un ticket está terminado solo si:
    panel (`T7`); `src/lib/supabase.ts` y `/api/sync-sheets` ya no existen.
 5. Corregir `.env.local`/Vercel (service role, `ADMIN_PASSWORD`, Resend, datos de transferencia) y RLS.
    **Abierto**: es de Enzo y de Isabella, y es lo único que separa al MVP de una demo en producción.
-6. Agregar Vitest y el primer test. ✅ Hecho: `tests/db/` + `vitest.config.ts` (ver [`docs/AUDITORIA_BD.md`](docs/AUDITORIA_BD.md)).
+6. Agregar Vitest y el primer test. ✅ Hecho: `tests/db/` + `vitest.config.ts` (ver [`docs/estado/AUDITORIA_BD.md`](docs/estado/AUDITORIA_BD.md)).
 7. Recién entonces, features nuevas. ✅ Hechas las tajadas del front (`T3`, `T5`, `T6`, `T7`, `T8`); falta la
    **verificación manual en navegador** con la base migrada y las claves puestas.
 
-La deuda detallada está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md), pero ese documento asume el esquema viejo: corregilo contra el modelo.
+La deuda detallada está en [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md), pero ese documento asume el esquema viejo: corregilo contra el modelo.
 
 ---
 
@@ -258,11 +258,11 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 
 ## 11. Documentos del agente
 
-- [`docs/agents/issue-tracker.md`](docs/agents/issue-tracker.md) — issues y specs en GitHub con `gh`.
-- [`docs/agents/triage-labels.md`](docs/agents/triage-labels.md) — roles de triage.
-- [`docs/agents/domain.md`](docs/agents/domain.md) — cómo consumir glosario y ADRs.
+- [`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md) — issues y specs en GitHub con `gh`.
+- [`docs/agentes/triage-labels.md`](docs/agentes/triage-labels.md) — roles de triage.
+- [`docs/agentes/domain.md`](docs/agentes/domain.md) — cómo consumir glosario y ADRs.
 - [`GLOSSARY.md`](GLOSSARY.md) — vocabulario.
-- `.agents/skills/` — skills propias del proyecto (anatomía en [`docs/brain.md`](docs/brain.md) §4.1).
+- `.agents/skills/` — skills propias del proyecto (anatomía en [`docs/metodo/brain.md`](docs/metodo/brain.md) §4.1).
 - `docs/adr/` — decisiones de arquitectura.
 
 **Skills del proyecto.** Las skills propias de Esencia Técnica viven en el repo, en

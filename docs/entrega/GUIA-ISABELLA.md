@@ -5,7 +5,7 @@
 > **Cómo se lee:** de arriba hacia abajo, en orden. Cada paso trae el comando exacto, el resultado que
 > tenés que ver y el prompt que le podés pegar a Claude Code. Si el resultado no coincide, **pará y
 > avisá** en la bandeja del Teams.
-> **Contrato del repo:** [`AGENTS.md`](../AGENTS.md). Si esta guía y `AGENTS.md` se contradicen, manda `AGENTS.md`.
+> **Contrato del repo:** [`AGENTS.md`](../../AGENTS.md). Si esta guía y `AGENTS.md` se contradicen, manda `AGENTS.md`.
 > **Tu ticket:** [issue #15 · D1 · Cerrar la migración del MVP en `otjph`](https://github.com/juanmamerodio/esenciatecnica/issues/15).
 
 ---
@@ -113,8 +113,8 @@ de partida, y va a ser tu prueba de que avanzaste.
 | **No se reescribe lo ya aplicado** | Si una migración ya corrió, su semántica no se cambia. Se corrige lo que está mal escrito y no corrió. |
 | **Verde de verdad** | **Nunca digas que algo está verde si el comando está rojo.** Pegá el comando y su salida. |
 
-El detalle está en [`AGENTS.md`](../AGENTS.md) §5, §6 y §9, y en
-[`docs/specs/migracion-otjph/spec.md`](specs/migracion-otjph/spec.md) §4.
+El detalle está en [`AGENTS.md`](../../AGENTS.md) §5, §6 y §9, y en
+[`docs/specs/migracion-otjph/spec.md`](../specs/migracion-otjph/spec.md) §4.
 
 ---
 
@@ -151,7 +151,7 @@ Escribí `/` en Claude Code y te aparece la lista. Estas son las que vas a usar:
 | `/domain-modeling` | Si un término del modelo necesita entrar en `GLOSSARY.md` o si hay que escribir un ADR. |
 | `/find-skills` | Si no sabés qué skill usar. |
 
-> ⚠️ **Aviso sobre `docs/brain.md`.** Su §3 muestra `/grill-me`, `/to-spec`, `/to-tickets`,
+> ⚠️ **Aviso sobre `docs/metodo/brain.md`.** Su §3 muestra `/grill-me`, `/to-spec`, `/to-tickets`,
 > `/implement-spec` y `/retro`. **Esos nombres no existen en el runtime actual**: escribirlos no hace
 > nada. La tabla de arriba es la lista real.
 
@@ -198,7 +198,7 @@ del dominio, correrlo sin respaldo **destruye las filas actuales sin red**.
 (3 filas); `detalle_carrito`, `admin` y `roll` responden vacías; pero las tablas protegidas por RLS
 (`cliente`, `pedido`, `detalle_del_pedido`, `comprobante`, `remitos_de_venta`, `alerta_de_estado`) **no
 se pueden contar desde afuera**. No se puede afirmar que estén vacías. Esa es exactamente la razón de
-la decisión en [`specs/migracion-otjph/spec.md`](specs/migracion-otjph/spec.md) §4.
+la decisión en [`specs/migracion-otjph/spec.md`](../specs/migracion-otjph/spec.md) §4.
 
 **Cómo respaldar.** Elegí la que te permita el plan del proyecto:
 
@@ -284,7 +284,7 @@ Es de tu área y tiene errores concretos ya detectados:
 - Y **no tiene issue y ningún issue lo linkea**: eso incumple `AGENTS.md` §6.2. Creá el issue o
   linkealo a uno existente.
 
-Referencia de lo correcto: [`docs/MODELO.md`](MODELO.md) y [`GLOSSARY.md`](../GLOSSARY.md).
+Referencia de lo correcto: [`docs/MODELO.md`](../MODELO.md) y [`GLOSSARY.md`](../../GLOSSARY.md).
 
 ### 4.8 Paso 7 · Volver a mover el tablero
 
@@ -381,11 +381,11 @@ El código de error de Postgres suele decir todo: no lo resumas.
 | Documento | Para qué |
 |---|---|
 | [Issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15) | Tu ticket y el criterio de cierre. |
-| [`docs/specs/migracion-otjph/spec.md`](specs/migracion-otjph/spec.md) | La spec de esta migración: decisiones, los 13 desajustes y por qué el orden es ese. |
-| [`docs/HANDOFF-ISABELLA.md`](HANDOFF-ISABELLA.md) | El brief de DDL, constraints, índices y RLS. |
-| [`docs/MODELO.md`](MODELO.md) | El modelo aprobado: es lo que las migraciones implementan. |
-| [`AGENTS.md`](../AGENTS.md) | El contrato operativo. |
-| [`GLOSSARY.md`](../GLOSSARY.md) | El vocabulario. Si un término no está, no se inventa un sinónimo. |
-| [`docs/AUDITORIA_BD.md`](AUDITORIA_BD.md) | La auditoría de la base y los tests. |
-| [`scripts/verificar-bd-viva.mjs`](../scripts/verificar-bd-viva.mjs) | El script que te da el veredicto. Leelo: dice qué controla. |
-| [`memory.md`](../memory.md) | El estado real del build, al día. |
+| [`docs/specs/migracion-otjph/spec.md`](../specs/migracion-otjph/spec.md) | La spec de esta migración: decisiones, los 13 desajustes y por qué el orden es ese. |
+| [`docs/entrega/HANDOFF-ISABELLA.md`](HANDOFF-ISABELLA.md) | El brief de DDL, constraints, índices y RLS. |
+| [`docs/MODELO.md`](../MODELO.md) | El modelo aprobado: es lo que las migraciones implementan. |
+| [`AGENTS.md`](../../AGENTS.md) | El contrato operativo. |
+| [`GLOSSARY.md`](../../GLOSSARY.md) | El vocabulario. Si un término no está, no se inventa un sinónimo. |
+| [`docs/estado/AUDITORIA_BD.md`](../estado/AUDITORIA_BD.md) | La auditoría de la base y los tests. |
+| [`scripts/verificar-bd-viva.mjs`](../../scripts/verificar-bd-viva.mjs) | El script que te da el veredicto. Leelo: dice qué controla. |
+| [`memory.md`](../../memory.md) | El estado real del build, al día. |

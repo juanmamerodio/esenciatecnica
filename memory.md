@@ -30,7 +30,7 @@
 | `src/lib/catalogo.ts` + `tests/front/catalogo.test.ts` | Guard: si la vista devuelve filas sin `disponible`, el catálogo da `estado: 'error'` en vez de mostrar **todo agotado** en silencio. Rojo → verde verificado. |
 | `docs/specs/migracion-otjph/spec.md` + issue #15 | La spec del cierre de la migración, con las decisiones y el criterio de cierre. |
 | Auditoría de specs (subagente, 9 specs + 14 issues) | Hallazgos en §7.4 de la spec y en "Hallazgos abiertos" acá abajo. |
-| `docs/GUIA-ISABELLA.md` + `docs/GUIA-QUEIPO.md` | Paso a paso operativo para los dos responsables, con los prompts de Claude Code, las skills reales del runtime y el criterio de cierre de cada uno. Publicados también en la bandeja del Teams. |
+| `docs/entrega/GUIA-ISABELLA.md` + `docs/entrega/GUIA-QUEIPO.md` | Paso a paso operativo para los dos responsables, con los prompts de Claude Code, las skills reales del runtime y el criterio de cierre de cada uno. Publicados también en la bandeja del Teams. |
 | Verificación de `otjph` del 26-10 (anon key) | `producto.id_stock` **no existe** → la migración `00` es un no-op y `01` destruiría filas sin respaldo. La RLS ya está verde: de "RLS y Storage" solo faltan los dos buckets. `producto` y `stock` tienen 3 filas cada una; `detalle_carrito`, `admin` y `roll` están vacías. |
 
 ## Falta

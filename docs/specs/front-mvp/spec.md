@@ -3,9 +3,9 @@
 > **Feature:** `front-mvp` · **Estado:** aprobada para implementación por tajadas · **Fecha:** 2026-10-23.
 > **Origen:** sesión de grilling (`/grill-me`) del 2026-10-23; el issue de GitHub es la spec publicada.
 > **Fuente de verdad:** [`GLOSSARY.md`](../../../GLOSSARY.md), [`docs/MODELO.md`](../../MODELO.md),
-> [`src/lib/database.types.ts`](../../../src/lib/database.types.ts) y [`docs/prototype1.html`](../../prototype1.html)
+> [`src/lib/database.types.ts`](../../../src/lib/database.types.ts) y [`docs/academico/prototype1.html`](../../academico/prototype1.html)
 > (este último **solo diseño/UX**: sus productos son contenido de muestra, no catálogo).
-> **Proceso:** [`docs/brain.md`](../../brain.md) §3 y [`AGENTS.md`](../../../AGENTS.md) §6.
+> **Proceso:** [`docs/metodo/brain.md`](../../metodo/brain.md) §3 y [`AGENTS.md`](../../../AGENTS.md) §6.
 
 ---
 
@@ -20,7 +20,7 @@ y el `lint` con 1.
 Al mismo tiempo, la base canónica ya está definida, migrada y probada (59 tests con PGlite), con
 `vista_catalogo` exponiendo `precio` y `disponible`, y con tipos generados que **ningún archivo importa**.
 
-El prototipo `docs/prototype1.html` define una identidad visual que nunca se implementó en la app, y su
+El prototipo `docs/academico/prototype1.html` define una identidad visual que nunca se implementó en la app, y su
 contenido (insumos de laboratorio, `pH`, validación “vía Gemini”, estados de envío) **contradice el modelo
 aprobado**: el Producto es cosmética e higiene, la validación es manual y el MVP termina en Pago Validado.
 
@@ -107,7 +107,7 @@ Verificado contra el runtime real del Harness: el descubrimiento es de **un solo
 (`.agents/skills/<nombre>/SKILL.md`, nunca `skills/<categoría>/<skill>/SKILL.md`), el nombre canónico sale
 del frontmatter (`name` en kebab-case, `description` obligatorios), y el archivo debe llamarse `SKILL.md`.
 
-[`docs/brain.md`](../../brain.md) §4.1 exigía `model:`/`tools:` y un archivo `skill.md` en minúscula: tal
+[`docs/metodo/brain.md`](../../metodo/brain.md) §4.1 exigía `model:`/`tools:` y un archivo `skill.md` en minúscula: tal
 cual, una skill escrita siguiendo ese ejemplo **no carga**. Se corrige el estándar para que coincida con
 el runtime, y la regla de ubicación se registra en AGENTS §11.
 
@@ -255,7 +255,7 @@ formas de query ni detalles de implementación.
 - T2 a T8: catálogo con buscador, detalle, carrito, checkout, “Sobre el proyecto”, admin, remito y emails.
 - Fotos reales de producto: las carga el Administrador desde el panel (T7). La Home solo consume `imagen_url`.
 - i18n, Gemini/IA, envío y seguimiento, cuentas de Cliente, carrito persistente en Supabase.
-- DDL, migraciones, RLS y datos reales: los revisa Isabella Infante ([`docs/HANDOFF-ISABELLA.md`](../../HANDOFF-ISABELLA.md)).
+- DDL, migraciones, RLS y datos reales: los revisa Isabella Infante ([`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)).
 - Cualquier skill externa (incluida `awesome-ecommerce-skills`): no se instala la colección; si una tajada
   necesita una skill puntual, se vendea adaptada a la regla de §3.4 y con sus propias guardrails.
 - Dominio, deploy y `.env` de producción.

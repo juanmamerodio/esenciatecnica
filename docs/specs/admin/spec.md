@@ -219,7 +219,7 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 - **Reimplementar la regla en el front**: reservas, descuentos de stock, estados y numeración del remito son
   de la base.
 - **Ver el comprobante sin autenticación**: el bucket es privado y la URL firmada vence.
-- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../HANDOFF-ISABELLA.md)); la
+- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); la
   migración `05` sólo crea el bucket y entra en el handoff para su revisión.
 - **Búsqueda, filtros y paginación del panel**: el MVP tiene un solo Administrador y un catálogo chico.
 - **Envío, seguimiento y estados posteriores a `Pago Validado`**: fuera del MVP (`AGENTS.md` §5.5).
@@ -247,7 +247,7 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 8. **La alerta es un aviso del panel, no un email** (`AGENTS.md` §5.7). Atenderla sólo marca `atendida`; la
    fila se conserva como auditoría.
 9. **Se retira la deuda legacy en esta tajada**: `src/lib/supabase.ts` y `src/app/api/sync-sheets/`. Dejarlos
-   vivos era la contradicción de dos esquemas que la auditoría marcó (`docs/AUDITORIA.md` §6) y su único
+   vivos era la contradicción de dos esquemas que la auditoría marcó (`docs/estado/AUDITORIA.md` §6) y su único
    consumidor era esa ruta. `/api/products` no se toca.
 10. **La confirmación del monto es en pantalla, no un `confirm()` del navegador**: muestra el monto del
     comprobante y el total del pedido, se anuncia con `role="alert"` y se puede cancelar.
@@ -255,7 +255,7 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 ## 7. Blockers declarados
 
 1. **Migración `05` revisada y aplicada en `otjph…`** (Isabella). Sin el bucket `productos`, subir una foto
-   falla; el DDL está en [`HANDOFF-ISABELLA.md`](../../HANDOFF-ISABELLA.md) y **no** se aplica a producción
+   falla; el DDL está en [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a producción
    desde acá.
 2. **`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_PASSWORD`** en `.env.local` y en Vercel (Enzo, tarea *Secretos y
    entorno*): sin la primera el panel no puede leer ni escribir; sin la segunda responde `503`.

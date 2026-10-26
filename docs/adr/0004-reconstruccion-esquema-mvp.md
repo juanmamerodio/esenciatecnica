@@ -3,7 +3,7 @@
 - **Fecha:** 2026-10-22
 - **Estado:** aceptada (pendiente de aplicar en producción)
 - **Responsable del DDL:** Isabella Infante
-- **Contexto:** [`AUDITORIA_BD.md`](../AUDITORIA_BD.md) · [`MODELO.md`](../MODELO.md)
+- **Contexto:** [`AUDITORIA_BD.md`](../estado/AUDITORIA_BD.md) · [`MODELO.md`](../MODELO.md)
 
 ## Contexto
 

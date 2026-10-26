@@ -5,7 +5,7 @@
 > **Cómo se lee:** de arriba hacia abajo, en orden. Cada paso trae el comando exacto, el resultado
 > que tenés que ver, y el prompt que le podés pegar a Claude Code. Si el resultado no coincide, **pará
 > y avisá** en la bandeja del Teams — no sigas "arreglando" a ciegas.
-> **Contrato del repo:** [`AGENTS.md`](../AGENTS.md). Si esta guía y `AGENTS.md` se contradicen, manda `AGENTS.md`.
+> **Contrato del repo:** [`AGENTS.md`](../../AGENTS.md). Si esta guía y `AGENTS.md` se contradicen, manda `AGENTS.md`.
 
 ---
 
@@ -86,7 +86,7 @@ todas las sesiones hasta que se arregle.
 | **No inventes** | Ni datos bancarios, ni productos, ni datos fiscales, ni esquemas. Si falta algo, se documenta y se consulta. |
 | **Verde de verdad** | **Nunca digas que algo está verde si el comando está rojo.** Reportá el comando, la salida y el error exacto. |
 
-El detalle completo está en [`AGENTS.md`](../AGENTS.md) §5, §6 y §7.
+El detalle completo está en [`AGENTS.md`](../../AGENTS.md) §5, §6 y §7.
 
 ---
 
@@ -125,7 +125,7 @@ Escribí `/` en Claude Code y te aparece la lista. Estas son las que vas a usar:
 | `/domain-modeling` | Si aparece un término nuevo o hay que tocar `GLOSSARY.md` o un ADR. |
 | `/find-skills` | Si no sabés qué skill usar, o buscás una que no ves. |
 
-> ⚠️ **Aviso importante sobre `docs/brain.md`.** Su §3 muestra un ciclo con `/grill-me`, `/to-spec`,
+> ⚠️ **Aviso importante sobre `docs/metodo/brain.md`.** Su §3 muestra un ciclo con `/grill-me`, `/to-spec`,
 > `/to-tickets`, `/implement-spec` y `/retro`. **Esos nombres no existen en el runtime actual**:
 > escribirlos no hace nada. La tabla de arriba es la lista real. Si querés ese flujo, se arma con
 > `/grilling` + una spec escrita a mano + `/tdd`.
@@ -133,7 +133,7 @@ Escribí `/` en Claude Code y te aparece la lista. Estas son las que vas a usar:
 ### 3.4 El ciclo, aplicado a este repo
 
 1. `/grilling` sobre el ticket → se cierran las decisiones.
-2. Si la decisión es difícil de revertir → un ADR nuevo en [`docs/adr/`](adr/).
+2. Si la decisión es difícil de revertir → un ADR nuevo en [`docs/adr/`](../adr).
 3. `/tdd` → test que falla primero.
 4. Verificar: `npm run typecheck && npm run lint && npm test`.
 5. `/code-review` en contexto limpio (no en la sesión que escribió el código).
@@ -164,7 +164,7 @@ Tu `.env.local` hoy tiene solo `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE
 - La `service_role` **jamás** va en una variable que empiece con `NEXT_PUBLIC_`. Es la llave maestra:
   salta todas las RLS.
 - No inventes los datos de transferencia. Si la Cooperadora no los mandó, dejá las tres vacías: el
-  sistema no muestra la franja si falta alguna ([`docs/specs/front-mvp/spec.md`](specs/front-mvp/spec.md) §6.1).
+  sistema no muestra la franja si falta alguna ([`docs/specs/front-mvp/spec.md`](../specs/front-mvp/spec.md) §6.1).
 - Ojo con el proyecto: es **`otjphjnrwihqzzhbfnmh`** (e-commerce). Nunca el de Teams
   (`uchy…`), que tiene el catálogo viejo.
 
@@ -193,8 +193,8 @@ ignora (el MVP no tiene administradores en base: `ADMIN`/`ROL` son fase 2); la c
 `ADMIN_PASSWORD`. Si en cambio ves un **503**, falta la variable. Si ves el panel sin pedirte nada,
 `ADMIN_PASSWORD` no está llegando al middleware.
 
-> El porqué de esa decisión está en [`docs/adr/0005-basic-auth-en-middleware.md`](adr/0005-basic-auth-en-middleware.md)
-> y en [`src/lib/admin-auth.ts`](../src/lib/admin-auth.ts).
+> El porqué de esa decisión está en [`docs/adr/0005-basic-auth-en-middleware.md`](../adr/0005-basic-auth-en-middleware.md)
+> y en [`src/lib/admin-auth.ts`](../../src/lib/admin-auth.ts).
 
 ### 4.3 Prompt para esta tarea
 
@@ -247,7 +247,7 @@ así: *"no verificado, falta X"*. **No lo declares verde.**
 ### 6.1 La regla
 
 Los pedidos sin comprobante aprobado se cancelan **los viernes** y liberan su reserva de stock
-([`AGENTS.md`](../AGENTS.md) §5.6). La función que lo hace ya existe: RPC
+([`AGENTS.md`](../../AGENTS.md) §5.6). La función que lo hace ya existe: RPC
 `cancelar_pedidos_vencidos()`. **Lo que falta es que alguien la llame.** Hoy no hay `vercel.json`
 ni un `schedule:` en `.github/workflows/ci.yml`.
 
@@ -286,13 +286,13 @@ Esta es la más chica y la más clara. Tiene un síntoma exacto.
 
 `src/app/api/admin/comprobantes/route.ts` (líneas 40-46) **sí** devuelve un `aviso` cuando Resend
 falla al mandar el remito. Pero `pedirAlPanel`, en
-[`src/components/admin/comun.ts`](../src/components/admin/comun.ts) (líneas 12-26), **solo lee
+[`src/components/admin/comun.ts`](../../src/components/admin/comun.ts) (líneas 12-26), **solo lee
 `estado` y `mensaje`**. El `aviso` se pierde.
 
 **Consecuencia para el usuario:** el Administrador aprueba, el correo falla, y el panel igual dice
 *"quedó aprobado y la base emitió el remito"*. El Cliente no recibió nada y nadie se enteró.
 
-Esto incumple la **HU-4** de [`docs/specs/remito/spec.md`](specs/remito/spec.md): *"la respuesta avisa
+Esto incumple la **HU-4** de [`docs/specs/remito/spec.md`](../specs/remito/spec.md): *"la respuesta avisa
 del fallo sin revertir nada"*.
 
 ### 7.2 Cómo lo arreglás
@@ -322,7 +322,7 @@ EOF
 - **No cambies el orden:** la venta la cierra la base primero; el correo es posterior y **no
   bloqueante**. Un fallo de correo **no** revierte ni duplica la aprobación.
 - **No inventes reintentos automáticos**: el reenvío es manual y explícito
-  ([`docs/specs/remito/spec.md`](specs/remito/spec.md) §5).
+  ([`docs/specs/remito/spec.md`](../specs/remito/spec.md) §5).
 - Logueá el fallo con su motivo. No lo silencies con un `catch {}` vacío.
 
 ---
@@ -338,7 +338,7 @@ gh issue comment <N> --body "..."              # reportar avance
 gh issue close <N> --comment "..."             # cerrar
 ```
 
-Más detalle en [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
+Más detalle en [`docs/agentes/issue-tracker.md`](../agentes/issue-tracker.md).
 
 ---
 
@@ -392,12 +392,12 @@ dos minutos.
 
 | Documento | Para qué |
 |---|---|
-| [`AGENTS.md`](../AGENTS.md) | El contrato operativo. Si dudás, se lee acá. |
-| [`GLOSSARY.md`](../GLOSSARY.md) | El vocabulario. Si un término no está, no se inventa un sinónimo. |
-| [`docs/MODELO.md`](MODELO.md) | El modelo de datos aprobado. |
-| [`docs/specs/admin/spec.md`](specs/admin/spec.md) | El panel, las alertas y el Basic Auth. |
-| [`docs/specs/remito/spec.md`](specs/remito/spec.md) | El remito y el email. Tu tarea 4 sale de acá. |
-| [`docs/specs/checkout/spec.md`](specs/checkout/spec.md) | El checkout y la subida del comprobante. |
-| [`docs/agents/issue-tracker.md`](agents/issue-tracker.md) | Cómo usar `gh`. |
-| [`docs/TESTING.md`](TESTING.md) | Vitest y TDD, en corto. |
-| [`memory.md`](../memory.md) | El estado real del build, al día. |
+| [`AGENTS.md`](../../AGENTS.md) | El contrato operativo. Si dudás, se lee acá. |
+| [`GLOSSARY.md`](../../GLOSSARY.md) | El vocabulario. Si un término no está, no se inventa un sinónimo. |
+| [`docs/MODELO.md`](../MODELO.md) | El modelo de datos aprobado. |
+| [`docs/specs/admin/spec.md`](../specs/admin/spec.md) | El panel, las alertas y el Basic Auth. |
+| [`docs/specs/remito/spec.md`](../specs/remito/spec.md) | El remito y el email. Tu tarea 4 sale de acá. |
+| [`docs/specs/checkout/spec.md`](../specs/checkout/spec.md) | El checkout y la subida del comprobante. |
+| [`docs/agentes/issue-tracker.md`](../agentes/issue-tracker.md) | Cómo usar `gh`. |
+| [`docs/metodo/TESTING.md`](../metodo/TESTING.md) | Vitest y TDD, en corto. |
+| [`memory.md`](../../memory.md) | El estado real del build, al día. |

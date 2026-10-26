@@ -30,24 +30,37 @@ El **Hub de documentación** y el **entorno Teams** (Kanban, reuniones, minutas,
 
 ## 📚 Documentación
 
+El índice completo, por carpeta, está en **[`docs/README.md`](docs/README.md)**.
+
+### Para el cliente
+
+| Documento | Para qué |
+|---|---|
+| [`docs/cliente/MANUAL.md`](docs/cliente/MANUAL.md) | **Manual de uso**: cómo funciona la tienda y el panel, en lenguaje no técnico. |
+| [`docs/cliente/PANEL-DE-ADMIN.md`](docs/cliente/PANEL-DE-ADMIN.md) | El panel paso a paso: validar comprobantes, stock, alertas y catálogo. |
+
+### Para el equipo
+
 | Documento | Para qué |
 |---|---|
 | [`GLOSSARY.md`](GLOSSARY.md) | Vocabulario canónico del dominio. |
 | [`docs/MODELO.md`](docs/MODELO.md) | ERD Mermaid del MVP, estados y reglas de integridad. |
-| [`docs/AUDITORIA.md`](docs/AUDITORIA.md) | Inventario, duplicados y contradicciones entre docs, código y bases. |
-| [`docs/GUIA-ISABELLA.md`](docs/GUIA-ISABELLA.md) | **Paso a paso** para Isabella: respaldar `otjph`, aplicar `00 → 05`, cerrar con `bd:viva` verde. Incluye cómo usar Claude Code y las skills. |
-| [`docs/GUIA-QUEIPO.md`](docs/GUIA-QUEIPO.md) | **Paso a paso** para Enzo: claves y entorno, verificación de punta a punta, cron de los viernes y el aviso de correo. Incluye cómo usar Claude Code y las skills. |
-| [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
-| [`docs/TESTING.md`](docs/TESTING.md) | Guía corta de Vitest y TDD. |
-| [`docs/brain.md`](docs/brain.md) | Filosofía de trabajo (SDD, TDD, módulos profundos, contexto). |
-| [`docs/DER-quimica.csv`](docs/DER-quimica.csv) | DER académico de 13 entidades. |
-| [`docs/DCU-Quimica.csv`](docs/DCU-Quimica.csv) | Diagrama de casos de uso. |
-| `docs/DFD1-Quimica.csv`, `DFD2`, `DFD3` | DFD niveles 1–3. |
-| [`docs/informe_Escencia_Tecnica.md`](docs/informe_Escencia_Tecnica.md) | Informe de cátedra. |
-| [`docs/prototype1.html`](docs/prototype1.html) | Prototipo visual; referencia de diseño, no catálogo. |
-| [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) | Deuda conocida (escrita contra el esquema legacy). |
-| [`docs/SEPARACION.md`](docs/SEPARACION.md) | Separación real entre e-commerce y Teams. |
-| [`docs/agents/`](docs/agents/domain.md) | Configuración de skills: issue tracker, triage y docs de dominio. |
+| [`docs/specs/`](docs/specs/front-mvp/spec.md) | Specs por feature, linkeadas desde cada issue. |
+| [`docs/adr/`](docs/adr/0001-modelo-normalizado-mermaid.md) | Decisiones de arquitectura. |
+| [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md) | Inventario, duplicados y contradicciones entre docs, código y bases. |
+| [`docs/entrega/GUIA-ISABELLA.md`](docs/entrega/GUIA-ISABELLA.md) | **Paso a paso** para Isabella: respaldar `otjph`, aplicar `00 → 05`, cerrar con `bd:viva` verde. Incluye cómo usar Claude Code y las skills. |
+| [`docs/entrega/GUIA-QUEIPO.md`](docs/entrega/GUIA-QUEIPO.md) | **Paso a paso** para Enzo: claves y entorno, verificación de punta a punta, cron de los viernes y el aviso de correo. Incluye cómo usar Claude Code y las skills. |
+| [`docs/entrega/HANDOFF-ISABELLA.md`](docs/entrega/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
+| [`docs/metodo/TESTING.md`](docs/metodo/TESTING.md) | Guía corta de Vitest y TDD. |
+| [`docs/metodo/brain.md`](docs/metodo/brain.md) | Filosofía de trabajo (SDD, TDD, módulos profundos, contexto). |
+| [`docs/academico/DER-quimica.csv`](docs/academico/DER-quimica.csv) | DER académico de 13 entidades. |
+| [`docs/academico/DCU-Quimica.csv`](docs/academico/DCU-Quimica.csv) | Diagrama de casos de uso. |
+| `docs/academico/DFD1-Quimica.csv`, `DFD2`, `DFD3` | DFD niveles 1–3. |
+| [`docs/academico/informe_Escencia_Tecnica.md`](docs/academico/informe_Escencia_Tecnica.md) | Informe de cátedra. |
+| [`docs/academico/prototype1.html`](docs/academico/prototype1.html) | Prototipo visual; referencia de diseño, no catálogo. |
+| [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) | Deuda conocida (escrita contra el esquema legacy). |
+| [`docs/estado/SEPARACION.md`](docs/estado/SEPARACION.md) | Separación real entre e-commerce y Teams. |
+| [`docs/agents/`](docs/agentes/domain.md) | Configuración de skills: issue tracker, triage y docs de dominio. |
 
 ---
 
@@ -97,7 +110,7 @@ El **Hub de documentación** y el **entorno Teams** (Kanban, reuniones, minutas,
 
 El MVP termina en `Pago Validado` + remito: **no hay envío ni seguimiento**. El código legacy todavía
 conserva Gemini y el esquema viejo; en el sistema final la IA no existe. La migración está en
-[`docs/MODELO.md`](docs/MODELO.md) y [`docs/AUDITORIA.md`](docs/AUDITORIA.md).
+[`docs/MODELO.md`](docs/MODELO.md) y [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md).
 
 ---
 
@@ -149,8 +162,8 @@ npm run bd:viva     # compara el repo contra el proyecto Supabase vivo (en red)
 > cierre del [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15).
 
 El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR.
-El estado real de la deuda está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) y en
-[`docs/AUDITORIA.md`](docs/AUDITORIA.md).
+El estado real de la deuda está en [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) y en
+[`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md).
 
 ---
 

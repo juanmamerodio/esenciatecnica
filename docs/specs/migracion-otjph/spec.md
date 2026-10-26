@@ -2,7 +2,7 @@
 
 > **Feature:** `migracion-otjph` · **Estado:** lista para implementar · **Fecha:** 2026-10-26.
 > **Origen:** auditoría de la sesión del 26-10 sobre el estado real de `otjphjnrwihqzzhbfnmh`.
-> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/HANDOFF-ISABELLA.md`](../../HANDOFF-ISABELLA.md) + `supabase/migrations/`.
+> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) + `supabase/migrations/`.
 > **Responsable:** Isabella Infante (Database & SQL Architecture).
 > **Criterio de cierre:** `npm run bd:viva` en verde.
 

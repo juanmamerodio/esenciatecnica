@@ -54,7 +54,7 @@ window.QUIMICASHOP_CONFIG = {
 1. La base nueva del e-commerce ya tiene el DER normalizado y datos de prueba.
 2. El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`).
    i18n y Gemini ya se retiraron (`T0 · Español único` y `a984727`).
-3. El modelo objetivo está en [`MODELO.md`](MODELO.md); la brecha y el plan, en
+3. El modelo objetivo está en [`MODELO.md`](../MODELO.md); la brecha y el plan, en
    [`AUDITORIA.md`](AUDITORIA.md).
 4. El DER académico se adapta al modelo operativo; no al revés.
 

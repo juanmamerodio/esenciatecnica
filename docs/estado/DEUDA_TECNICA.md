@@ -1,7 +1,7 @@
 # Deuda técnica detectada al separar los repos
 
 > **Nota 2026-10-22:** este documento se escribió contra el esquema legacy (`productos`, `pedidos`,
-> `verificaciones`). El modelo vigente es [`MODELO.md`](MODELO.md) y la brecha completa está en
+> `verificaciones`). El modelo vigente es [`MODELO.md`](../MODELO.md) y la brecha completa está en
 > [`AUDITORIA.md`](AUDITORIA.md). Los puntos 1–4 siguen siendo ciertos para el código actual, pero
 > los nombres de tablas son legacy y no deben usarse en código nuevo.
 >

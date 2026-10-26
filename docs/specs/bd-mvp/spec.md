@@ -2,8 +2,8 @@
 
 > **Feature:** `bd-mvp` · **Estado:** aprobada para implementación · **Fecha:** 2026-10-22.
 > **Responsable DDL:** Isabella Infante · **Implementación:** esta sesión.
-> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/HANDOFF-ISABELLA.md`](../../HANDOFF-ISABELLA.md).
-> **Proceso:** `docs/brain.md` §3 (spec antes de codificar) y §7 (TDD obligatorio).
+> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md).
+> **Proceso:** `docs/metodo/brain.md` §3 (spec antes de codificar) y §7 (TDD obligatorio).
 
 ---
 

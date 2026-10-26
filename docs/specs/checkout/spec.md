@@ -168,7 +168,7 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
 4. **Reintento idempotente después de crear el pedido:** el `id_pedido` se conserva en el intento, así un
    fallo de subida no duplica pedido ni reserva.
 5. **Se retira el camino legacy de compra en esta misma tajada:** dos caminos de pedido conviviendo es
-   exactamente la contradicción que la auditoría marcó (`docs/AUDITORIA.md` §6).
+   exactamente la contradicción que la auditoría marcó (`docs/estado/AUDITORIA.md` §6).
 
 ## 7. Blockers declarados
 

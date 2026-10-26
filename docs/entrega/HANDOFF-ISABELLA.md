@@ -5,7 +5,7 @@
 > **Fecha:** 2026-10-22 (actualizado 2026-10-26).
 > **Estado:** modelo normalizado aprobado y **versionado en `supabase/migrations/`**; falta **aplicarlo**
 > en `otjph` y dejar `npm run bd:viva` en verde.
-> **Referencia:** [`MODELO.md`](MODELO.md) y [`AUDITORIA.md`](AUDITORIA.md).
+> **Referencia:** [`MODELO.md`](../MODELO.md) y [`AUDITORIA.md`](../estado/AUDITORIA.md).
 
 > [!IMPORTANT]
 > **Este documento es el brief de diseño, no el paso a paso.** El DDL ya está escrito: son los seis
@@ -40,7 +40,7 @@ El código Next.js todavía usa el esquema legacy (`productos`, `pedidos`, `veri
 
 ## 2. Qué necesito de vos
 
-1. Revisar el ERD de [`MODELO.md`](MODELO.md) y confirmar tablas/columnas.
+1. Revisar el ERD de [`MODELO.md`](../MODELO.md) y confirmar tablas/columnas.
 2. Escribir el DDL de migración en el proyecto `otjphjnrwihqzzhbfnmh`.
 3. Definir constraints, índices y tipos numéricos.
 4. Definir RLS y permisos de Storage.
@@ -155,7 +155,7 @@ Qué falta de tu lado:
    de escritura para `anon`); la lectura se resuelve con el bucket público. Si preferís una política explícita
    de lectura para `anon`, decilo y la agregamos.
 3. **`producto.imagen_url`** guarda la URL pública del objeto (decisión registrada en
-   [`MODELO.md`](MODELO.md) §9 y en [`specs/admin/spec.md`](specs/admin/spec.md) §6.5). El bucket
+   [`MODELO.md`](../MODELO.md) §9 y en [`specs/admin/spec.md`](../specs/admin/spec.md) §6.5). El bucket
    `comprobantes` **sigue privado** y con signed URL: no se toca.
 
 ---
@@ -172,6 +172,6 @@ Qué falta de tu lado:
 > vacías: no se pueden contar desde afuera.
 >
 > El paso a paso completo, con el orden, los prompts para Claude Code y el criterio de cierre, está en
-> `docs/GUIA-ISABELLA.md`: https://github.com/juanmamerodio/esenciatecnica/blob/main/docs/GUIA-ISABELLA.md
+> `docs/entrega/GUIA-ISABELLA.md`: https://github.com/juanmamerodio/esenciatecnica/blob/main/docs/GUIA-ISABELLA.md
 >
 > Tu ticket es el issue #15. La RLS ya está bien: de "RLS y Storage" solo faltan los dos buckets.
