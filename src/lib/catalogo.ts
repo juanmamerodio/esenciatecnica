@@ -93,6 +93,16 @@ export async function consultarCatalogo(
     return { estado: "error", mensaje: "La vista del catálogo no devolvió filas." };
   }
 
+  if (filas.length > 0 && !filas.some((fila) => "disponible" in fila)) {
+    // Fila válida del dominio sin la columna del contrato: la vista no es la aprobada. Se avisa,
+    // no se rellena con 0 — un catálogo entero "Agotado" es una mentira silenciosa.
+    return {
+      estado: "error",
+      mensaje:
+        "La vista del catálogo no expone `disponible`: el esquema de la base no coincide con el contrato aprobado.",
+    };
+  }
+
   const catalogo = normalizar(filas);
 
   return {

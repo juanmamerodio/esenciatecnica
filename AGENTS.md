@@ -3,7 +3,7 @@
 > **Proyecto:** tienda, checkout, panel `/admin` y APIs del e-commerce **Esencia Técnica**.
 > **Institución:** E.E.S.T N°1 Luciano Reyes · Campana, Buenos Aires · 7mo Año Programación 2026.
 > **Equipo:** Isabella Infante, Juan Manuel Merodio, Celeste Cáceres, Enzo Queipo.
-> **Última actualización:** 2026-10-25.
+> **Última actualización:** 2026-10-26.
 
 Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/brain.md`](docs/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
 
@@ -186,13 +186,14 @@ npm run lint
 npm run build
 npm test          # suite de base de datos (Vitest + PGlite)
 npm run db:types  # regenera src/lib/database.types.ts desde el SQL
+npm run bd:viva   # compara las migraciones con el proyecto Supabase vivo (en red)
 ```
 
-Estado actual (2026-10-25, tras `T3`, `T5`, `T6`, `T7` y `T8`):
+Estado actual (2026-10-26, tras `T3`, `T5`, `T6`, `T7` y `T8`):
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
 - `npm run lint` → 0 errores y 0 warnings. El warning de `<img>` se fue con `ReceiptUploader.tsx` en `T5`.
-- `npm test` → 227 tests en 19 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker.
+- `npm test` → 230 tests en 19 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corren contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar los deja en verde. Para el proyecto real está `npm run bd:viva` (issue #15).
 - `npm run build` → compila **sin** `RESEND_API_KEY`: desde `T8` Resend se instancia por llamada y no al importar. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
@@ -210,8 +211,9 @@ Un ticket está terminado solo si:
 ## 9. Deuda y orden de migración
 
 1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md).
-   **Abierto:** en `otjph…` faltan `vista_catalogo`, las RPC de `02`, la RLS de `03` y los buckets de `04`
-   y `05` (ver el estado en [`memory.md`](memory.md)).
+   **Abierto:** la migración de `otjph` está a medio aplicar (13 desajustes medidos con `npm run bd:viva`).
+   El cierre es la spec [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md), **issue #15**,
+   y el criterio es `npm run bd:viva` en verde. Estado al día en [`memory.md`](memory.md).
 2. Eliminar i18n (`[lang]`, diccionarios, middleware de idioma). ✅ Hecho: `T0 · Español único` (issue #2).
    `src/middleware.ts` volvió en `T7` **solo** para el Basic Auth del panel (ADR 0005).
 3. Retirar Gemini (`src/lib/gemini.ts`, `verify-payment` con IA, `GEMINI_API_KEY`). ✅ Hecho: la validación

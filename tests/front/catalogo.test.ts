@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { consultarCatalogo } from '../../src/lib/catalogo';
+import type { VistaCatalogo } from '../../src/lib/database.types';
 import { crearBase, crearProducto } from '../db/ayudantes';
 import { catalogoConSeed, lectorDe } from './ayudantes';
 
@@ -69,6 +70,34 @@ describe('T1 · catálogo público', () => {
       precio: 2500,
       tiempoProduccion: 3,
     });
+  });
+
+  it('si la vista no expone `disponible`, avisa el desajuste en vez de declarar todo agotado', async () => {
+    // Forma real de `vista_catalogo` en otjph (auditoría del 26-10): trae `stock_actual`,
+    // `stock_warning` y `porcentaje`, pero no `disponible`. Sin esa columna cada fila quedaría
+    // con `disponible = 0` y la tienda mostraría todo el catálogo como Agotado, en silencio.
+    const vistaVieja = {
+      id_producto: 1,
+      nombre: 'Crema Hidratante Facial',
+      categoria: 'Cosmética',
+      tipo: 'Emulsión',
+      descripcion: 'Base de aloe vera',
+      precio: 2500,
+      tiempo_produccion: 3,
+      activo: true,
+      imagen_url: null,
+      stock_actual: 50,
+      stock_warning: 10,
+      porcentaje: 100,
+    } as unknown as VistaCatalogo;
+
+    const resultado = await consultarCatalogo({
+      async leer() {
+        return { filas: [vistaVieja], error: null };
+      },
+    });
+
+    expect(resultado.estado).toBe('error');
   });
 
   it('distingue la tienda vacía del error: sin filas es un catálogo vacío, no una falla', async () => {
