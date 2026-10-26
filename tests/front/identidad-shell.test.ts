@@ -108,3 +108,42 @@ describe('F0 · shell compartido', () => {
     expect(footer).toContain('E.E.S.T N°1 Luciano Reyes');
   });
 });
+
+/**
+ * Tipografía: `next/font` no escribe `font-family` en ningún lado; inyecta una clase que
+ * declara `--font-dm-sans` / `--font-dm-mono` sobre el elemento que la recibe. Y las custom
+ * properties de CSS se sustituyen en el elemento **donde se declaran**, no donde se usan:
+ * `--font-sans` vive en `:root` (el `<html>`), así que ahí tiene que estar también la clase
+ * de `next/font`. Si la clase cae en el `<body>`, en el `<html>` el `var(--font-dm-sans)`
+ * todavía no existe, `--font-sans` queda inválido y el navegador cae a su fuente por defecto
+ * (verificado: `font-family` computada = "Times New Roman", con los `.woff2` ya descargados).
+ */
+/**
+ * El código sin comentarios: estos assertos miran el código, no la prosa que lo explica.
+ * Sin esto, un `<html>` o un `dmSans.variable` escrito en un comentario satisfaría el test.
+ */
+function sinComentarios(fuente: string): string {
+  return fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+}
+
+describe('F0 · tipografía', () => {
+  it('las variables de next/font se aplican en <html>, donde :root las resuelve', () => {
+    const codigo = sinComentarios(leer('src/app/layout.tsx'));
+    const etiquetaHtml = codigo.match(/<html\b[^>]*>/)?.[0] ?? '';
+    const etiquetaBody = codigo.match(/<body\b[^>]*>/)?.[0] ?? '';
+
+    expect(etiquetaHtml).toMatch(/dmSans\.variable/);
+    expect(etiquetaHtml).toMatch(/dmMono\.variable/);
+    expect(etiquetaBody).not.toMatch(/\.variable/);
+  });
+
+  it('la cadena de familias es una sola: next/font → token → tema de Tailwind', () => {
+    const css = leer('src/app/globals.css');
+    expect(css).toMatch(/--font-sans:\s*var\(--font-dm-sans\)/);
+    expect(css).toMatch(/--font-mono:\s*var\(--font-dm-mono\)/);
+
+    const tema = leer('tailwind.config.ts');
+    expect(tema).toMatch(/sans:\s*\["var\(--font-sans\)"\]/);
+    expect(tema).toMatch(/mono:\s*\["var\(--font-mono\)"\]/);
+  });
+});

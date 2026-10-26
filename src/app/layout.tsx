@@ -38,8 +38,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body className={`${dmSans.variable} ${dmMono.variable} bg-bg font-sans text-text antialiased`}>
+    // Las variables de next/font van en <html>: `:root` declara --font-sans/--font-mono
+    // como `var(--font-dm-*)`, y una custom property se sustituye en el elemento donde se
+    // declara. En <body> la referencia quedaría sin resolver y el navegador usaría su
+    // fuente por defecto (ver `tests/front/identidad-shell.test.ts`).
+    <html lang="es" className={`${dmSans.variable} ${dmMono.variable}`}>
+      <body className="bg-bg font-sans text-text antialiased">
         <div className="relative flex min-h-screen flex-col">
           <Header />
           <main className="mx-auto w-full max-w-7xl flex-grow px-4 pt-24 sm:px-6 lg:px-8">

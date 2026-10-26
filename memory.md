@@ -102,3 +102,9 @@ vacíos y sin secretos en el cliente):
 - **Vitest resuelve `@/`** con un alias en `vitest.config.ts`, porque `admin.ts` importa las listas
   canónicas de estados como valores.
 - El panel **no** expone la clave del bucket: el modelo de lectura entrega sólo la signed URL.
+- **Las variables de `next/font` van en `<html>`, no en `<body>`.** `globals.css` declara en `:root`
+  `--font-sans: var(--font-dm-sans), …`, y una custom property se sustituye en el elemento **donde se
+  declara** (el `<html>`), no donde se usa. Con la clase de `next/font` en el `<body>`, `--font-sans`
+  queda inválido y el navegador cae a su fuente por defecto — medido en Chrome: `"Times New Roman"`,
+  con los `.woff2` ya descargados y servidos. Lo cubre `tests/front/identidad-shell.test.ts`
+  (§F0 · tipografía), y `font-mono` cae por el mismo motivo.
