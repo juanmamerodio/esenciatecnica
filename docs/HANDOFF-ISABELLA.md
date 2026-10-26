@@ -2,9 +2,22 @@
 
 > **Para:** Isabella Infante — Database & SQL Architecture.
 > **De:** Juan Manuel Merodio / equipo de e-commerce.
-> **Fecha:** 2026-10-22.
-> **Estado:** modelo normalizado aprobado; falta tu revisión de DDL, constraints, índices, RLS y limpieza.
+> **Fecha:** 2026-10-22 (actualizado 2026-10-26).
+> **Estado:** modelo normalizado aprobado y **versionado en `supabase/migrations/`**; falta **aplicarlo**
+> en `otjph` y dejar `npm run bd:viva` en verde.
 > **Referencia:** [`MODELO.md`](MODELO.md) y [`AUDITORIA.md`](AUDITORIA.md).
+
+> [!IMPORTANT]
+> **Este documento es el brief de diseño, no el paso a paso.** El DDL ya está escrito: son los seis
+> archivos de `supabase/migrations/` y ya están verdes en PGlite. Lo que falta es **aplicarlos en orden
+> sobre el proyecto vivo**, respaldar antes y cerrar con el control automático.
+> El instructivo operativo, con el orden exacto, los prompts y el criterio de cierre, está en
+> **[`GUIA-ISABELLA.md`](GUIA-ISABELLA.md)** → issue
+> [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15).
+>
+> Medido el 2026-10-26 con `npm run bd:viva`: **ROJO, 13 desajustes**. La RLS ya está bien; de
+> "RLS y Storage" solo faltan los dos buckets. Y ojo: la migración `00` **no respalda nada**, porque su
+> marcador `producto.id_stock` ya no existe en `otjph` — el respaldo va a mano, antes de `01`.
 
 ---
 
@@ -149,4 +162,16 @@ Qué falta de tu lado:
 
 ## 9. Mensaje listo para enviar
 
-> Isabella: aprobamos el modelo normalizado del e-commerce. Está en `docs/MODELO.md` y el brief de DDL en `docs/HANDOFF-ISABELLA.md`. Necesitamos que revises tablas, constraints, índices, RLS y limpieza de datos del proyecto `otjph...`. El MVP termina en Pago Validado + remito, sin envío; carrito en cliente y admin con Basic Auth. Cuando tengas el DDL, avisá y migramos el código. Gracias.
+> Isabella: el modelo normalizado ya está aprobado **y versionado**: el DDL son las seis migraciones de
+> `supabase/migrations/`, y están verdes en la suite local. Lo que falta es aplicarlas en `otjph` **en
+> orden** (`00 → 01 → 02 → 03 → 04 → 05`), recargar el cache de PostgREST y dejar `npm run bd:viva` en
+> verde.
+>
+> **Antes de `01`, respaldá a mano**: la migración `00` no respalda porque usa `producto.id_stock` como
+> marcador y esa columna ya no existe. Y no se puede asumir que las tablas protegidas por RLS estén
+> vacías: no se pueden contar desde afuera.
+>
+> El paso a paso completo, con el orden, los prompts para Claude Code y el criterio de cierre, está en
+> `docs/GUIA-ISABELLA.md`: https://github.com/juanmamerodio/esenciatecnica/blob/main/docs/GUIA-ISABELLA.md
+>
+> Tu ticket es el issue #15. La RLS ya está bien: de "RLS y Storage" solo faltan los dos buckets.

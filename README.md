@@ -4,7 +4,12 @@
 > **E.E.S.T N°1 Luciano Reyes** · Campana, Buenos Aires · 7mo Año Programación 2026.
 
 > [!IMPORTANT]
-> **Estado: en migración.** El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`) del proyecto viejo, mientras la base nueva del e-commerce tiene el modelo normalizado de 13 tablas. La brecha, el inventario y el plan están en [`docs/AUDITORIA.md`](docs/AUDITORIA.md) y [`docs/MODELO.md`](docs/MODELO.md). No tomes el código actual como especificación.
+> **Estado: el front del MVP está completo; la base viva no.** El código ya está sobre el esquema
+> normalizado (los nombres legacy `productos`, `pedidos` y `verificaciones` no quedan en el repo), pero
+> el proyecto Supabase `otjph…` sigue a medio migrar: `npm run bd:viva` mide **13 desajustes** al
+> 2026-10-26. Criterio de cierre: [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md)
+> e [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15). El estado al día está en
+> [`memory.md`](memory.md).
 
 ---
 
@@ -30,6 +35,8 @@ El **Hub de documentación** y el **entorno Teams** (Kanban, reuniones, minutas,
 | [`GLOSSARY.md`](GLOSSARY.md) | Vocabulario canónico del dominio. |
 | [`docs/MODELO.md`](docs/MODELO.md) | ERD Mermaid del MVP, estados y reglas de integridad. |
 | [`docs/AUDITORIA.md`](docs/AUDITORIA.md) | Inventario, duplicados y contradicciones entre docs, código y bases. |
+| [`docs/GUIA-ISABELLA.md`](docs/GUIA-ISABELLA.md) | **Paso a paso** para Isabella: respaldar `otjph`, aplicar `00 → 05`, cerrar con `bd:viva` verde. Incluye cómo usar Claude Code y las skills. |
+| [`docs/GUIA-QUEIPO.md`](docs/GUIA-QUEIPO.md) | **Paso a paso** para Enzo: claves y entorno, verificación de punta a punta, cron de los viernes y el aviso de correo. Incluye cómo usar Claude Code y las skills. |
 | [`docs/HANDOFF-ISABELLA.md`](docs/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
 | [`docs/TESTING.md`](docs/TESTING.md) | Guía corta de Vitest y TDD. |
 | [`docs/brain.md`](docs/brain.md) | Filosofía de trabajo (SDD, TDD, módulos profundos, contexto). |
@@ -54,7 +61,7 @@ El **Hub de documentación** y el **entorno Teams** (Kanban, reuniones, minutas,
 | Emails | Resend |
 | Validación de pago | **Manual, por los Administradores de Química** (flujo oficial) |
 | Carrito | Cliente (cookie/localStorage); sin persistencia en Supabase en el MVP |
-| Admin | **Sin protección desde `T0`**: el login con `ADMIN_PASSWORD` llega en `T7 · Admin` (issue #13); Supabase Auth queda para fase 2 |
+| Admin | **Basic Auth con `ADMIN_PASSWORD`** en `src/middleware.ts` (ADR 0005); `ADMIN`/`ROL` en base quedan para fase 2 |
 | Idioma | **Español único**: rutas en la raíz, textos en el código, sin diccionarios ni selector `es/en` |
 | Tests | Vitest + PGlite: `tests/db/` y `tests/front/` (`npm test`) |
 | Deploy | Vercel |
@@ -103,7 +110,7 @@ npm run dev
 ```
 
 - Tienda: `http://localhost:3000/` (sin prefijo de idioma; `/es` y `/en` ya no existen).
-- Admin: `http://localhost:3000/admin` (**todavía sin autenticación**: el login se implementa en `T7`).
+- Admin: `http://localhost:3000/admin` (Basic Auth; el usuario se ignora y la contraseña es `ADMIN_PASSWORD`).
 - Typecheck: `npm run typecheck`.
 - Build: `npm run build`.
 
@@ -130,11 +137,16 @@ La `anon key` es pública por diseño, pero **no** debe ser la misma para el e-c
 ## 🧪 Verificación
 
 ```bash
-npm run typecheck
-npm run lint
-npm test
-npm run build       # requiere RESEND_API_KEY; no valida tipos: next.config.ts tiene ignoreBuildErrors: true
+npm run typecheck   # 0 errores
+npm run lint        # 0 errores, 0 warnings
+npm test            # 230 tests: tests/db (PGlite) y tests/front, sin red
+npm run build       # compila sin RESEND_API_KEY; no valida tipos (ignoreBuildErrors: true)
+npm run bd:viva     # compara el repo contra el proyecto Supabase vivo (en red)
 ```
+
+> `npm test` corre contra **PGlite** con las migraciones del repo, así que un proyecto Supabase a medio
+> migrar deja la suite en verde. El control de la base real es `npm run bd:viva`, y es el criterio de
+> cierre del [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15).
 
 El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR.
 El estado real de la deuda está en [`docs/DEUDA_TECNICA.md`](docs/DEUDA_TECNICA.md) y en
