@@ -1,25 +1,29 @@
 # memory.md · estado de build
 
 > Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-25 (sesión de las tajadas
-> `T3`, `T5`, `T6`, `T7` y `T8` del front).
+> `T3`, `T5`, `T6`, `T7` y `T8` del front, más el fix de tipografía en `<html>` y el push a Vercel).
 
 ## Ahora
-- Objetivo: el **front del MVP está completo y en verde**; lo único que falta para verlo funcionando es
-  aplicar las migraciones y poner las claves. Después: verificación manual en navegador y push a Vercel.
+- Objetivo: el **front del MVP está completo, en verde y desplegado**; lo que falta para que la tienda
+  funcione de punta a punta es aplicar las migraciones y poner las claves. En producción ya se sirve la
+  Home nueva, pero la grilla de productos cae al estado de error por la BD y por las claves ausentes.
 - Contrato del front: `src/lib/database.types.ts` (canónico) + módulos `catalogo.ts` / `carrito.ts` /
   `checkout.ts` / `admin.ts` / `remito.ts`, cada uno con su adaptador `*-servidor.ts`.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y **0 warnings** · **227 tests** en 19 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y **0 warnings** · **229 tests** en 19 archivos ·
   `npm run build` **compila sin `RESEND_API_KEY`** y el middleware entra en el build.
 - BD prod `otjph…`: **ROJA, igual que antes**. Sigue faltando: `vista_catalogo` (`PGRST205`), las RPC de
   `02` (`crear_pedido` → `PGRST202`), RLS de `03` sin verificar, bucket `comprobantes` de `04` y —nuevo—
   bucket `productos` de `05` (la agregó `T7` y la revisa Isabella).
 - `.env.local`: sólo `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `VERCEL_OIDC_TOKEN`.
   Faltan `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY` y `NEXT_PUBLIC_TRANSFERENCIA_*`.
-- Producción Vercel: sigue sirviendo el Home legacy hasta que se pusheen estos commits.
-- Nada de esto se maquilló: **no** hay verificación en navegador ni demo en producción; los módulos puros
-  y sus tests sí están verdes.
+- Producción Vercel (`esenciatecnica.vercel.app`): desde `c80150e` sirve el front nuevo (verificado en
+  Chrome: `font-family` computada = **DM Sans**; antes caía a la fuente por defecto del navegador).
+  La Home renderiza, pero la grilla de productos muestra «No pudimos cargar el catálogo»: la BD sigue
+  roja y faltan claves en Vercel.
+- Nada de esto se maquilló: la tienda **no** compra de punta a punta todavía. Lo verificado en navegador
+  es el shell y la tipografía, no el flujo de compra.
 
 ## Hecho (2026-10-25)
 | Commit | Tajada | Qué dejó |
@@ -43,7 +47,8 @@ Specs nuevas: `docs/specs/detalle-producto`, `sobre-el-proyecto`, `admin`, `remi
    dice que los confirma la Cooperadora y **no** muestra datos bancarios inventados.
 4. **Verificación manual en navegador** de `/`, `/catalog`, `/producto/<id>`, `/cart`, `/checkout`, `/about`
    y `/admin` (con las claves y las migraciones puestas).
-5. Push a `main` (Vercel) para que producción deje de servir el Home legacy.
+5. ✅ **Hecho** (`c80150e`): push a `main`; producción ya sirve el front nuevo. Falta que la grilla de
+   productos deje de caer al error (puntos 1 y 2) y la verificación manual del resto de las rutas.
 
 ## Revisión de código (2026-10-25) · hallazgos abiertos
 
