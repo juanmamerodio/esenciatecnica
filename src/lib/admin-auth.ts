@@ -16,6 +16,8 @@
  * ignora y el único secreto es la contraseña compartida (spec `admin` §6.3).
  */
 
+import { coincideEnTiempoConstante } from "./comparacion";
+
 export type RevisionBasicAuth = "ok" | "sin-credenciales" | "invalido" | "sin-configurar";
 
 /** Esquema Basic: `Basic` + espacio + credenciales en base64 (`usuario:contrasena`). */
@@ -39,7 +41,7 @@ export function revisarBasicAuth(
   if (separador < 0) return "invalido";
 
   const declarada = credenciales.slice(separador + 1);
-  return coinciden(declarada, contrasena) ? "ok" : "invalido";
+  return coincideEnTiempoConstante(declarada, contrasena) ? "ok" : "invalido";
 }
 
 /**
@@ -59,18 +61,4 @@ function decodificar(valor: string): string | null {
     // Base64 inválido: `atob` tira. No se filtra el detalle.
     return null;
   }
-}
-
-/** Comparación en tiempo constante: no se filtra cuántos caracteres coincidieron. */
-function coinciden(uno: string, otro: string): boolean {
-  const a = new TextEncoder().encode(uno);
-  const b = new TextEncoder().encode(otro);
-
-  let diferencia = a.length ^ b.length;
-  const largo = Math.max(a.length, b.length);
-  for (let indice = 0; indice < largo; indice += 1) {
-    diferencia |= (a[indice] ?? 0) ^ (b[indice] ?? 0);
-  }
-
-  return diferencia === 0;
 }

@@ -230,7 +230,7 @@ expone por PostgREST.
 | `rechazar_comprobante(integer)` | liberación de reserva | motivo mostrado en UI |
 | `cancelar_pedidos_vencidos()` | cron y idempotencia | scheduler real de Vercel |
 | `vista_catalogo` + RLS | lectura pública y fuga de datos | seguridad de la service role |
-| `bd:viva` | deriva entre repo y `otjph` | cuerpos de funciones y datos fila por fila |
+| `bd:viva` | deriva entre repo y `otjph`: vista con sus 12 columnas, columnas legacy, cuatro RPC, tablas retiradas, **diez tablas cerradas con 401/403**, escritura anónima y buckets; sale distinto de cero y resume los desajustes | cuerpos de funciones, datos fila por fila y columnas de las tablas cerradas (no verificables con la anon key) |
 | Migración `06` | `precio > 0`, `ET007`, `23505` | estilos del panel |
 
 No se testean internals (nombres de triggers, OIDs ni planes). El cron se prueba con el módulo puro de
@@ -290,6 +290,10 @@ En verde: `estados_pedidos` y `remitos_de_venta` completas, ausencia de `product
 `verificaciones`, las tres RPC restantes y la RLS de lectura/escritura de las seis tablas que
 `bd:viva` ya miraba.
 
+Con el `bd:viva` ampliado de B2, la medición del 27-10 sube a **26 desajustes**: además de los de
+la tabla, detecta la lectura anónima abierta de las diez tablas, `detalle_del_pedido.id_detalle`,
+`detalle_carrito` y que la anon key **puede ejecutar** tres RPC (ver §9.2).
+
 ### 9.2 Fugas y formas legacy que la spec anterior no cubría
 
 | Superficie | Medición | Esperado |
@@ -299,6 +303,8 @@ En verde: `estados_pedidos` y `remitos_de_venta` completas, ausencia de `product
 | `estados_pedidos` | `GET` anónimo `200 []` | `401`/`403` |
 | `estados_comprobante` | `GET` anónimo `200 []` | `401`/`403` |
 | `detalle_carrito` | `GET` anónimo `200 []` | no existe |
+| `detalle_del_pedido` | columna legacy `id_detalle` visible | sin `id_detalle` |
+| RPC `aprobar_comprobante`, `rechazar_comprobante`, `cancelar_pedidos_vencidos` | la anon key las ejecuta (`204` / `25006`) | `401`/`403` |
 | `stock` | columna legacy `porcentaje` | sin `porcentaje` |
 | `vista_catalogo` | forma vieja (`stock_actual`, `porcentaje`, `activo`) | contrato §3.2 |
 | `respaldo_legacy` | no existe (`404`) | existe y cerrado |
@@ -314,11 +320,23 @@ veía.
    `alerta_de_estado`, `admin`, `roll`, `detalle_carrito`.
 2. Verificar que `respaldo_legacy` tenga las tablas y los mismos conteos.
 3. Correr `00`, `01`, `02`, `03`, `04`, `05` en orden, cada uno en su ventana del SQL Editor.
-4. Correr `06` cuando exista.
+4. Correr `06` después de `05` (es re-ejecutable: si la ventana falla, se puede repetir).
 5. `notify pgrst, 'reload schema';`
-6. Correr `supabase/seed.sql`.
+6. Correr `supabase/seed.sql`. Deja tres productos de demo con stock y uno por debajo del umbral;
+   `imagen_url` queda en `NULL` a propósito y las fotos se suben desde `/admin` al bucket `productos`
+   (nunca rutas locales como `/productos/*.jpg`).
 7. `npm run bd:viva` → verde.
 8. Probar en el navegador: catálogo, checkout, panel y cron manual.
+
+**Fallback manual del cron** (si el plan de Vercel no dispara el job, o antes de tener el
+`CRON_SECRET` cargado): desde el SQL Editor de Supabase, con un usuario administrador, correr
+
+```sql
+select cancelar_pedidos_vencidos();
+```
+
+Devuelve la cantidad de pedidos cancelados. Es idempotente: correrlo dos veces no libera la reserva
+dos veces ni toca los pedidos `Pago Validado` (HU-5).
 
 **Nunca** correr `01` sin el paso 2: destruye las filas actuales sin red.
 
