@@ -1,4 +1,9 @@
-/** Ayudantes compartidos por los componentes cliente del panel (T7 · issue #13). */
+/**
+ * Ayudantes de **transporte** de los componentes cliente del panel (T7 · issue #13).
+ *
+ * El formato de la fecha vivía acá y se fue a `src/lib/fecha.ts`: el que sólo quería formatear una
+ * fecha no tiene por qué arrastrar `fetch` ni Zod (#35).
+ */
 
 import { z } from "zod";
 
@@ -53,19 +58,4 @@ export async function pedirAlPanel(ruta: string, opciones: RequestInit): Promise
   } catch {
     return { ok: false, mensaje: SIN_RESPUESTA };
   }
-}
-
-/**
- * Fecha del panel en la hora de la Argentina. El huso va explícito para que el HTML del servidor
- * y el del navegador digan lo mismo (si no, React avisa por un desajuste de hidratación).
- */
-export function fechaEnHoraArgentina(iso: string): string {
-  const fecha = new Date(iso);
-  if (Number.isNaN(fecha.getTime())) return iso;
-
-  return new Intl.DateTimeFormat("es-AR", {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: "America/Argentina/Buenos_Aires",
-  }).format(fecha);
 }

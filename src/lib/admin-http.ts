@@ -1,27 +1,17 @@
 import { NextResponse } from "next/server";
-import type { ErrorDelPanel, MotivoDeErrorAdmin, PanelAdmin } from "@/lib/admin";
+import { ESTADO_HTTP, esFaltaDeConfiguracion } from "@/lib/errores-bd";
+import type { ErrorDelPanel, PanelAdmin } from "@/lib/admin";
 import { crearPanelServidor } from "@/lib/admin-servidor";
 
 /**
  * Pegamento HTTP del panel — T7 · issue #13.
  *
- * Traduce el resultado del módulo a una respuesta y el estado del dominio a un código HTTP.
- * Todas las rutas de `src/app/api/admin/` son server-side y comparten esto para no repetir la
- * misma decisión cinco veces.
+ * Traduce el resultado del módulo a una respuesta y el motivo del dominio a un código HTTP. Todas
+ * las rutas de `src/app/api/admin/` comparten esto para no repetir la misma decisión cinco veces.
+ *
+ * El mapa de motivo a HTTP **no** vive acá: es el mismo del checkout
+ * (`ESTADO_HTTP` en `src/lib/errores-bd.ts`), así que las dos superficies no pueden divergir (#35).
  */
-
-export const ESTADO_HTTP: Record<MotivoDeErrorAdmin, number> = {
-  "datos-invalidos": 400,
-  "datos-inconsistentes": 500,
-  "stock-insuficiente": 409,
-  "stock-bajo-reserva": 409,
-  "comprobante-no-pendiente": 409,
-  "monto-no-coincide": 422,
-  "pedido-no-pendiente": 409,
-  "nombre-duplicado": 409,
-  "datos-duplicados": 409,
-  "error-del-servidor": 500,
-};
 
 export function panelDelAdministrador(): PanelAdmin {
   return crearPanelServidor();
@@ -34,6 +24,36 @@ export function respuestaDeError(resultado: ErrorDelPanel): NextResponse {
     console.error(`Panel · ${resultado.motivo}:`, resultado.mensaje);
   }
   return NextResponse.json(resultado, { status: estado });
+}
+
+/**
+ * Falla del borde del panel. Sólo la configuración ausente responde 503 con el mensaje del entorno;
+ * una falla real responde 500, deja su motivo en el log y **no** inventa el diagnóstico de la
+ * service role (AGENTS §7.10 · hallazgo 9 de #25).
+ */
+export function respuestaDeFalla(error: unknown): NextResponse {
+  if (esFaltaDeConfiguracion(error)) {
+    console.error("Panel no disponible:", error.message);
+    return NextResponse.json(
+      {
+        estado: "error",
+        motivo: "error-del-servidor",
+        mensaje:
+          "El panel no está configurado en este entorno: falta SUPABASE_SERVICE_ROLE_KEY. Avisá al equipo del proyecto.",
+      },
+      { status: 503 },
+    );
+  }
+
+  console.error("Panel · falló la operación:", error instanceof Error ? error.message : error);
+  return NextResponse.json(
+    {
+      estado: "error",
+      motivo: "error-del-servidor",
+      mensaje: "No pudimos completar la operación en el panel. Volvé a intentar en unos minutos.",
+    },
+    { status: 500 },
+  );
 }
 
 export function errorDeEntrada(mensaje: string, campos?: Record<string, string>): NextResponse {
@@ -60,18 +80,4 @@ export async function leerCuerpo(
       respuesta: errorDeEntrada("El cuerpo de la petición no es un JSON válido."),
     };
   }
-}
-
-/** Falta configuración del entorno: se dice, no se devuelve un 500 opaco (AGENTS §7.10). */
-export function sinConfiguracion(error: unknown): NextResponse {
-  console.error("Panel no disponible:", error instanceof Error ? error.message : error);
-  return NextResponse.json(
-    {
-      estado: "error",
-      motivo: "error-del-servidor",
-      mensaje:
-        "El panel no está configurado en este entorno: falta SUPABASE_SERVICE_ROLE_KEY. Avisá al equipo del proyecto.",
-    },
-    { status: 503 },
-  );
 }

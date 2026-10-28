@@ -1,10 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import {
-  normalizarEmail,
-  type ArchivoDeComprobante,
-  type DatosDelCliente,
-  type PuertoCheckout,
-} from "@/lib/checkout";
+import { normalizarEmail, type DatosDelCliente, type PuertoCheckout } from "@/lib/checkout";
+import { bucketDe, type ArchivoSubido } from "@/lib/archivo";
+import { FaltaConfiguracion } from "@/lib/errores-bd";
 import type { Database, Json } from "@/lib/database.types";
 
 /**
@@ -18,13 +15,13 @@ import type { Database, Json } from "@/lib/database.types";
  * la imagen se sirve con una signed URL generada desde el servidor.
  */
 
-const BUCKET = "comprobantes";
+const BUCKET = bucketDe("comprobante");
 
 export function puertoCheckoutServidor(): PuertoCheckout {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const llave = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !llave) {
-    throw new Error(
+    throw new FaltaConfiguracion(
       "Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el checkout no puede registrar pedidos ni comprobantes.",
     );
   }
@@ -106,7 +103,7 @@ export function puertoSobre(cliente: SupabaseClient<Database>): PuertoCheckout {
       return data;
     },
 
-    async subirArchivo(clave: string, archivo: ArchivoDeComprobante) {
+    async subirArchivo(clave: string, archivo: ArchivoSubido) {
       const { error } = await cliente.storage.from(BUCKET).upload(clave, archivo.bytes, {
         contentType: archivo.tipo,
         // Reintentar la subida del mismo comprobante reemplaza la imagen, no duplica el objeto.
@@ -138,6 +135,3 @@ export function puertoSobre(cliente: SupabaseClient<Database>): PuertoCheckout {
     },
   };
 }
-
-/** Nombre del bucket privado de comprobantes: una sola fuente (lo usa el panel en T7). */
-export const BUCKET_COMPROBANTES = BUCKET;

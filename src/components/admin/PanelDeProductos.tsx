@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ImagePlus, Loader2, Plus, Save } from "lucide-react";
 import ImagenProducto from "@/components/ImagenProducto";
-import { LIMITES_DE_FOTO, type StockDelPanel } from "@/lib/admin";
+import { LIMITES_DE_ARCHIVO } from "@/lib/archivo";
+import type { StockDelPanel } from "@/lib/admin";
 import { formatPrice } from "@/lib/format";
 import { pedirAlPanel } from "./comun";
 
@@ -412,7 +413,7 @@ function FilaDeProducto({
           <input
             id={`foto-${fila.idProducto}`}
             type="file"
-            accept={LIMITES_DE_FOTO.tipos.join(",")}
+            accept={LIMITES_DE_ARCHIVO.tipos.join(",")}
             onChange={(evento) => setArchivo(evento.target.files?.[0] ?? null)}
             className="text-xs text-muted file:mr-3 file:rounded-pill file:border file:border-border file:bg-surface file:px-4 file:py-2 file:text-xs file:font-semibold file:text-accent"
           />

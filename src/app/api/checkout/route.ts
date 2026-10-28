@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { confirmarPedido, type EntradaCheckout, type MotivoDeError } from "@/lib/checkout";
+import { confirmarPedido, type EntradaCheckout } from "@/lib/checkout";
+import { ESTADO_HTTP, esFaltaDeConfiguracion } from "@/lib/errores-bd";
 import { puertoCheckoutServidor } from "@/lib/checkout-servidor";
 
 /**
@@ -8,20 +9,12 @@ import { puertoCheckoutServidor } from "@/lib/checkout-servidor";
  * Una sola ruta server-side. Recibe `datos` (JSON con Cliente, items, monto y el `idPedido` del
  * reintento) y `archivo` (la imagen del comprobante), y devuelve solo lo que la pantalla
  * muestra: nunca la service role, ni el DNI de otro Cliente, ni un listado de comprobantes.
+ *
+ * El mapa de motivo a HTTP es el compartido con el panel (`src/lib/errores-bd.ts`): una sola
+ * definición para las dos superficies (#35 · #25).
  */
 
 export const runtime = "nodejs";
-
-const ESTADO_HTTP: Record<MotivoDeError, number> = {
-  "datos-invalidos": 400,
-  "items-invalidos": 400,
-  "archivo-invalido": 400,
-  "stock-insuficiente": 409,
-  "producto-no-disponible": 409,
-  "monto-no-coincide": 422,
-  "pedido-no-pendiente": 409,
-  "error-del-servidor": 500,
-};
 
 type DatosDelFormulario = {
   cliente?: unknown;
@@ -70,15 +63,32 @@ export async function POST(peticion: Request) {
 
     return NextResponse.json(resultado, { status: ESTADO_HTTP[resultado.motivo] });
   } catch (error) {
-    // Falta de configuración o falla inesperada: se dice, no se devuelve un 500 opaco (AGENTS §7.10).
-    console.error("Checkout no disponible:", error instanceof Error ? error.message : error);
+    if (esFaltaDeConfiguracion(error)) {
+      console.error("Checkout no disponible:", error.message);
+      return NextResponse.json(
+        {
+          estado: "error",
+          motivo: "error-del-servidor",
+          mensaje:
+            "El checkout no está configurado en este entorno. Avisá al equipo del proyecto.",
+        },
+        { status: 503 },
+      );
+    }
+
+    // Falla real: se dice que es un error del servidor y el motivo queda en el log, sin disfrazarlo
+    // de entorno mal configurado (AGENTS §7.10).
+    console.error(
+      "Checkout · falló la operación:",
+      error instanceof Error ? error.message : error,
+    );
     return NextResponse.json(
       {
         estado: "error",
         motivo: "error-del-servidor",
-        mensaje: "El checkout no está configurado en este entorno. Avisá al equipo del proyecto.",
+        mensaje: "No pudimos completar el pedido. Volvé a intentar en unos minutos.",
       },
-      { status: 503 },
+      { status: 500 },
     );
   }
 }

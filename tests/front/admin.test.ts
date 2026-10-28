@@ -1,12 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import {
-  LIMITES_DE_FOTO,
-  crearPanel,
-  type ArchivoDeFoto,
-  type PuertoAdmin,
-} from '../../src/lib/admin';
+import { LIMITES_DE_ARCHIVO } from '../../src/lib/archivo';
+import { crearPanel, type ArchivoDeFoto, type PuertoAdmin } from '../../src/lib/admin';
 import { revisarBasicAuth } from '../../src/lib/admin-auth';
 import { RAIZ, archivosFuente, leer } from './ayudantes';
 
@@ -284,7 +280,7 @@ describe('T7 · el módulo valida el borde antes de llamar al puerto', () => {
     const panel = crearPanel(puerto);
 
     const pdf = await panel.subirFotoProducto(1, foto({ tipo: 'application/pdf' }));
-    const enorme = await panel.subirFotoProducto(1, foto({ tamano: LIMITES_DE_FOTO.tamanoMaximo + 1 }));
+    const enorme = await panel.subirFotoProducto(1, foto({ tamano: LIMITES_DE_ARCHIVO.tamanoMaximo + 1 }));
     const vacia = await panel.subirFotoProducto(1, foto({ tamano: 0, bytes: new Uint8Array() }));
 
     expect(pdf.estado).toBe('error');
@@ -296,7 +292,7 @@ describe('T7 · el módulo valida el borde antes de llamar al puerto', () => {
   });
 
   it('acepta los tres formatos del bucket de fotos', async () => {
-    for (const tipo of LIMITES_DE_FOTO.tipos) {
+    for (const tipo of LIMITES_DE_ARCHIVO.tipos) {
       const { puerto, llamadas } = puertoFalso();
       const resultado = await crearPanel(puerto).subirFotoProducto(
         1,

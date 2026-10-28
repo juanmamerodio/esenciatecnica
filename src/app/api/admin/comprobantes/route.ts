@@ -4,7 +4,7 @@ import {
   objeto,
   panelDelAdministrador,
   respuestaDeError,
-  sinConfiguracion,
+  respuestaDeFalla,
 } from "@/lib/admin-http";
 import { emitirRemito } from "@/lib/remito";
 import { buzonDelRemito } from "@/lib/remito-servidor";
@@ -45,6 +45,6 @@ export async function POST(peticion: Request) {
 
     return NextResponse.json(aviso ? { ...resultado, aviso } : resultado);
   } catch (error) {
-    return sinConfiguracion(error);
+    return respuestaDeFalla(error);
   }
 }

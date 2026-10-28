@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { FileCheck2, Paperclip, X } from "lucide-react";
-import { LIMITES } from "@/lib/checkout";
+import { LIMITES_DE_ARCHIVO, revisarTipoYTamano } from "@/lib/archivo";
 
 /**
  * Selector del comprobante (T5 · issue #10). Valida contra los límites del bucket y avisa en
@@ -60,7 +60,7 @@ export default function SubirComprobante({
           id="comprobante"
           name="comprobante"
           type="file"
-          accept={LIMITES.tipos.join(",")}
+          accept={LIMITES_DE_ARCHIVO.tipos.join(",")}
           className="text-xs text-muted file:mr-3 file:rounded-pill file:border file:border-border file:bg-surface file:px-4 file:py-2 file:text-xs file:font-semibold file:text-accent"
           aria-describedby={problema || error ? "comprobante-error" : undefined}
           onChange={(evento) => elegir(evento.target.files?.[0] ?? null)}
@@ -93,13 +93,8 @@ export default function SubirComprobante({
 }
 
 function revisar(archivo: File): string | null {
-  if (!(LIMITES.tipos as readonly string[]).includes(archivo.type)) {
-    return "El comprobante tiene que ser una imagen PNG, JPEG o WebP.";
-  }
-  if (archivo.size > LIMITES.tamanoMaximo) {
-    return "El comprobante no puede superar los 5 MB.";
-  }
-  return null;
+  // Es la misma revisión del servidor, con los mismos mensajes: el borde no tiene su propia copia.
+  return revisarTipoYTamano({ tipo: archivo.type, tamano: archivo.size }, "comprobante");
 }
 
 function peso(bytes: number): string {

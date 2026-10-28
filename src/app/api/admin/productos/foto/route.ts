@@ -3,7 +3,7 @@ import {
   errorDeEntrada,
   panelDelAdministrador,
   respuestaDeError,
-  sinConfiguracion,
+  respuestaDeFalla,
 } from "@/lib/admin-http";
 
 /**
@@ -42,7 +42,7 @@ export async function POST(peticion: Request) {
 
     return NextResponse.json(resultado);
   } catch (error) {
-    return sinConfiguracion(error);
+    return respuestaDeFalla(error);
   }
 }
 

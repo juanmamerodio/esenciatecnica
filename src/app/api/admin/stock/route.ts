@@ -4,7 +4,7 @@ import {
   objeto,
   panelDelAdministrador,
   respuestaDeError,
-  sinConfiguracion,
+  respuestaDeFalla,
 } from "@/lib/admin-http";
 
 /**
@@ -28,6 +28,6 @@ export async function PATCH(peticion: Request) {
 
     return NextResponse.json(resultado);
   } catch (error) {
-    return sinConfiguracion(error);
+    return respuestaDeFalla(error);
   }
 }

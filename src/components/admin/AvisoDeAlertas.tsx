@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, BellRing, EyeOff, Loader2 } from "lucide-react";
 import type { AlertaDelPanel } from "@/lib/admin";
-import { fechaEnHoraArgentina, pedirAlPanel } from "./comun";
+import { fechaEnHoraArgentina } from "@/lib/fecha";
+import { pedirAlPanel } from "./comun";
 
 /**
  * Aviso de stock del panel — T7 · issue #13 (HU-7).

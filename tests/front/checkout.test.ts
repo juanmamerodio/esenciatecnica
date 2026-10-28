@@ -2,12 +2,11 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  LIMITES,
   confirmarPedido,
-  type ArchivoDeComprobante,
   type EntradaCheckout,
   type PuertoCheckout,
 } from '../../src/lib/checkout';
+import { LIMITES_DE_ARCHIVO, type ArchivoSubido } from '../../src/lib/archivo';
 import type { EstadoPedido, ItemPedido } from '../../src/lib/database.types';
 import { RAIZ, archivosFuente, leer } from './ayudantes';
 
@@ -22,7 +21,7 @@ import { RAIZ, archivosFuente, leer } from './ayudantes';
 
 const CLIENTE_OK = { nombre: 'Juan Pérez', email: 'juan@ejemplo.com', dni: '40111222' };
 
-function archivo(overrides: Partial<ArchivoDeComprobante> = {}): ArchivoDeComprobante {
+function archivo(overrides: Partial<ArchivoSubido> = {}): ArchivoSubido {
   return {
     nombre: 'comprobante.png',
     tipo: 'image/png',
@@ -167,7 +166,7 @@ describe('T5 · validación del borde antes de tocar la base', () => {
     const pdf = await confirmarPedido(puerto, entrada({ archivo: archivo({ tipo: 'application/pdf' }) }));
     const enorme = await confirmarPedido(
       puerto,
-      entrada({ archivo: archivo({ tamano: LIMITES.tamanoMaximo + 1 }) }),
+      entrada({ archivo: archivo({ tamano: LIMITES_DE_ARCHIVO.tamanoMaximo + 1 }) }),
     );
 
     expect(pdf.estado).toBe('error');
@@ -178,7 +177,7 @@ describe('T5 · validación del borde antes de tocar la base', () => {
   });
 
   it('acepta los tres formatos del bucket', async () => {
-    for (const tipo of LIMITES.tipos) {
+    for (const tipo of LIMITES_DE_ARCHIVO.tipos) {
       const { puerto } = puertoFalso();
       const resultado = await confirmarPedido(puerto, entrada({ archivo: archivo({ tipo }) }));
       expect(resultado.estado).toBe('ok');

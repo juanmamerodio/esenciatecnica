@@ -170,10 +170,10 @@ Decisiones por hallazgo:
 | 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | pendiente |
 | 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | pendiente |
 | 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
-| 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | pendiente |
-| 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | pendiente |
+| 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
+| 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
 | 10 · el borde del cliente castea la respuesta | [#46](https://github.com/juanmamerodio/esenciatecnica/issues/46) | pendiente |
-| 11 · juicios del baseline | repartido (ver §2) | pendiente |
+| 11 · juicios del baseline | repartido (ver §2) | ✅ implementado en [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) (fecha) y [#44](https://github.com/juanmamerodio/esenciatecnica/issues/44) (dinero) |
 
 ### Hallazgo 1 · cerrado (#33)
 
@@ -188,3 +188,29 @@ la igualdad siempre encuentra la fila que creó el sistema.
 | El camino de carrera reutiliza el Cliente correcto, no el que matcheó por patrón | implementado | test *«no reutiliza la fila que matcheó por patrón»*: con `vitima@ejemplo.com` y `%@ejemplo.com` cargados, el alta de `%@ejemplo.com` reutiliza la segunda fila |
 | Test de integración con PGlite que falla con el comportamiento actual | implementado | 6 de los 9 tests fallaban con `ilike`; el seam es `puertoSobre` + el PostgREST falso sobre PGlite (`tests/db/postgrest-falso.ts`) |
 | El adaptador no vuelve a usar patrones | implementado | tests estructurales *«no queda ningún `ilike` en el adaptador del checkout»* y *«busca por igualdad con el email normalizado»* |
+
+### Hallazgos 8, 9 y 11 · cerrados (#35)
+
+Nacieron dos módulos compartidos y profundos, y el formato de la fecha se separó del transporte.
+
+- **`src/lib/archivo.ts`** — una sola tabla de tipos y tope (`LIMITES_DE_ARCHIVO`), una sola
+  revisión (`revisarTipoYTamano` para el borde del navegador, `revisarArchivo` en el servidor) y una
+  sola forma de derivar la clave (`claveDelArchivo`). El uso (`comprobante` o `foto`) decide el
+  bucket y el nombre de respaldo. El nombre del bucket privado vive acá (`bucketDe("comprobante")`).
+- **`src/lib/errores-bd.ts`** — código crudo → motivo (`MOTIVO_POR_CODIGO`), motivo → HTTP
+  (`ESTADO_HTTP`), `codigoDeError`, `camposDeZod` y `FaltaConfiguracion`. El checkout y el panel
+  comparten la tabla; cada uno elige sólo el mensaje que lee su público.
+- **`src/lib/fecha.ts`** — `fechaEnHoraArgentina` sale de `src/components/admin/comun.ts`, que queda
+  con el transporte (`pedirAlPanel`).
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Una sola definición de tipos y tope, usada por el comprobante y la foto | implementado | `LIMITES_DE_ARCHIVO` en `src/lib/archivo.ts`; test *«el tope de tamaño está definido en un solo lugar»* (ningún otro archivo de `src/` declara `tamanoMaximo`) |
+| Una sola forma de sanear la clave del objeto | implementado | `claveDelArchivo`; tests *«sanea el nombre igual en los dos usos»* y *«si el nombre no deja nada usable, usa el de respaldo del uso»* |
+| Una sola revisión con los mensajes del dominio en un solo lugar | implementado | `revisarArchivo`/`revisarTipoYTamano`; `SubirComprobante.tsx` dejó su copia y usa la misma función |
+| Un solo mapa de error de base a motivo, campos y HTTP | implementado | `MOTIVO_POR_CODIGO`, `ESTADO_HTTP` y `camposDeZod` en `src/lib/errores-bd.ts`; `checkout.ts` y `admin.ts` ya no tienen `codigoDeError` ni `camposDe`; test *«los dos bordes HTTP comparten el mapa de motivo a HTTP»* |
+| Sin service role → 503 con el mensaje del entorno | implementado | `FaltaConfiguracion` (la lanzan los dos adaptadores) y `respuestaDeFalla`; test *«sin configuración responde 503 con el mensaje del entorno»* |
+| Error real → 500 con el motivo real, sin `SUPABASE_SERVICE_ROLE_KEY` | implementado | test *«una falla real responde 500, sin el diagnóstico del entorno, y deja el motivo en el log»* |
+| La fecha del panel se separa del transporte HTTP | implementado | `src/lib/fecha.ts`; test *«`comun.ts` queda con el transporte y sin formato de fecha»* |
+| Tests que fijan la importación canónica de los dos módulos | implementado | `tests/front/archivo-y-errores.test.ts` (25 tests, 6 estructurales) |
+| Cobertura migrada sin duplicar el mapeo | implementado | `tests/front/admin.test.ts` y `tests/front/checkout.test.ts` usan `LIMITES_DE_ARCHIVO` y `ArchivoSubido` del módulo |

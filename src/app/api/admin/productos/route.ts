@@ -5,7 +5,7 @@ import {
   objeto,
   panelDelAdministrador,
   respuestaDeError,
-  sinConfiguracion,
+  respuestaDeFalla,
 } from "@/lib/admin-http";
 
 /**
@@ -29,7 +29,7 @@ export async function POST(peticion: Request) {
 
     return NextResponse.json(resultado, { status: 201 });
   } catch (error) {
-    return sinConfiguracion(error);
+    return respuestaDeFalla(error);
   }
 }
 
@@ -60,6 +60,6 @@ export async function PATCH(peticion: Request) {
       accion: "Acción inválida.",
     });
   } catch (error) {
-    return sinConfiguracion(error);
+    return respuestaDeFalla(error);
   }
 }

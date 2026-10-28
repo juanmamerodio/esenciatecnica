@@ -1,4 +1,10 @@
 import { z } from "zod";
+import { claveDelArchivo, revisarArchivo, type ArchivoSubido } from "@/lib/archivo";
+import {
+  camposDeZod,
+  motivoDeBd,
+  type MotivoDelCheckout,
+} from "@/lib/errores-bd";
 import type { EstadoPedido, ItemPedido } from "@/lib/database.types";
 import { redondearACentavos } from "@/lib/format";
 
@@ -23,12 +29,6 @@ import { redondearACentavos } from "@/lib/format";
  * `SUPABASE_SERVICE_ROLE_KEY`.
  */
 
-/** Límites del bucket `comprobantes` (migración 04). */
-export const LIMITES = {
-  tamanoMaximo: 5 * 1024 * 1024,
-  tipos: ["image/png", "image/jpeg", "image/webp"],
-} as const;
-
 export type DatosDelCliente = {
   nombre: string;
   email: string;
@@ -47,13 +47,6 @@ export function normalizarEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export type ArchivoDeComprobante = {
-  nombre: string;
-  tipo: string;
-  tamano: number;
-  bytes: Uint8Array;
-};
-
 /**
  * Lo que llega del borde, todavía sin validar: los campos de un formulario son texto y los
  * items viajan como JSON. El módulo es el único que los convierte en datos del dominio.
@@ -62,20 +55,13 @@ export type EntradaCheckout = {
   cliente: { nombre: unknown; email: unknown; dni: unknown; telefono?: unknown };
   items: unknown;
   monto: unknown;
-  archivo: ArchivoDeComprobante;
+  archivo: ArchivoSubido;
   /** Presente solo si un intento anterior ya creó el pedido. */
   idPedido?: number | null;
 };
 
-export type MotivoDeError =
-  | "datos-invalidos"
-  | "items-invalidos"
-  | "archivo-invalido"
-  | "stock-insuficiente"
-  | "producto-no-disponible"
-  | "monto-no-coincide"
-  | "pedido-no-pendiente"
-  | "error-del-servidor";
+/** Lo que el checkout puede devolver: subconjunto de los motivos del dominio (#35). */
+export type MotivoDeError = MotivoDelCheckout;
 
 export type ResultadoCheckout =
   | { estado: "ok"; idPedido: number; total: number; numeroDeComprobante: number }
@@ -105,7 +91,7 @@ export interface PuertoCheckout {
     items: ItemPedido[],
   ): Promise<{ id_pedido: number; total: number; estado_actual: EstadoPedido }>;
   comprobantePendiente(idPedido: number): Promise<{ id_comprobante: number } | null>;
-  subirArchivo(clave: string, archivo: ArchivoDeComprobante): Promise<void>;
+  subirArchivo(clave: string, archivo: ArchivoSubido): Promise<void>;
   registrarComprobante(datos: {
     idPedido: number;
     clave: string;
@@ -114,12 +100,6 @@ export interface PuertoCheckout {
     idComprobante?: number;
   }): Promise<{ id_comprobante: number }>;
 }
-
-const EXTENSIONES: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-};
 
 const ESQUEMA_CLIENTE = z.object({
   nombre: z.string().trim().min(2, "Escribí tu nombre completo."),
@@ -217,38 +197,6 @@ export async function confirmarPedido(
   }
 }
 
-/** La clave del objeto en el bucket: por pedido, saneada y sin poder salir de su carpeta. */
-export function claveDelComprobante(idPedido: number, archivo: ArchivoDeComprobante): string {
-  const extension = EXTENSIONES[archivo.tipo] ?? "png";
-  const ultimoSegmento = archivo.nombre.split(/[\\/]/).pop() ?? "";
-  const base = ultimoSegmento
-    .replace(/\.[^.]*$/, "")
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-
-  return `comprobantes/${idPedido}/${base || "comprobante"}.${extension}`;
-}
-
-/** Revisa el archivo contra los límites del bucket; el borde HTTP lo usa para responder 400. */
-export function revisarArchivo(
-  archivo: ArchivoDeComprobante,
-): { ok: true } | { ok: false; mensaje: string } {
-  if (!(LIMITES.tipos as readonly string[]).includes(archivo.tipo)) {
-    return { ok: false, mensaje: "El comprobante tiene que ser una imagen PNG, JPEG o WebP." };
-  }
-  if (archivo.tamano <= 0 || archivo.bytes.length === 0) {
-    return { ok: false, mensaje: "El archivo del comprobante llegó vacío: volvé a seleccionarlo." };
-  }
-  if (archivo.tamano > LIMITES.tamanoMaximo) {
-    return { ok: false, mensaje: "El comprobante no puede superar los 5 MB." };
-  }
-  return { ok: true };
-}
-
 type Revision =
   | { ok: true; cliente: DatosDelCliente; items: ItemPedido[]; monto: number; idPedido: number | null }
   | { ok: false; resultado: ResultadoCheckout };
@@ -262,7 +210,7 @@ function revisarEntrada(entrada: EntradaCheckout): Revision {
         estado: "error",
         motivo: "datos-invalidos",
         mensaje: "Revisá tus datos: hay campos que no son válidos.",
-        campos: camposDe(cliente.error),
+        campos: camposDeZod(cliente.error),
       },
     };
   }
@@ -279,7 +227,7 @@ function revisarEntrada(entrada: EntradaCheckout): Revision {
     };
   }
 
-  const archivo = revisarArchivo(entrada.archivo);
+  const archivo = revisarArchivo(entrada.archivo, "comprobante");
   if (!archivo.ok) {
     return {
       ok: false,
@@ -325,11 +273,11 @@ function revisarEntrada(entrada: EntradaCheckout): Revision {
 
 async function completarComprobante(
   puerto: PuertoCheckout,
-  datos: { idPedido: number; archivo: ArchivoDeComprobante; monto: number; total: number },
+  datos: { idPedido: number; archivo: ArchivoSubido; monto: number; total: number },
   buscarPendiente: boolean,
 ): Promise<ResultadoCheckout> {
   const pendiente = buscarPendiente ? await puerto.comprobantePendiente(datos.idPedido) : null;
-  const clave = claveDelComprobante(datos.idPedido, datos.archivo);
+  const clave = claveDelArchivo("comprobante", datos.idPedido, datos.archivo);
 
   await puerto.subirArchivo(clave, datos.archivo);
 
@@ -363,44 +311,34 @@ function coincideElMonto(uno: number, otro: number): boolean {
   return redondearACentavos(uno) === redondearACentavos(otro);
 }
 
-function camposDe(error: z.ZodError): Record<string, string> {
-  const campos: Record<string, string> = {};
-  for (const problema of error.issues) {
-    const clave = problema.path.join(".");
-    if (clave && !campos[clave]) campos[clave] = problema.message;
-  }
-  return campos;
-}
-
 /**
- * Los errores de la base llegan con su `errcode` (ET001..ET006, migración 02): el módulo los
- * convierte en mensajes del dominio en vez de mostrar el texto crudo de PostgreSQL.
+ * Los errores de la base llegan con su `errcode` (ET001..ET006, migración 02): el módulo del
+ * archivo y el de errores de base traducen el código a un **motivo del dominio** una sola vez
+ * (#35 · #25) y acá sólo se elige el mensaje que lee el Cliente.
  */
 function describirError(error: unknown): { motivo: MotivoDeError; mensaje: string } {
-  const codigo = codigoDeError(error);
-
-  switch (codigo) {
-    case "ET001":
+  switch (motivoDeBd(error)) {
+    case "stock-insuficiente":
       return {
         motivo: "stock-insuficiente",
         mensaje: "No hay stock suficiente de uno de los productos. Ajustá las cantidades y volvé a intentar.",
       };
-    case "ET002":
+    case "producto-no-disponible":
       return {
         motivo: "producto-no-disponible",
         mensaje: "Uno de los productos del pedido ya no está disponible. Quitalo del carrito y volvé a intentar.",
       };
-    case "ET003":
+    case "items-invalidos":
       return {
         motivo: "items-invalidos",
         mensaje: "El pedido tiene un producto repetido o una cantidad inválida. Revisá el carrito.",
       };
-    case "ET005":
+    case "monto-no-coincide":
       return {
         motivo: "monto-no-coincide",
         mensaje: "El importe tiene que coincidir con el total del pedido.",
       };
-    case "ET006":
+    case "pedido-no-pendiente":
       return {
         motivo: "pedido-no-pendiente",
         mensaje: "El pedido ya no está pendiente de pago.",
@@ -411,19 +349,13 @@ function describirError(error: unknown): { motivo: MotivoDeError; mensaje: strin
 
   return {
     motivo: "error-del-servidor",
-    mensaje:
-      codigo === "SUBIDA"
-        ? "No pudimos subir el comprobante. El pedido quedó registrado: volvé a intentar la subida."
-        : "No pudimos completar el pedido. Volvé a intentar en unos minutos.",
+    mensaje: fallaDeStorage(error)
+      ? "No pudimos subir el comprobante. El pedido quedó registrado: volvé a intentar la subida."
+      : "No pudimos completar el pedido. Volvé a intentar en unos minutos.",
   };
 }
 
-function codigoDeError(error: unknown): string | null {
-  if (typeof error === "object" && error !== null && "code" in error) {
-    const codigo = error.code;
-    if (typeof codigo === "string" && codigo) return codigo;
-  }
-  // Una falla de Storage no trae `code` de Postgres: se marca para no confundirla con otra cosa.
-  if (error instanceof Error && /bucket|storage|subir/i.test(error.message)) return "SUBIDA";
-  return null;
+/** Una falla de Storage no trae `code` de Postgres: se reconoce por el mensaje del cliente. */
+function fallaDeStorage(error: unknown): boolean {
+  return error instanceof Error && /bucket|storage|subir/i.test(error.message);
 }

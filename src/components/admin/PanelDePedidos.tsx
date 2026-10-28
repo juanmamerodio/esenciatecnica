@@ -7,7 +7,8 @@ import { Check, ExternalLink, FileText, Loader2, Send, ShieldQuestion, X } from 
 import type { DecisionSobreComprobante, PedidoDelPanel } from "@/lib/admin";
 import type { EstadoPedido } from "@/lib/database.types";
 import { formatPrice } from "@/lib/format";
-import { fechaEnHoraArgentina, pedirAlPanel } from "./comun";
+import { fechaEnHoraArgentina } from "@/lib/fecha";
+import { pedirAlPanel } from "./comun";
 
 /**
  * Pedidos con su estado actual — T7 · issue #13 (HU-2, HU-3, HU-4 y HU-5).

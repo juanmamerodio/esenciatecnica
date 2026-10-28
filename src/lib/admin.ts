@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { claveDelArchivo, revisarArchivo, type ArchivoSubido } from "@/lib/archivo";
+import { camposDeZod, motivoDeBd, type MotivoDelPanel } from "@/lib/errores-bd";
 import {
   ESTADOS_COMPROBANTE,
   ESTADOS_PEDIDO,
@@ -21,42 +23,13 @@ import {
  * clave de servicio: eso es de la capa de infraestructura.
  */
 
-/** Límites del bucket público `productos` (migración 05). */
-export const LIMITES_DE_FOTO = {
-  tamanoMaximo: 5 * 1024 * 1024,
-  tipos: ["image/png", "image/jpeg", "image/webp"],
-} as const;
-
-const EXTENSIONES: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-};
-
-export type ArchivoDeFoto = {
-  nombre: string;
-  tipo: string;
-  tamano: number;
-  bytes: Uint8Array;
-};
+/** La foto del producto es un archivo subido: el mismo tipo y los mismos límites que el comprobante. */
+export type ArchivoDeFoto = ArchivoSubido;
 
 export type DecisionSobreComprobante = "aprobar" | "rechazar";
 
-export type MotivoDeErrorAdmin =
-  | "datos-invalidos"
-  /** La fila leída no cumple el contrato del modelo. */
-  | "datos-inconsistentes"
-  | "stock-insuficiente"
-  /** `ET007`: la cantidad quedaría por debajo de lo que ya está reservado (migración 06). */
-  | "stock-bajo-reserva"
-  | "comprobante-no-pendiente"
-  | "monto-no-coincide"
-  | "pedido-no-pendiente"
-  /** `23505`: ya hay un producto activo con ese nombre (alta o edición de producto). */
-  | "nombre-duplicado"
-  /** `23505` en cualquier otra tabla: el dato choca con un índice único del modelo. */
-  | "datos-duplicados"
-  | "error-del-servidor";
+/** Lo que el panel puede devolver: subconjunto de los motivos del dominio de los errores de base. */
+export type MotivoDeErrorAdmin = MotivoDelPanel;
 
 export type ErrorDelPanel = {
   estado: "error";
@@ -478,7 +451,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
       if (!revisionId.success || !revisionDatos.success) {
         const campos: Record<string, string> = {};
         if (!revisionId.success) campos.idProducto = "El producto no es válido.";
-        if (!revisionDatos.success) Object.assign(campos, camposDe(revisionDatos.error));
+        if (!revisionDatos.success) Object.assign(campos, camposDeZod(revisionDatos.error));
         return errorDeDatos("Revisá la cantidad y el umbral de aviso.", campos);
       }
 
@@ -548,7 +521,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
     async crearProducto(datos) {
       const revision = ESQUEMA_PRODUCTO.safeParse(datos);
       if (!revision.success) {
-        return errorDeDatos("Revisá los datos del producto.", camposDe(revision.error));
+        return errorDeDatos("Revisá los datos del producto.", camposDeZod(revision.error));
       }
 
       try {
@@ -566,7 +539,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
       if (!revisionId.success || !revision.success) {
         const campos: Record<string, string> = {};
         if (!revisionId.success) campos.idProducto = "El producto no es válido.";
-        if (!revision.success) Object.assign(campos, camposDe(revision.error));
+        if (!revision.success) Object.assign(campos, camposDeZod(revision.error));
         return errorDeDatos("Revisá los datos del producto.", campos);
       }
 
@@ -604,12 +577,12 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
         return errorDeDatos("El producto no es válido.", { idProducto: "Producto inválido." });
       }
 
-      const revisionArchivo = revisarArchivoDeFoto(archivo);
+      const revisionArchivo = revisarArchivo(archivo, "foto");
       if (!revisionArchivo.ok) {
         return errorDeDatos(revisionArchivo.mensaje, { archivo: revisionArchivo.mensaje });
       }
 
-      const clave = claveDeLaFoto(revisionId.data, revisionArchivo.archivo);
+      const clave = claveDelArchivo("foto", revisionId.data, revisionArchivo.archivo);
       try {
         const subida = await puerto.subirFoto(revisionId.data, clave, revisionArchivo.archivo);
         return { estado: "ok", idProducto: revisionId.data, url: subida.url };
@@ -633,51 +606,6 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
       }
     },
   };
-}
-
-const ESQUEMA_ARCHIVO_DE_FOTO = z.object({
-  nombre: z.string().trim().min(1, "La foto necesita un nombre de archivo."),
-  tipo: z.string().trim().min(1),
-  tamano: z.coerce.number().finite().nonnegative(),
-  bytes: z.instanceof(Uint8Array),
-});
-
-/** Clave del objeto en el bucket público: bajo la carpeta del producto y sin poder salir de ella. */
-function claveDeLaFoto(idProducto: number, archivo: ArchivoDeFoto): string {
-  const extension = EXTENSIONES[archivo.tipo] ?? "png";
-  const ultimoSegmento = archivo.nombre.split(/[\\/]/).pop() ?? "";
-  const base = ultimoSegmento
-    .replace(/\.[^.]*$/, "")
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-
-  return `productos/${idProducto}/${base || "foto"}.${extension}`;
-}
-
-function revisarArchivoDeFoto(
-  archivo: unknown,
-): { ok: true; archivo: ArchivoDeFoto } | { ok: false; mensaje: string } {
-  const revision = ESQUEMA_ARCHIVO_DE_FOTO.safeParse(archivo);
-  if (!revision.success) {
-    return { ok: false, mensaje: "El archivo de la foto no llegó bien: volvé a seleccionarlo." };
-  }
-
-  const datos = revision.data;
-  if (!(LIMITES_DE_FOTO.tipos as readonly string[]).includes(datos.tipo)) {
-    return { ok: false, mensaje: "La foto tiene que ser una imagen PNG, JPEG o WebP." };
-  }
-  if (datos.tamano <= 0 || datos.bytes.length === 0) {
-    return { ok: false, mensaje: "El archivo de la foto llegó vacío: volvé a seleccionarlo." };
-  }
-  if (datos.tamano > LIMITES_DE_FOTO.tamanoMaximo) {
-    return { ok: false, mensaje: "La foto del producto no puede superar los 5 MB." };
-  }
-
-  return { ok: true, archivo: datos };
 }
 
 function revisarDecision(
@@ -769,52 +697,43 @@ function errorDeContrato(mensaje: string): ErrorDelPanel {
   return { estado: "error", motivo: "datos-inconsistentes", mensaje };
 }
 
-function camposDe(error: z.ZodError): Record<string, string> {
-  const campos: Record<string, string> = {};
-  for (const problema of error.issues) {
-    const clave = problema.path.join(".");
-    if (clave && !campos[clave]) campos[clave] = problema.message;
-  }
-  return campos;
-}
-
 /**
  * Los errores de la base llegan con su `errcode` (ET001..ET007, `23505` y `23514`; migraciones
- * 02 y 06): el panel los convierte en mensajes del dominio en vez de mostrar el texto crudo de
- * PostgreSQL.
+ * 02 y 06). El código crudo se traduce a **motivo del dominio una sola vez**, en el módulo de
+ * errores de base (#35 · #25); acá sólo se elige el mensaje que lee el Administrador.
  *
  * `23505` no siempre es el nombre del producto: `01` tiene índices únicos en cliente, comprobante,
  * remito, alerta y detalle. El contexto de la operación decide el mensaje.
  */
 function describirError(error: unknown, contexto: "producto" | "general" = "general"): ErrorDelPanel {
-  switch (codigoDeError(error)) {
-    case "ET001":
+  switch (motivoDeBd(error)) {
+    case "stock-insuficiente":
       return {
         estado: "error",
         motivo: "stock-insuficiente",
         mensaje: "No hay stock suficiente para completar la operación. Revisá las cantidades.",
       };
-    case "ET004":
+    case "comprobante-no-pendiente":
       return {
         estado: "error",
         motivo: "comprobante-no-pendiente",
         mensaje:
           "Ese comprobante ya no está pendiente: otro Administrador lo resolvió o el pedido venció.",
       };
-    case "ET005":
+    case "monto-no-coincide":
       return {
         estado: "error",
         motivo: "monto-no-coincide",
         mensaje:
           "El monto del comprobante no coincide con el total del pedido: revisá la imagen y el importe.",
       };
-    case "ET006":
+    case "pedido-no-pendiente":
       return {
         estado: "error",
         motivo: "pedido-no-pendiente",
         mensaje: "El pedido ya no está pendiente de pago, así que el comprobante no se puede validar.",
       };
-    case "ET007":
+    case "stock-bajo-reserva":
       return {
         estado: "error",
         motivo: "stock-bajo-reserva",
@@ -825,7 +744,7 @@ function describirError(error: unknown, contexto: "producto" | "general" = "gene
             "No podés dejar la cantidad por debajo de lo reservado: revisá la cantidad actual.",
         },
       };
-    case "23505":
+    case "datos-duplicados":
       if (contexto === "producto") {
         return {
           estado: "error",
@@ -840,7 +759,7 @@ function describirError(error: unknown, contexto: "producto" | "general" = "gene
         mensaje:
           "Ya existe otro registro con esos datos. Revisá los valores antes de volver a intentar.",
       };
-    case "23514":
+    case "datos-invalidos":
       // Último recurso: una constraint sin código de dominio. No se muestra el texto crudo.
       return {
         estado: "error",
@@ -855,12 +774,4 @@ function describirError(error: unknown, contexto: "producto" | "general" = "gene
         mensaje: "No pudimos completar la operación en el panel. Volvé a intentar en unos minutos.",
       };
   }
-}
-
-function codigoDeError(error: unknown): string | null {
-  if (typeof error === "object" && error !== null && "code" in error) {
-    const codigo = error.code;
-    if (typeof codigo === "string" && codigo) return codigo;
-  }
-  return null;
 }
