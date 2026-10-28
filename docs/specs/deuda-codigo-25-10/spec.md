@@ -168,7 +168,7 @@ Decisiones por hallazgo:
 | 3 · `tiempo_produccion` en el catálogo | [#38](https://github.com/juanmamerodio/esenciatecnica/issues/38) | pendiente |
 | 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
-| 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | pendiente |
+| 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | ✅ implementado |
 | 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
 | 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
 | 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
@@ -246,3 +246,17 @@ cuerpo con `as ResultadoCheckout`.
 | Un cuerpo inesperado no explota: muestra el mensaje de respuesta que no se entiende | implementado | test *«un cuerpo inesperado devuelve nulo en vez de explotar»* (JSON roto, vacío, lista, `null`, sin campos, motivo inventado, tipos cambiados) |
 | El camino feliz y el error con total siguen entendiéndose | implementado | tests *«el camino feliz sigue igual»* y *«el error del dominio con total también se entiende»* |
 | Los motivos son una sola fuente (tupla) para el tipo y el `z.enum` | implementado | `MOTIVOS_DEL_CHECKOUT` y `MOTIVOS_DEL_PANEL` en `src/lib/errores-bd.ts` |
+
+### Hallazgo 6 · cerrado (#36)
+
+La base es la única fuente de la alerta: `leerStock()` del adaptador trae, en una consulta a
+`alerta_de_estado` con `atendida = false`, qué stock tiene una alerta sin atender, y la fila del panel
+marca `alerta` con ese dato. El módulo ya no recalcula con el disponible ni con el umbral: `hayAlerta`
+se retiró. La tabla y su trigger no cambian.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Con una alerta atendida y el stock bajo, la fila no marca alerta pendiente | implementado | test `stock() calcula el disponible y la alerta la toma de la base, no del umbral (#36)`: la tercera fila tiene disponible 1, umbral 3 y `alerta_pendiente: false` |
+| Con una alerta sin atender, la fila marca alerta y el popup la muestra | implementado | segunda fila del mismo test; `alertas()` ordena las pendientes primero y `AvisoDeAlertas` las muestra |
+| La fila y el popup nunca dicen cosas distintas | implementado | los dos salen de `alerta_de_estado`; test estructural `el panel no recalcula la alerta…` (sin `hayAlerta`, con `alerta_pendiente` y `atendida`) |
+| El spec de admin se corrige a una sola fuente | implementado | [`admin/spec.md` HU-6 y HU-7](../admin/spec.md) y su tabla |

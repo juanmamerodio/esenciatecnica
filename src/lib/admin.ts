@@ -88,7 +88,12 @@ export type StockDelPanel = {
   cantidadReservada: number;
   cantidadWarning: number;
   disponible: number;
-  /** `cantidad_warning = 0` significa "sin umbral configurado". */
+  /**
+   * Alerta **sin atender** para ese stock, tal como la registró la base en `alerta_de_estado`.
+   * El panel no la recalcula: una alerta atendida no vuelve a pedir atención aunque el disponible
+   * siga bajo (#36 · hallazgo 6 de `deuda-codigo-25-10`). `cantidad_warning = 0` ya no decide nada
+   * acá: el umbral lo usa el trigger de la base.
+   */
   alerta: boolean;
 };
 
@@ -302,6 +307,8 @@ const ESQUEMA_STOCK_LEIDO = z.object({
   cantidad_actual: z.coerce.number().int().nonnegative(),
   cantidad_reservada: z.coerce.number().int().nonnegative(),
   cantidad_warning: z.coerce.number().int().nonnegative(),
+  /** La alerta es de la base: la fila dice si hay una sin atender para ese stock (#36). */
+  alerta_pendiente: z.boolean(),
 });
 
 const ESQUEMA_STOCK_ACTUALIZADO = z.object({
@@ -425,7 +432,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
           cantidadReservada: cantidad_reservada,
           cantidadWarning: cantidad_warning,
           disponible: disponibleDe(cantidad_actual, cantidad_reservada),
-          alerta: hayAlerta(cantidad_actual, cantidad_reservada, cantidad_warning),
+          alerta: intento.data.alerta_pendiente,
         });
       }
 
@@ -639,16 +646,6 @@ async function firmarSinRomper(puerto: PuertoAdmin, clave: string): Promise<stri
 
 function disponibleDe(cantidadActual: number, cantidadReservada: number): number {
   return Math.max(0, cantidadActual - cantidadReservada);
-}
-
-/** `cantidad_warning = 0` es "sin umbral configurado" (migración 02). */
-function hayAlerta(
-  cantidadActual: number,
-  cantidadReservada: number,
-  cantidadWarning: number,
-): boolean {
-  if (cantidadWarning <= 0) return false;
-  return disponibleDe(cantidadActual, cantidadReservada) <= cantidadWarning;
 }
 
 function errorDeDatos(mensaje: string, campos?: Record<string, string>): ErrorDelPanel {

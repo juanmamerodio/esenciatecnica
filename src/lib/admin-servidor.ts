@@ -154,10 +154,22 @@ export function puertoAdminSobre(cliente: SupabaseClient<Database>): PuertoAdmin
 
       const productoPorId = new Map((productos.data ?? []).map((fila) => [fila.id_producto, fila]));
 
+      // La alerta es de la base: se trae, en una sola consulta, qué stock tiene una alerta sin
+      // atender. El panel no la recalcula con el disponible ni con el umbral (#36).
+      const alertas = await cliente
+        .from("alerta_de_estado")
+        .select("id_stock")
+        .eq("atendida", false)
+        .in("id_stock", filasDeStock.map((fila) => fila.id_stock));
+      if (alertas.error) return { filas: null, error: alertas.error };
+
+      const stockConAlerta = new Set((alertas.data ?? []).map((fila) => fila.id_stock));
+
       return {
         filas: filasDeStock.map((fila) => ({
           ...fila,
           ...(productoPorId.get(fila.id_producto) ?? {}),
+          alerta_pendiente: stockConAlerta.has(fila.id_stock),
         })),
         error: null,
       };

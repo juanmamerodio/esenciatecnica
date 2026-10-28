@@ -55,6 +55,8 @@ const FILA_STOCK = {
   cantidad_actual: 10,
   cantidad_reservada: 2,
   cantidad_warning: 3,
+  /** La alerta la decide la base: la fila trae si hay una alerta sin atender para ese stock (#36). */
+  alerta_pendiente: false,
 };
 
 const FILA_ALERTA = {
@@ -507,12 +509,45 @@ describe('T7 · stock editable y alertas en el panel', () => {
     expect(resultado.mensaje).toMatch(/stock/i);
   });
 
-  it('stock() calcula el disponible y marca la alerta sólo con umbral configurado', async () => {
+  it('stock() calcula el disponible y la alerta la toma de la base, no del umbral (#36)', async () => {
     const { puerto } = puertoFalso({
       stock: [
-        { ...FILA_STOCK, id_producto: 1, cantidad_actual: 10, cantidad_reservada: 2, cantidad_warning: 3 },
-        { ...FILA_STOCK, id_producto: 2, cantidad_actual: 3, cantidad_reservada: 1, cantidad_warning: 3 },
-        { ...FILA_STOCK, id_producto: 3, cantidad_actual: 1, cantidad_reservada: 0, cantidad_warning: 0 },
+        // Disponible alto, sin alerta pendiente: sin alerta.
+        {
+          ...FILA_STOCK,
+          id_producto: 1,
+          cantidad_actual: 10,
+          cantidad_reservada: 2,
+          cantidad_warning: 3,
+          alerta_pendiente: false,
+        },
+        // Disponible bajo y una alerta sin atender: con alerta.
+        {
+          ...FILA_STOCK,
+          id_producto: 2,
+          cantidad_actual: 3,
+          cantidad_reservada: 1,
+          cantidad_warning: 3,
+          alerta_pendiente: true,
+        },
+        // Disponible bajo pero la alerta ya se atendió: **no** vuelve a pedir atención.
+        {
+          ...FILA_STOCK,
+          id_producto: 3,
+          cantidad_actual: 1,
+          cantidad_reservada: 0,
+          cantidad_warning: 3,
+          alerta_pendiente: false,
+        },
+        // Sin umbral configurado y sin alerta pendiente: sin alerta.
+        {
+          ...FILA_STOCK,
+          id_producto: 4,
+          cantidad_actual: 1,
+          cantidad_reservada: 0,
+          cantidad_warning: 0,
+          alerta_pendiente: false,
+        },
       ],
     });
 
@@ -520,14 +555,24 @@ describe('T7 · stock editable y alertas en el panel', () => {
 
     expect(resultado.estado).toBe('ok');
     if (resultado.estado !== 'ok') return;
-    expect(resultado.stock.map((fila) => fila.disponible)).toEqual([8, 2, 1]);
-    expect(resultado.stock.map((fila) => fila.alerta)).toEqual([false, true, false]);
+    expect(resultado.stock.map((fila) => fila.disponible)).toEqual([8, 2, 1, 1]);
+    expect(resultado.stock.map((fila) => fila.alerta)).toEqual([false, true, false, false]);
     expect(resultado.stock[1]).toMatchObject({
       idProducto: 2,
       nombre: 'Jabón de avena',
       activo: true,
       cantidadWarning: 3,
     });
+  });
+
+  it('el panel no recalcula la alerta: la fila y el popup salen de `alerta_de_estado` (#36)', () => {
+    const modulo = leer('src/lib/admin.ts');
+    expect(modulo).not.toMatch(/hayAlerta/);
+    expect(modulo).toMatch(/alerta_pendiente/);
+
+    const adaptador = leer('src/lib/admin-servidor.ts');
+    expect(adaptador).toMatch(/alerta_de_estado/);
+    expect(adaptador).toMatch(/atendida/);
   });
 
   it('atender una alerta la marca atendida sin borrarla', async () => {

@@ -9,8 +9,9 @@ import { pedirAlPanel } from "./comun";
 /**
  * Stock editable — T7 · issue #13 (HU-6).
  *
- * Se editan la cantidad actual y el umbral de aviso. El disponible y la alerta los recalcula la
- * base con sus triggers; acá sólo se validan los campos antes de mandarlos.
+ * Se editan la cantidad actual y el umbral de aviso. El disponible lo calcula la base (actual menos
+ * reservada) y la alerta de la fila es la que la base ya registró en `alerta_de_estado`: acá sólo se
+ * validan los campos antes de mandarlos y no se recalcula ninguna alerta (#36).
  */
 
 type Borrador = { cantidad_actual: string; cantidad_warning: string };
@@ -112,7 +113,7 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
                     {fila.alerta ? (
                       <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-amber-900">
                         <BellRing aria-hidden className="h-3.5 w-3.5" />
-                        En el umbral de aviso
+                        En el umbral de aviso, sin atender
                       </span>
                     ) : null}
                   </td>
@@ -180,8 +181,9 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
       </div>
 
       <p className="text-xs leading-relaxed text-muted">
-        El umbral 0 significa “sin umbral configurado”: no dispara alerta. El disponible es la
-        cantidad actual menos la reservada, y lo calcula el panel a partir de lo que guarda la base.
+        El umbral 0 significa “sin umbral configurado”: la base no dispara la alerta. La alerta de la
+        fila es la que la base registró y todavía no se atendió; el disponible es la cantidad actual
+        menos la reservada.
       </p>
     </div>
   );

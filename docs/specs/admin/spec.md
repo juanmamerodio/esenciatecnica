@@ -145,7 +145,8 @@ reflejen la realidad.
 - **Given** una cantidad o un umbral negativo o no entero, **Then** el módulo lo rechaza **antes** de llamar a
   la base y el mensaje se asocia al campo.
 - **Then** la edición devuelve el stock actualizado (con su disponible recalculado) y el panel lo refleja.
-- **Then** el umbral `0` significa “sin umbral configurado”, como en la base: no dispara alerta.
+- **Then** el umbral `0` significa “sin umbral configurado”, como en la base: no dispara la alerta del
+  trigger. La alerta que muestra la fila no sale del umbral sino de `alerta_de_estado` (#36).
 
 ### HU-7 · La alerta de stock vive en el panel
 
@@ -157,7 +158,9 @@ reflejen la realidad.
 - **Given** una alerta, **When** la atiendo, **Then** queda `atendida = true` y deja de aparecer en el popup;
   la fila se conserva (es auditoría) y se puede seguir consultando.
 - **Then** la alerta la genera la base cuando el disponible toca el umbral; el panel no la calcula ni la
-  inventa.
+  inventa. La fila de stock marca alerta si y sólo si existe una `alerta_de_estado` **sin atender** para ese
+  stock: una alerta ya atendida no vuelve a pedir atención aunque el disponible siga bajo, y la fila y el
+  popup nunca dicen cosas distintas (#36 · hallazgo 6 de `deuda-codigo-25-10`).
 
 ### HU-8 · Productos: alta, edición, baja lógica y foto
 
@@ -235,7 +238,7 @@ adivinar.
 
 | Seam | Cubre | Deja afuera |
 |---|---|---|
-| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006`/`ET007` como mensajes del dominio, `23505` de nombre duplicado, stock que no cambia en `ET005`, disponible y alerta recalculados, orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
+| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006`/`ET007` como mensajes del dominio, `23505` de nombre duplicado, stock que no cambia en `ET005`, disponible calculado y alerta tomada de la base (#36), orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
 | `src/components/admin/comun.ts` + `PanelDePedidos.tsx` | el `aviso` de remito no se descarta: se muestra y no se confunde con éxito | el envío real de Resend |
 | `src/lib/admin-auth.ts` (módulo puro) | sin credenciales, encabezado mal formado, contraseña incorrecta, correcta y `sin-configurar` | el runtime Edge del middleware |
 | `tests/db/aprobacion.test.ts` (ya existe) | aprobar/rechazar contra PGlite: reserva, venta, remito y el monto que no coincide | el borde HTTP y el panel |
@@ -330,8 +333,8 @@ y `ADMIN_PASSWORD`. Por eso casi todo queda “implementado, sin verificar en vi
 | HU-3 · Aprobar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:208-214` (RPC `aprobar_comprobante`), `src/lib/admin.ts:418-427`; `src/components/admin/PanelDePedidos.tsx:244-249` y `:283-304` (confirmación con el monto); tests `aprobar va al RPC…` y `…confirman mostrando el monto`. La transacción de stock y remito vive en la base (`tests/db/aprobacion.test.ts`) y no está aplicada en `otjph` (#16). |
 | HU-4 · Rechazar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:216-222` (RPC `rechazar_comprobante`), `src/lib/admin.ts:430-440`; tests `rechazar va al RPC…` y `traduce ET001, ET004 y ET006…`. |
 | HU-5 · Monto que no coincide | implementado, sin verificar en vivo | `describirError` en `src/lib/admin.ts` traduce el motivo `monto-no-coincide` (viene de `src/lib/errores-bd.ts`, #35) y `ESTADO_HTTP` responde `422`; test `un monto que no coincide llega como mensaje del dominio…`. |
-| HU-6 · Stock editable | implementado, sin verificar en vivo | `src/lib/admin.ts:244-256` y `:474-503`; `src/components/admin/PanelDeStock.tsx:86-185`; tests `rechaza una cantidad de stock o un umbral negativos`, `editarStock devuelve el stock actualizado…`, `stock() calcula el disponible…`. |
-| HU-7 · La alerta de stock vive en el panel | implementado, sin verificar en vivo | `src/components/admin/AvisoDeAlertas.tsx:44-48` (`role="alert"`), `:22-23` (las atendidas no se muestran); `src/app/admin/page.tsx:52-56`; tests `alertas() muestra primero las pendientes…` y `…la alerta de stock es un aviso del panel, nunca un email al Administrador`. |
+| HU-6 · Stock editable | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (`editarStock`, `stock()`); `src/components/admin/PanelDeStock.tsx`; tests `rechaza una cantidad de stock o un umbral negativos`, `editarStock devuelve el stock actualizado…`, `stock() calcula el disponible y la alerta la toma de la base…`. |
+| HU-7 · La alerta de stock vive en el panel | implementado, sin verificar en vivo | `src/lib/admin.ts` (`alertas()` ordena las pendientes primero y la fila de stock toma `alerta_pendiente` de la base, #36); `src/lib/admin-servidor.ts` (una sola consulta a `alerta_de_estado` con `atendida = false`); `src/components/admin/AvisoDeAlertas.tsx` (`role="alert"`); `src/app/admin/page.tsx`; tests `stock() calcula el disponible y la alerta la toma de la base…`, `el panel no recalcula la alerta…`, `alertas() muestra primero las pendientes…` y `…la alerta de stock es un aviso del panel, nunca un email al Administrador`. |
 | HU-8 · Productos: alta, edición, baja y foto | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (productos y `subirFotoProducto`, que usa `revisarArchivo` y `claveDelArchivo` de `src/lib/archivo.ts`, #35); `src/lib/admin-servidor.ts`; `src/components/admin/PanelDeProductos.tsx`; tests `rechaza un producto sin nombre…`, `la baja es lógica…`, `sanea el nombre…`, `rechaza una foto de otro tipo…`. Sin el bucket `productos` (migración `05`, #16) la subida no corre en vivo. |
 | HU-9 · Borde HTTP | implementado, sin verificar en vivo | `src/app/api/admin/{comprobantes,stock,productos,productos/foto,alertas}/route.ts`; `ESTADO_HTTP` (compartido con el checkout, en `src/lib/errores-bd.ts`) y `respuestaDeFalla` (503 sólo por configuración, 500 por falla real) en `src/lib/admin-http.ts`; test `existe una ruta server-side por operación…`. Nota: §4 habla de “cinco” rutas y hoy hay una sexta, `src/app/api/admin/remito/route.ts`, del reenvío de T8. |
 | HU-10 · Se retira la deuda legacy | implementado | Tests `la deuda legacy del esquema viejo se retiró del repo` (no existen `src/lib/supabase.ts` ni `src/app/api/sync-sheets/`; `/api/products` se conserva) y `/admin deja de ser el aviso de migración…`. |
