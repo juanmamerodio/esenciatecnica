@@ -53,6 +53,8 @@ venta al correo, de modo que un fallo de Resend revierta o duplique una aprobaci
 
 ### HU-2 · El Cliente recibe el remito
 
+**Como** Cliente, **quiero** recibir el remito por email, **para** tener el comprobante de la compra.
+
 - **Then** el email sale al `email` del Cliente del pedido, con el número del remito, la fecha, la lista
   de productos (cantidad × precio unitario = subtotal) y el total.
 - **Then** el asunto y el cuerpo dicen **Esencia Técnica** y la institución; no dicen “QuimicaShop”.
@@ -61,11 +63,15 @@ venta al correo, de modo que un fallo de Resend revierta o duplique una aprobaci
 
 ### HU-3 · Sin promesas que el MVP no cumple
 
+**Como** Cliente, **quiero** que el remito no prometa envío ni seguimiento, **para** no esperar algo que el proyecto no incluye.
+
 - **Then** ni el remito ni el email prometen envío, seguimiento ni estados posteriores a `Pago Validado`
   (`AGENTS.md` §5.5). Se aclara que el retiro o la entrega se acuerdan aparte.
 - **Then** el remito no inventa datos fiscales (CUIT, IVA, domicilio) que el modelo no tiene.
 
 ### HU-4 · Un fallo de correo no toca la venta
+
+**Como** Administrador de Química, **quiero** que un fallo de correo no revierta la aprobación, **para** no perder una venta ya cerrada.
 
 - **Given** que Resend falla, **When** apruebo, **Then** el pedido queda `Pago Validado`, el remito existe
   (uno solo) y la respuesta avisa del fallo sin revertir nada.
@@ -75,28 +81,13 @@ venta al correo, de modo que un fallo de Resend revierta o duplique una aprobaci
 
 ### HU-5 · Visible desde el panel
 
+**Como** Administrador de Química, **quiero** ver el número de remito del pedido aprobado, **para** reimprimirlo o reenviarlo.
+
 - **Then** el pedido aprobado muestra su número de remito y lleva a la página imprimible.
 - **Then** la página del remito se ve sin el resto del panel (para imprimir) y respeta mobile,
   accesibilidad y contraste AA.
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| `src/lib/remito.ts` con un puerto de correo falso (sin red) | composición del documento y del email, destinatario, ausencia de promesas de envío, `ok`/`error` del envío, y que un fallo no altere la venta | Resend, el panel, el render |
-| `tests/db/aprobacion.test.ts` (ya existe) | un solo remito por comprobante, numeración única y estado final `Pago Validado` | el correo |
-| Estructura de los archivos | `RESEND_API_KEY` solo en el servidor, el remito no se crea en el front, la ruta imprimible existe | automatización de UI |
-| Verificación manual | que el email llegue y se vea bien (una vez, con la clave real) | automatización de UI |
-
-## 5. Fuera de alcance
-
-- PDF adjunto: el modelo no lo pide y el remito HTML cumple la función del MVP.
-- Datos fiscales, envío y seguimiento: fuera del MVP (`AGENTS.md` §5.5).
-- Reintentos automáticos con backoff: el reenvío es manual y explícito.
-- El puente `/api/notifications` hacia Teams (`AGENTS.md` §3): solo se le corrige la inicialización de
-  Resend, no se migra.
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **El remito lo emite la base, el front lo compone**: una sola fuente de numeración y una sola
    transacción de venta.
@@ -106,7 +97,31 @@ venta al correo, de modo que un fallo de Resend revierta o duplique una aprobaci
 4. **Remito HTML, sin PDF**: el documento se imprime desde el navegador si hace falta.
 5. **Sin datos fiscales**: el modelo no los tiene y no se inventan.
 
-## 7. Estado de implementación (auditoría del 2026-10-27)
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| `src/lib/remito.ts` con un puerto de correo falso (sin red) | composición del documento y del email, destinatario, ausencia de promesas de envío, `ok`/`error` del envío, y que un fallo no altere la venta | Resend, el panel, el render |
+| `tests/db/aprobacion.test.ts` (ya existe) | un solo remito por comprobante, numeración única y estado final `Pago Validado` | el correo |
+| Estructura de los archivos | `RESEND_API_KEY` solo en el servidor, el remito no se crea en el front, la ruta imprimible existe | automatización de UI |
+| Verificación manual | que el email llegue y se vea bien (una vez, con la clave real) | automatización de UI |
+
+## 6. Fuera de alcance
+
+- PDF adjunto: el modelo no lo pide y el remito HTML cumple la función del MVP.
+- Datos fiscales, envío y seguimiento: fuera del MVP (`AGENTS.md` §5.5).
+- Reintentos automáticos con backoff: el reenvío es manual y explícito.
+- El puente `/api/notifications` hacia Teams (`AGENTS.md` §3): solo se le corrige la inicialización de
+  Resend, no se migra.
+
+## 7. Notas finales
+
+- El remito lo **emite la base** en la misma transacción de la aprobación; el front lo compone y lo envía.
+- El email es **posterior y no bloqueante**: cuando se intenta mandar, la venta ya está cerrada, y un fallo se avisa en el panel sin revertir nada.
+- Un remito por comprobante: reintentar el envío reutiliza el mismo número.
+- El envío real depende de `RESEND_API_KEY` (#20).
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada HU contra el código de `src/` y los tests de `tests/front/` y `tests/db/`. El remito lo
 emite la base (RPC); el front lo lee, lo compone y lo envía por Resend. El email es posterior y no

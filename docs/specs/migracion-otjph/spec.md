@@ -157,7 +157,7 @@ en CI.
   Es una tajada propia. **(Cerrado el 2026-10-27 en B4 · #18:** `vercel.json` dispara
   `/api/cron/vencidos` con `CRON_SECRET`; el fallback manual queda en `bd-mvp` §9.3.)**
 - **`.agents/skills/`:** `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran y el directorio no existe. Tajada propia.
-- **Inconsistencias de specs detectadas en la auditoría** (se listan en §7): `checkout` §6.3 contra su HU-3,
+- **Inconsistencias de specs detectadas en la auditoría** (se listan en §7): `checkout` §4.3 contra su HU-3,
   el `aviso` de fallo de correo que se descartaba en `comun.ts` (**cerrado en A1 · #19, 2026-10-27**),
   `FlaskConical` en `/about` y el footer, y el término `productos` en la spec de admin contra
   `GLOSSARY.md`. (`bd-mvp` ya no está huérfano de issue: cuelga de [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15).)
@@ -256,7 +256,7 @@ El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
 | Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por #16 y #20. |
 | Scheduler del cron (antes fuera de alcance) | implementado | B4 · #18: `vercel.json` + `CRON_SECRET`; fallback manual en `bd-mvp` §9.3. |
 | `.agents/skills/` | pendiente | `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran y el directorio no existe. |
-| Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19; siguen abiertos `checkout` §6.3, `FlaskConical` en `/about` y el footer, y el término `productos` de la spec de admin. |
+| Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19; siguen abiertos `checkout` §4.3, `FlaskConical` en `/about` y el footer, y el término `productos` de la spec de admin. |
 | `npm test` como evidencia de la base viva | retirado | Corre contra PGlite y deja `otjph` a medio migrar en verde; el único control es `bd:viva` (`memory.md`, reglas). |
 
 En verde **en repo**: `typecheck` y `lint` en 0, `npm test` con 279 tests en 23 archivos y `npm run build`
@@ -272,5 +272,5 @@ deja en **26 desajustes** y `bd:viva` sigue **rojo** hasta aplicar las migracion
 - **Verificación punta a punta en navegador** (B6 · #23, Celeste), bloqueada por #16 y #20.
 - **Fotos reales de la beta**: subirlas desde `/admin` al bucket `productos` (B5 · #22).
 - **`.agents/skills/`**: el directorio no existe aunque `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran.
-- **Inconsistencias de specs**: `checkout` §6.3 contra su HU-3, `FlaskConical` en `/about` y el footer, y
+- **Inconsistencias de specs**: `checkout` §4.3 contra su HU-3, `FlaskConical` en `/about` y el footer, y
   el término `productos` en la spec de admin contra `GLOSSARY.md`.

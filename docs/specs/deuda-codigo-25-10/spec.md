@@ -263,14 +263,14 @@ se retiró. La tabla y su trigger no cambian.
 
 ### Hallazgo 7 · cerrado (#37)
 
-Los límites que el módulo ya aplicaba quedaron escritos en [`checkout/spec.md` §6.1](../checkout/spec.md)
+Los límites que el módulo ya aplicaba quedaron escritos en [`checkout/spec.md` §4.1](../checkout/spec.md)
 —nombre ≥ 2, email con formato, DNI de 7 u 8 dígitos, teléfono ≤ 30, monto > 0, entre 1 y 50 líneas con
 cada producto una sola vez, archivo PNG/JPEG/WebP ≤ 5 MB, `idPedido` entero positivo— y fijados con test.
 No hubo cambio de comportamiento: el código mandaba y el spec se completó.
 
 | Criterio | Estado | Evidencia |
 |---|---|---|
-| El spec enuncia cada límite con su valor | implementado | `checkout/spec.md` §6.1; test *«el spec enuncia cada límite con su valor»* |
+| El spec enuncia cada límite con su valor | implementado | `checkout/spec.md` §4.1; test *«el spec enuncia cada límite con su valor»* |
 | Un test fija cada límite y su caso válido en el borde | implementado | tests *«nombre: dos caracteres pasan, uno no»*, *«teléfono: 30 pasan, 31 no»*, *«items: 50 pasan, 51 no»*, *«cada producto una sola vez»* y *«monto: el mínimo positivo pasa, cero no»* |
 
 ### Hallazgo 3 · cerrado (#38)

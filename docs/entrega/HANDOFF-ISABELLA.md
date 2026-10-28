@@ -155,7 +155,7 @@ Qué falta de tu lado:
    de escritura para `anon`); la lectura se resuelve con el bucket público. Si preferís una política explícita
    de lectura para `anon`, decilo y la agregamos.
 3. **`producto.imagen_url`** guarda la URL pública del objeto (decisión registrada en
-   [`MODELO.md`](../MODELO.md) §9 y en [`specs/admin/spec.md`](../specs/admin/spec.md) §6.5). El bucket
+   [`MODELO.md`](../MODELO.md) §9 y en [`specs/admin/spec.md`](../specs/admin/spec.md) §4.5). El bucket
    `comprobantes` **sigue privado** y con signed URL: no se toca.
 
 ---

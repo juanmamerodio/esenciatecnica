@@ -56,6 +56,8 @@ marca la ruta activa, así que no monta navegación propia.
 
 ### HU-2 · Cómo se compra
 
+**Como** Cliente, **quiero** entender cómo se compra, **para** saber qué pasa después de transferir.
+
 - **Then** la página explica que el pago es por **transferencia validada a mano** por los Administradores de
   Química.
 - **Then** comunica que la **reserva se libera el viernes** si el comprobante no está aprobado.
@@ -64,6 +66,8 @@ marca la ruta activa, así que no monta navegación propia.
 
 ### HU-3 · Franja de valores en un solo lugar
 
+**Como** Cliente, **quiero** leer los valores de la tienda una sola vez, **para** no encontrar el mismo bloque repetido.
+
 - **Given** las tres valores aprobados (“Ciencia Aplicada”, “Sin Fines de Lucro”, “Formación Técnica”),
   **Then** la franja existe en `/about` y **no** en la Home: una sola fuente por concepto
   (`AGENTS.md` §7.4).
@@ -71,28 +75,14 @@ marca la ruta activa, así que no monta navegación propia.
 
 ### HU-4 · Contacto, mobile y accesibilidad
 
+**Como** Cliente, **quiero** el contacto institucional y una página usable en el celular, **para** preguntar sin buscar el dato.
+
 - **Then** el contacto y la institución son los aprobados en G1 y coinciden con el footer.
 - **Then** un solo `h1`, jerarquía de encabezados coherente, una columna en mobile, sin desbordes
   horizontales, foco visible y contraste AA.
 - **Then** la ruta activa se marca desde el shell: la página no duplica navegación.
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| Estructura y texto de `src/app/about/page.tsx` y de `src/app/page.tsx` | vocabulario del dominio, las tres piezas de “cómo se compra”, la franja de valores en un solo lugar y el contacto aprobado | render y estilos |
-| Verificación en navegador de `/about` | jerarquía, responsive, foco, ruta activa en el header | automatización de UI |
-
-Esta tajada no toca datos, así que no tiene seam de base: su verificación es de contenido y estructura, y no
-se agregan dependencias (`AGENTS.md` §4 y §8).
-
-## 5. Fuera de alcance
-
-- La franja de valores en la Home: se retira de ahí en esta misma tajada (decisión G1).
-- Copy nuevo: el texto institucional es el aprobado; cualquier cambio de fondo es un gate de contenido.
-- Teléfono, dirección, redes o formulario de contacto: el modelo y el copy aprobado no los tienen.
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **“Sobre el proyecto” en `/about`** (G3), no “Investigación”.
 2. **La franja de valores vive solo en esta página** (G1, decisión 5); la Home la suelta.
@@ -102,7 +92,30 @@ se agregan dependencias (`AGENTS.md` §4 y §8).
 
 ---
 
-## 7. Estado de implementación (auditoría del 2026-10-27)
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| Estructura y texto de `src/app/about/page.tsx` y de `src/app/page.tsx` | vocabulario del dominio, las tres piezas de “cómo se compra”, la franja de valores en un solo lugar y el contacto aprobado | render y estilos |
+| Verificación en navegador de `/about` | jerarquía, responsive, foco, ruta activa en el header | automatización de UI |
+
+Esta tajada no toca datos, así que no tiene seam de base: su verificación es de contenido y estructura, y no
+se agregan dependencias (`AGENTS.md` §4 y §8).
+
+## 6. Fuera de alcance
+
+- La franja de valores en la Home: se retira de ahí en esta misma tajada (decisión G1).
+- Copy nuevo: el texto institucional es el aprobado; cualquier cambio de fondo es un gate de contenido.
+- Teléfono, dirección, redes o formulario de contacto: el modelo y el copy aprobado no los tienen.
+
+## 7. Notas finales
+
+- G1 (27-10): la franja de valores vive **sólo** en esta página; la Home no la repite.
+- G3: la institucional se llama «Sobre el proyecto» y vive en `/about`.
+- La marca dejó el vaso de laboratorio (#43): `Sparkles` en el shell y `Droplets` para el producto y para el valor «Ciencia Aplicada».
+- Se conservan «Departamento de Química» y «Ciencia Aplicada»: lo que se retiró es el encuadre de insumo de laboratorio, no el origen del producto.
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada historia contra el código del repo y sus tests. La página está escrita y el contenido del
 dominio está cubierto por tests; la verificación en navegador queda pendiente (depende del issue #16 y de las

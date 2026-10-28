@@ -114,5 +114,5 @@ precisa en el mismo movimiento: no se busca «en la unión», se busca «cada pa
 | Una palabra de otro producto no crea coincidencia | implementado | test *«cada palabra tiene que aparecer en algún campo del mismo producto»*: `jabón zinc` y `crema shampoo` devuelven `[]` |
 | Sin mayúsculas ni acentos, en todas las palabras | implementado | test *«ignora acentos y mayúsculas en todas las palabras»* (`GLICERINA Alcohol`, `emulsión zinc`, espacios de más) |
 | Categoría exacta junto con la búsqueda | implementado | test *«la categoría se sigue respetando junto con las palabras»* |
-| El spec del catálogo §2 dice la regla real | implementado | [`catalogo/spec.md` §2](../catalogo/spec.md); la fila de desviación de su §7 pasó a ✅ |
+| El spec del catálogo §2 dice la regla real | implementado | [`catalogo/spec.md` §2](../catalogo/spec.md); la fila de desviación de su §8 pasó a ✅ |
 | Un solo módulo de búsqueda | implementado | el filtrado vive en `src/lib/catalogo.ts`; `src/app/catalog/page.tsx:50` sólo le pasa la consulta |

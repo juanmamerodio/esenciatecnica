@@ -322,7 +322,7 @@ EOF
 - **No cambies el orden:** la venta la cierra la base primero; el correo es posterior y **no
   bloqueante**. Un fallo de correo **no** revierte ni duplica la aprobación.
 - **No inventes reintentos automáticos**: el reenvío es manual y explícito
-  ([`docs/specs/remito/spec.md`](../specs/remito/spec.md) §5).
+  ([`docs/specs/remito/spec.md`](../specs/remito/spec.md) §6).
 - Logueá el fallo con su motivo. No lo silencies con un `catch {}` vacío.
 
 ---

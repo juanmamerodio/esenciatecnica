@@ -134,6 +134,14 @@ Secciones de la plantilla:
 **Hallazgos del propio test** (los tres se corrigieron acá, porque son de una línea): las HU 13 de este
 spec, 8 de `skills-del-proyecto` y 8 de `trazabilidad-issues` no enunciaban beneficio.
 
-**Pendiente de la tanda:** el retrofit de los siete specs que toca la tanda del 27-10 es **#47**; los
-otros tres specs que no siguen la plantilla (`bd-mvp`, `front-mvp` y `migracion-otjph`) quedan como están
-hasta que una tarea los alcance, y están nombrados en el test con ese motivo.
+### Retrofit de la tanda · #47
+
+Los siete specs que la tanda del 27-10 toca —`carrito`, `checkout`, `catalogo`, `detalle-producto`,
+`sobre-el-proyecto`, `admin` y `remito`— ya siguen la plantilla: secciones canónicas en orden
+(`Decisiones de implementación` antes que `Decisiones de testing`, `Fuera de alcance` después), notas
+finales con los supuestos y las correcciones de evidencia, y las 21 HU que no enunciaban actor ni
+beneficio reescritas con la forma `Como … quiero … para`. El test dejó de nombrarlos como pendientes.
+
+Siguen fuera de la plantilla `bd-mvp`, `front-mvp` y `migracion-otjph`: la plantilla avanza por contacto
+y están nombrados en el test con ese motivo, así que una tarea futura los alcanza sin que nadie tenga que
+acordarse.

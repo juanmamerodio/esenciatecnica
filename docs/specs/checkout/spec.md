@@ -136,33 +136,15 @@ con la imagen y con el total (`AGENTS.md` §5.3).
 
 ### HU-7 · Borde y claves
 
+**Como** Administrador de Química, **quiero** que el borde del checkout no exponga la service role ni datos de otros Clientes, **para** que la tienda no filtre información.
+
 - **Then** el navegador **nunca** recibe `SUPABASE_SERVICE_ROLE_KEY`, ni el DNI de otro Cliente, ni un
   listado de comprobantes: la ruta es server-side y devuelve solo lo que la pantalla muestra.
 - **Then** la ruta valida la entrada con Zod y responde `400` con el detalle de los campos inválidos.
 - **Then** el adaptador tipa el cliente Supabase con `src/lib/database.types.ts`; no se agrega ningún
   `any` (`AGENTS.md` §7.1).
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| `src/lib/checkout.ts` con un `PuertoCheckout` falso (sin DOM, sin red) | orden de los pasos, reutilización del Cliente, mapeo de items a la RPC, monto declarado, reemplazo del comprobante pendiente, mapa de errores `ET001`/`ET002`/`ET003`/`ET005`/`ET006` a mensajes, validación de archivo y de la clave del objeto | Supabase, Storage, render |
-| RPC `crear_pedido` contra PGlite migrada (ya existe en `tests/db/pedidos.test.ts`) | reserva, total derivado, rechazo de repetidos y de stock insuficiente | el borde HTTP |
-| Verificación en navegador de `/checkout` | formulario, monto precargado, estados de error y de éxito, carrito que no se vacía al fallar | automatización de UI |
-
-No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8). El archivo se valida con
-el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a mano una vez.
-
-## 5. Fuera de alcance
-
-- Aprobar o rechazar el comprobante, el panel y las alertas de stock: **T7**.
-- El remito y su email: **T8**.
-- RLS, políticas y bucket: [`bd-mvp`](../bd-mvp/spec.md) (tarea de Isabella en el tablero).
-- Cuentas de Cliente, carrito persistido, cupones, envío y seguimiento: fuera del MVP.
-- `/api/products` (catálogo canónico en JSON) sigue en pie: es la única API del catálogo. `/api/sync-sheets`
-  se retiró con **T7**, junto con el cliente legacy `src/lib/supabase.ts` que lo alimentaba.
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **El Cliente se resuelve por email, no por DNI:** en la base el único es `lower(email)`; el DNI solo
    valida formato (`^[0-9]{7,8}$`). No hay RPC de Cliente y no se inventa una: el adaptador hace el
@@ -174,13 +156,13 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
    Cliente confirma. Si no coincide con el total de la base, no se sube el comprobante (`ET005`) y, desde
    #34, el total que se muestra pasa a ser el de la base (`totalAVisualizar`): el Cliente transfiere el
    número del pedido que el Administrador va a comparar.
-   > Contradicción resuelta en la auditoría del 2026-10-27: HU-3 y la §4 ya decían “monto precargado”; el código (`src/app/checkout/page.tsx`) lo confirma, así que se corrigió este punto y manda el código.
+   > Contradicción resuelta en la auditoría del 2026-10-27: HU-3 y esta sección ya decían “monto precargado”; el código (`src/app/checkout/page.tsx`) lo confirma, así que se corrigió este punto y manda el código.
 4. **Reintento idempotente después de crear el pedido:** el `id_pedido` se conserva en el intento, así un
    fallo de subida no duplica pedido ni reserva.
 5. **Se retira el camino legacy de compra en esta misma tajada:** dos caminos de pedido conviviendo es
    exactamente la contradicción que la auditoría marcó (`docs/estado/AUDITORIA.md` §6).
 
-### 6.1 Límites del borde
+### 4.1 Límites del borde
 
 El código manda: estos son los límites que el módulo aplica hoy (`ESQUEMA_CLIENTE`, `ESQUEMA_MONTO`,
 `ESQUEMA_ITEMS` y los límites del archivo), escritos acá para no depender de leer el módulo (#37 ·
@@ -199,7 +181,34 @@ borde del archivo, en `tests/front/archivo-y-errores.test.ts`.
 | `idPedido` (reintento) | entero positivo dentro del rango seguro, o ausente | `datos-invalidos`, campo `idPedido` |
 
 
-## 7. Blockers declarados
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| `src/lib/checkout.ts` con un `PuertoCheckout` falso (sin DOM, sin red) | orden de los pasos, reutilización del Cliente, mapeo de items a la RPC, monto declarado, reemplazo del comprobante pendiente, mapa de errores `ET001`/`ET002`/`ET003`/`ET005`/`ET006` a mensajes, validación de archivo y de la clave del objeto | Supabase, Storage, render |
+| RPC `crear_pedido` contra PGlite migrada (ya existe en `tests/db/pedidos.test.ts`) | reserva, total derivado, rechazo de repetidos y de stock insuficiente | el borde HTTP |
+| Verificación en navegador de `/checkout` | formulario, monto precargado, estados de error y de éxito, carrito que no se vacía al fallar | automatización de UI |
+
+No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8). El archivo se valida con
+el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a mano una vez.
+
+## 6. Fuera de alcance
+
+- Aprobar o rechazar el comprobante, el panel y las alertas de stock: **T7**.
+- El remito y su email: **T8**.
+- RLS, políticas y bucket: [`bd-mvp`](../bd-mvp/spec.md) (tarea de Isabella en el tablero).
+- Cuentas de Cliente, carrito persistido, cupones, envío y seguimiento: fuera del MVP.
+- `/api/products` (catálogo canónico en JSON) sigue en pie: es la única API del catálogo. `/api/sync-sheets`
+  se retiró con **T7**, junto con el cliente legacy `src/lib/supabase.ts` que lo alimentaba.
+
+## 7. Notas finales
+
+- El monto se guarda como lo declaró el Cliente, redondeado a centavos (`NUMERIC(12,2)`): el sistema no lo completa con el total.
+- Corrección de evidencia (2026-10-28): el ejemplo `3001.65 → $ 3.002` que el spec del carrito daba como desviación era falso; el monto que redondeaba al mostrarse era `3001.999`.
+- El borde del cliente valida la respuesta con el mismo esquema que define el contrato (#46): un cuerpo inesperado muestra que no se entendió y no rompe la pantalla.
+- La verificación en navegador de `/checkout` (formulario, monto precargado, estados de error y de éxito) queda en #23.
+
+## 8. Blockers declarados
 
 1. **Migraciones aplicadas en `otjph…`** (Isabella). Hoy en producción: `vista_catalogo` no existe, las RPC
    de `02` no existen (`crear_pedido` responde `PGRST202`) y el bucket `comprobantes` no existe. Sin eso no
@@ -211,7 +220,7 @@ borde del archivo, en `tests/front/archivo-y-errores.test.ts`.
 El módulo puro y sus tests **no** dependen de 1 ni 2: se puede implementar y dejar verde con el puerto
 falso y PGlite mientras se cierran los blockers.
 
-## 8. Estado de implementación (auditoría del 2026-10-27)
+## 9. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada HU contra el código de `src/` y los tests de `tests/front/` y `tests/db/`. El estado
 `implementado, sin verificar en vivo` significa que el código y los tests lo cubren, pero la base viva
@@ -246,7 +255,7 @@ criterio como “verde en producción” sin esa verificación.
 | HU-6 · Mobile y accesibilidad (foco, `aria-label`, errores anunciados) | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:166,233`; `src/components/SubirComprobante.tsx:65,88` |
 | HU-7 · El navegador no recibe la service role ni listados | implementado | `src/app/api/checkout/route.ts:33-84`; test `tests/front/checkout.test.ts:403` |
 | HU-7 · Zod y `400` con detalle de campos | implementado | `ESQUEMA_CLIENTE`/`ESQUEMA_ITEMS` en `src/lib/checkout.ts`; `camposDeZod` en `src/lib/errores-bd.ts`; `ESTADO_HTTP` compartido (#35) |
-| §6.1 · Límites del borde escritos en el spec y fijados con test | implementado | [`§6.1`](#61-límites-del-borde) con la tabla de límites; tests *«los límites del borde, con su caso válido en el borde»* en `tests/front/checkout.test.ts` (#37) |
+| §4.1 · Límites del borde escritos en el spec y fijados con test | implementado | [`§4.1`](#41-límites-del-borde) con la tabla de límites; tests *«los límites del borde, con su caso válido en el borde»* en `tests/front/checkout.test.ts` (#37) |
 | HU-7 · Adaptador tipado con `database.types.ts`, sin `any` | implementado | `src/lib/checkout-servidor.ts:1-3,27` |
 | Camino legacy de compra (`/api/orders`, `/api/verify-payment`, `ReceiptUploader`) | retirado | `tests/front/checkout.test.ts:384-401`; spec §2 |
 

@@ -18,13 +18,6 @@ const SPECS = join(RAIZ, 'docs', 'specs');
 
 /** Specs que todavía no siguen la plantilla, con el motivo por el que no la siguen. */
 const PENDIENTES: Record<string, string> = {
-  admin: '#47 · retrofit de la tanda',
-  carrito: '#47 · retrofit de la tanda',
-  catalogo: '#47 · retrofit de la tanda',
-  checkout: '#47 · retrofit de la tanda',
-  'detalle-producto': '#47 · retrofit de la tanda',
-  remito: '#47 · retrofit de la tanda',
-  'sobre-el-proyecto': '#47 · retrofit de la tanda',
   'bd-mvp': 'fuera de la tanda; la plantilla avanza por contacto',
   'front-mvp': 'fuera de la tanda; la plantilla avanza por contacto',
   'migracion-otjph': 'fuera de la tanda; le falta la sección de notas finales',
@@ -51,16 +44,18 @@ function seccionesDe(spec: string): { titulo: string; posicion: number }[] {
 
 /** Los bloques de HU: los `### HU-…` o, si el spec usa listas, los ítems numerados que abren con «Como». */
 function bloquesDeHU(spec: string): string[] {
-  const porEncabezado = [...spec.matchAll(/^###\s+(HU-[^\n]*)\n([\s\S]*?)(?=\n#{2,3}\s|\s*$)/gm)].map(
-    (encontrado) => encontrado[2] ?? '',
-  );
+  // Se parte por encabezados en vez de mirar con lookahead: un lookahead de fin de línea corta el
+  // bloque apenas encuentra una línea en blanco después del título.
+  const partes = spec.split(/\n(?=#{2,3}\s)/);
+  const porEncabezado = partes
+    .filter((parte) => /^###\s+HU-/.test(parte))
+    .map((parte) => parte.replace(/^###[^\n]*\n?/, ''));
   if (porEncabezado.length > 0) return porEncabezado;
 
-  return [
-    ...spec.matchAll(
-      /^\s*\d+\.\s+((?:\*\*)?Como\b[\s\S]*?)(?=^\s*\d+\.\s|\n#{2,3}\s|(?![\s\S]))/gm,
-    ),
-  ].map((encontrado) => encontrado[1] ?? '');
+  const historias = partes.find((parte) => /^##\s+\d+\.\s+Historias/.test(parte)) ?? '';
+  return historias
+    .split(/\n(?=\s*\d+\.\s+)/)
+    .filter((parte) => /^\s*\d+\.\s+(\*\*)?Como\b/.test(parte));
 }
 
 function specDe(carpeta: string): string {

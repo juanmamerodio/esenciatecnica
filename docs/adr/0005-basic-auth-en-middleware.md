@@ -36,7 +36,7 @@ testear con Vitest en `environment: node` sin red.
    mudo que mande al Administrador a buscar una contraseña inexistente (`AGENTS.md` §7.10).
 4. La comparación de la contraseña es en tiempo constante y el nombre de usuario se ignora: el MVP no tiene
    Administradores en base, así que no hay usuario con el que comparar (decisión registrada en
-   `specs/admin/spec.md` §6.3).
+   `specs/admin/spec.md` §4.3).
 
 El archivo vive en `src/`, al lado de `src/app/`: con el directorio `src` en uso, Next resuelve el middleware
 en la raíz de las páginas (`rootDir = join(pagesDir || appDir, '..')` → `src/`), así que un `middleware.ts` en

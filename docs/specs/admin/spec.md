@@ -180,6 +180,8 @@ productos de la tienda.
 
 ### HU-9 · Borde HTTP
 
+**Como** Administrador de Química, **quiero** que cada operación del panel tenga su ruta server-side, **para** operar sin que el navegador reciba claves.
+
 - **Then** existe una ruta server-side por operación: `POST /api/admin/comprobantes`,
   `PATCH /api/admin/stock`, `POST|PATCH /api/admin/productos`, `POST /api/admin/productos/foto` y
   `PATCH /api/admin/alertas`.
@@ -192,12 +194,16 @@ productos de la tienda.
 
 ### HU-10 · Se retira la deuda legacy
 
+**Como** integrante del equipo, **quiero** que el esquema legacy desaparezca del repo, **para** no leer dos modelos a la vez.
+
 - **Then** `src/lib/supabase.ts` (esquema legacy `pedidos`) y `src/app/api/sync-sheets/` **no existen**, y
   ninguna fuente del repo los importa (`AGENTS.md` §7.5).
 - **Then** `/api/products` **se conserva**: es el catálogo canónico en JSON de T1, no deuda legacy.
 - **Then** `/admin` deja de ser un aviso de migración: lee el contrato canónico con el módulo.
 
 ### HU-11 · Mobile y accesibilidad
+
+**Como** Administrador de Química, **quiero** usar el panel desde el celular y con el teclado, **para** validar pedidos sin la computadora.
 
 - **Then** el panel se usa en el celular sin desbordes horizontales ni zoom, con una columna y tablas
   desplazables cuando hacen falta.
@@ -234,38 +240,7 @@ adivinar.
 - **Then** un fallo de correo **no** revierte la venta ni duplica el remito: la base ya cerró la
   transacción (`specs/remito/spec.md` §2.4).
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006`/`ET007` como mensajes del dominio, `23505` de nombre duplicado, stock que no cambia en `ET005`, disponible calculado y alerta tomada de la base (#36), orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
-| `src/components/admin/comun.ts` + `PanelDePedidos.tsx` | el `aviso` de remito no se descarta: se muestra y no se confunde con éxito | el envío real de Resend |
-| `src/lib/admin-auth.ts` (módulo puro) | sin credenciales, encabezado mal formado, contraseña incorrecta, correcta y `sin-configurar` | el runtime Edge del middleware |
-| `tests/db/aprobacion.test.ts` (ya existe) | aprobar/rechazar contra PGlite: reserva, venta, remito y el monto que no coincide | el borde HTTP y el panel |
-| Estructura de los archivos | el matcher del middleware cubre sólo `/admin` y `/api/admin` y no negocia idioma, secretos sólo del lado servidor, RPC presentes en el adaptador, `delete` ausente, legacy retirado | automatización de UI |
-| Verificación en navegador de `/admin` | Basic Auth, popup de alerta, confirmación del monto, edición de stock y subida de foto | automatización de UI |
-
-No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8). El middleware se verifica a
-mano una vez en el navegador; la lógica que decide está en el módulo puro y se testea sin red.
-
-## 5. Fuera de alcance
-
-- **El email del remito**: **T8** ([#14](https://github.com/juanmamerodio/esenciatecnica/issues/14)). Acá el
-  remito se muestra con el número que emitió la base y, desde HU-13, el panel **avisa** si el correo no
-  salió; el envío en sí no se reimplementa.
-- **Administradores en base** (`ADMIN`/`ROL`), roles y permisos por perfil: fase 2 (`AGENTS.md` §5.9).
-- **Reimplementar la regla en el front**: reservas, descuentos de stock, estados y numeración del remito son
-  de la base.
-- **Ver el comprobante sin autenticación**: el bucket es privado y la URL firmada vence.
-- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); las
-  migraciones `05` y `06` entran en el handoff para su revisión.
-- **Búsqueda, filtros y paginación del panel**: el MVP tiene un solo Administrador y un catálogo chico.
-- **Envío, seguimiento y estados posteriores a `Pago Validado`**: fuera del MVP (`AGENTS.md` §5.5).
-- **Reabrir un pedido rechazado**: el rechazo es terminal (spec `bd-mvp` §7, decisión 3); el Cliente vuelve a comprar.
-- **Ejecutar el cron desde el panel**: el viernes lo dispara Vercel; el fallback es SQL Editor (spec `bd-mvp`
-  HU-5).
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **Basic Auth en `src/middleware.ts`, con la decisión en un módulo puro.** El middleware resuelve el
    encabezado pero no decide: `revisarBasicAuth` es testeable sin red. El matcher cubre **sólo** `/admin` y
@@ -280,7 +255,7 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 5. **`producto.imagen_url` guarda la URL pública del bucket `productos`; el comprobante sigue privado.** La
    foto es contenido público de la tienda y no tiene dato sensible; el comprobante tiene el monto y la imagen
    de una transferencia de un Cliente, así que sigue con signed URL y clave guardada (decisión de T5,
-   spec `checkout` §6.2).
+   spec `checkout` §4.1).
 6. **Validación estricta al leer el panel.** A diferencia del catálogo —donde una fila inválida se descarta y
    el producto no se publica—, acá una fila que no cumple el contrato detiene la sección con un error
    explícito: mostrar una lista incompleta podría hacer que un Administrador no vea un pedido a validar.
@@ -300,7 +275,46 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 13. **`productos` es el bucket, no la tabla legacy.** Se conserva el nombre con excepción explícita en
     `GLOSSARY.md` y `docs/MODELO.md` §9; renombrarlo no aporta al MVP y toca migración, adaptador y tests.
 
-## 7. Blockers declarados
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006`/`ET007` como mensajes del dominio, `23505` de nombre duplicado, stock que no cambia en `ET005`, disponible calculado y alerta tomada de la base (#36), orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
+| `src/components/admin/comun.ts` + `PanelDePedidos.tsx` | el `aviso` de remito no se descarta: se muestra y no se confunde con éxito | el envío real de Resend |
+| `src/lib/admin-auth.ts` (módulo puro) | sin credenciales, encabezado mal formado, contraseña incorrecta, correcta y `sin-configurar` | el runtime Edge del middleware |
+| `tests/db/aprobacion.test.ts` (ya existe) | aprobar/rechazar contra PGlite: reserva, venta, remito y el monto que no coincide | el borde HTTP y el panel |
+| Estructura de los archivos | el matcher del middleware cubre sólo `/admin` y `/api/admin` y no negocia idioma, secretos sólo del lado servidor, RPC presentes en el adaptador, `delete` ausente, legacy retirado | automatización de UI |
+| Verificación en navegador de `/admin` | Basic Auth, popup de alerta, confirmación del monto, edición de stock y subida de foto | automatización de UI |
+
+No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8). El middleware se verifica a
+mano una vez en el navegador; la lógica que decide está en el módulo puro y se testea sin red.
+
+## 6. Fuera de alcance
+
+- **El email del remito**: **T8** ([#14](https://github.com/juanmamerodio/esenciatecnica/issues/14)). Acá el
+  remito se muestra con el número que emitió la base y, desde HU-13, el panel **avisa** si el correo no
+  salió; el envío en sí no se reimplementa.
+- **Administradores en base** (`ADMIN`/`ROL`), roles y permisos por perfil: fase 2 (`AGENTS.md` §5.9).
+- **Reimplementar la regla en el front**: reservas, descuentos de stock, estados y numeración del remito son
+  de la base.
+- **Ver el comprobante sin autenticación**: el bucket es privado y la URL firmada vence.
+- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); las
+  migraciones `05` y `06` entran en el handoff para su revisión.
+- **Búsqueda, filtros y paginación del panel**: el MVP tiene un solo Administrador y un catálogo chico.
+- **Envío, seguimiento y estados posteriores a `Pago Validado`**: fuera del MVP (`AGENTS.md` §5.5).
+- **Reabrir un pedido rechazado**: el rechazo es terminal (spec `bd-mvp` §7, decisión 3); el Cliente vuelve a comprar.
+- **Ejecutar el cron desde el panel**: el viernes lo dispara Vercel; el fallback es SQL Editor (spec `bd-mvp`
+  HU-5).
+
+## 7. Notas finales
+
+- El panel **no** reimplementa la regla de la base: la reserva, el descuento de stock, los estados y la numeración del remito son de los RPC (AGENTS §5.10).
+- La alerta de stock tiene una sola fuente, `alerta_de_estado` sin atender (#36): la fila de stock y el popup no pueden contradecirse.
+- El borde responde 503 **sólo** cuando falta configuración; una falla real responde 500 y deja su motivo en el log, sin disfrazarse de entorno mal configurado (#35).
+- El DNI no identifica al Cliente: el único de la base es `lower(email)`.
+- La verificación en navegador (Basic Auth, popup de alerta, confirmación del monto, edición de stock y foto) queda en #23.
+
+## 8. Blockers declarados
 
 1. **Migraciones `05` y `06` aplicadas en `otjph…`** (Juanma aplica, Isabella revisa). Sin el bucket
    `productos`, subir una foto falla; sin `06`, el panel no puede recibir `ET007` ni la restricción de
@@ -319,7 +333,7 @@ falso mientras se cierran los blockers.
 
 ---
 
-## 8. Estado de implementación (auditoría del 2026-10-27)
+## 9. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada historia contra el código del repo y sus tests. El panel está codificado, pero la
 verificación en vivo no está hecha: la base `otjph…` está a medio migrar y faltan `SUPABASE_SERVICE_ROLE_KEY`
@@ -336,7 +350,7 @@ y `ADMIN_PASSWORD`. Por eso casi todo queda “implementado, sin verificar en vi
 | HU-6 · Stock editable | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (`editarStock`, `stock()`); `src/components/admin/PanelDeStock.tsx`; tests `rechaza una cantidad de stock o un umbral negativos`, `editarStock devuelve el stock actualizado…`, `stock() calcula el disponible y la alerta la toma de la base…`. |
 | HU-7 · La alerta de stock vive en el panel | implementado, sin verificar en vivo | `src/lib/admin.ts` (`alertas()` ordena las pendientes primero y la fila de stock toma `alerta_pendiente` de la base, #36); `src/lib/admin-servidor.ts` (una sola consulta a `alerta_de_estado` con `atendida = false`); `src/components/admin/AvisoDeAlertas.tsx` (`role="alert"`); `src/app/admin/page.tsx`; tests `stock() calcula el disponible y la alerta la toma de la base…`, `el panel no recalcula la alerta…`, `alertas() muestra primero las pendientes…` y `…la alerta de stock es un aviso del panel, nunca un email al Administrador`. |
 | HU-8 · Productos: alta, edición, baja y foto | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (productos y `subirFotoProducto`, que usa `revisarArchivo` y `claveDelArchivo` de `src/lib/archivo.ts`, #35); `src/lib/admin-servidor.ts`; `src/components/admin/PanelDeProductos.tsx`; tests `rechaza un producto sin nombre…`, `la baja es lógica…`, `sanea el nombre…`, `rechaza una foto de otro tipo…`. Sin el bucket `productos` (migración `05`, #16) la subida no corre en vivo. |
-| HU-9 · Borde HTTP | implementado, sin verificar en vivo | `src/app/api/admin/{comprobantes,stock,productos,productos/foto,alertas}/route.ts`; `ESTADO_HTTP` (compartido con el checkout, en `src/lib/errores-bd.ts`) y `respuestaDeFalla` (503 sólo por configuración, 500 por falla real) en `src/lib/admin-http.ts`; test `existe una ruta server-side por operación…`. Nota: §4 habla de “cinco” rutas y hoy hay una sexta, `src/app/api/admin/remito/route.ts`, del reenvío de T8. |
+| HU-9 · Borde HTTP | implementado, sin verificar en vivo | `src/app/api/admin/{comprobantes,stock,productos,productos/foto,alertas}/route.ts`; `ESTADO_HTTP` (compartido con el checkout, en `src/lib/errores-bd.ts`) y `respuestaDeFalla` (503 sólo por configuración, 500 por falla real) en `src/lib/admin-http.ts`; test `existe una ruta server-side por operación…`. Nota: §2 habla de “cinco” rutas y hoy hay una sexta, `src/app/api/admin/remito/route.ts`, del reenvío de T8. |
 | HU-10 · Se retira la deuda legacy | implementado | Tests `la deuda legacy del esquema viejo se retiró del repo` (no existen `src/lib/supabase.ts` ni `src/app/api/sync-sheets/`; `/api/products` se conserva) y `/admin deja de ser el aviso de migración…`. |
 | HU-11 · Mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (foco visible), `src/components/admin/PanelDeStock.tsx:86` y `PanelDePedidos.tsx:160` (`overflow-x-auto`), `aria-label` y `role="alert"` en los componentes; el uso en celular y el contraste AA se verifican en navegador (#23). |
 | HU-12 · El panel explica los rechazos de la base | implementado | `describirError` en `src/lib/admin.ts` (sobre `motivoDeBd`: `ET007`, `23505` y `23514`, #35); test `traduce ET007, 23505 y 23514 a mensajes del dominio (issue #17)`. |

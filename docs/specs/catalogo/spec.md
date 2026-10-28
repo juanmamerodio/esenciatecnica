@@ -62,6 +62,8 @@ página, sin duplicar la lógica de filtrado en el cliente.
 
 ### HU-3 · Combinar búsqueda y filtro
 
+**Como** Cliente, **quiero** combinar la búsqueda con la categoría, **para** acotar sin perder el término.
+
 - **Given** una búsqueda y una categoría activas, **Then** el resultado cumple **ambas**.
 - **Then** limpiar la búsqueda conserva la categoría, y elegir "Todos" conserva la búsqueda.
 
@@ -75,11 +77,21 @@ página, sin duplicar la lógica de filtrado en el cliente.
 
 ### HU-5 · Mobile y accesibilidad
 
+**Como** Cliente, **quiero** buscar y filtrar desde el celular y con el teclado, **para** usar el catálogo en cualquier dispositivo.
+
 - **Then** el buscador tiene `<label>` accesible (`sr-only`), se envía con Enter y tiene un botón visible.
 - **Then** una sola columna en mobile, sin desbordes horizontales, foco visible y contraste AA.
 - **Then** la URL refleja la consulta: recargar la página conserva búsqueda y categoría.
 
-## 4. Seams bajo test
+## 4. Decisiones de implementación
+
+1. **GET, no estado de cliente:** el filtro no necesita JavaScript y la URL es compartible.
+2. **Filtrado en el módulo:** una sola implementación, la misma que testea PGlite.
+3. **Categorías del catálogo completo:** los chips no se vacían al filtrar; el chip activo siempre existe.
+
+---
+
+## 5. Decisiones de testing
 
 | Seam | Cubre | Deja afuera |
 |---|---|---|
@@ -89,21 +101,20 @@ página, sin duplicar la lógica de filtrado en el cliente.
 No se agregan dependencias: la página se verifica en el navegador, no con jsdom
 ([`AGENTS.md`](../../../AGENTS.md) §4 y §8).
 
-## 5. Fuera de alcance
+## 6. Fuera de alcance
 
 - Orden configurable por el Cliente, paginación y filtro por precio: el modelo no los pide.
 - Búsqueda en el servidor con índices/`tsvector`: el catálogo se lee completo (spec `front-mvp` §3.3).
 - Detalle de producto (T3), que sigue dependiendo de la decisión abierta G2.
 
-## 6. Decisiones tomadas
+## 7. Notas finales
 
-1. **GET, no estado de cliente:** el filtro no necesita JavaScript y la URL es compartible.
-2. **Filtrado en el módulo:** una sola implementación, la misma que testea PGlite.
-3. **Categorías del catálogo completo:** los chips no se vacían al filtrar; el chip activo siempre existe.
+- Decisión del 27-10: la búsqueda es una **conjunción de palabras por campo** (#41). `gel alcohol` sigue encontrando `Alcohol en Gel` y las coincidencias ya no dependen de que los campos se hayan pegado.
+- La categoría es un match exacto: no hay búsqueda difusa ni chips de sinónimos.
+- El tiempo de producción se publica en la card del catálogo y **no** en la Home (#38), con una sola frase (`textoDeProduccion`).
+- La verificación en navegador de `/catalog` (form GET, chips, estados, responsive y contraste) queda en #23.
 
----
-
-## 7. Estado de implementación (auditoría del 2026-10-27)
+## 8. Estado de implementación (auditoría del 2026-10-27)
 
 `npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde, contra PGlite:
 la base viva sigue a medio migrar, así que nada de esto está verificado en producción.
@@ -126,7 +137,7 @@ la base viva sigue a medio migrar, así que nada de esto está verificado en pro
 | HU-5 · la URL refleja la consulta | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:14-21` y `src/app/catalog/page.tsx:48-50`; test `tests/front/catalogo-pagina.test.ts:19` |
 | §2 · un solo filtrado, en el módulo, sin reimplementarlo en la página | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:50`; test *«el filtrado no se reimplementa en la página»* en `tests/front/catalogo-pagina.test.ts:36` |
 | §2 · el catálogo publica el tiempo de producción en la card | ✅ implementado (#38) | `GrillaProductos` con `muestraProduccion` y `ProductCard` con `textoDeProduccion` (`src/lib/catalogo.ts`); tests *«el catálogo lo publica y la Home no»* en `tests/front/detalle-producto.test.ts` |
-| §5 · sin orden configurable, paginación ni filtro por precio | implementado, sin verificar en vivo | `src/lib/catalogo.ts:174` (orden por nombre) y ausencia de paginación en `src/app/catalog/page.tsx` |
+| §6 · sin orden configurable, paginación ni filtro por precio | implementado, sin verificar en vivo | `src/lib/catalogo.ts:174` (orden por nombre) y ausencia de paginación en `src/app/catalog/page.tsx` |
 | §2 · búsqueda "en nombre, categoría, tipo y descripción" | ✅ implementado (#41) | `src/lib/catalogo.ts:127-141`: conjunción de palabras, cada una en algún campo del mismo producto; tests *«encuentra un producto con las palabras en campos distintos y en cualquier orden»*, *«cada palabra tiene que aparecer en algún campo del mismo producto»* y *«sigue encontrando el caso que antes pasaba por casualidad»* en `tests/front/catalogo-filtros.test.ts` |
 
 ### Pendiente

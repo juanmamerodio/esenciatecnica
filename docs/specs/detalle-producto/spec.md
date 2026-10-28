@@ -64,12 +64,16 @@ baja sea real.
 
 ### HU-3 · Producción, no envío
 
+**Como** Cliente, **quiero** ver el tiempo de producción como dato de elaboración, **para** no confundirlo con un plazo de entrega.
+
 - **Then** `tiempo_produccion` aparece como **Producción estimada** (días), con la aclaración de que es
   tiempo de elaboración.
 - **Then** no hay promesa de envío, seguimiento ni estados posteriores a `Pago Validado`
   (`AGENTS.md` §5.5).
 
 ### HU-4 · Estados sin stock y sin imagen
+
+**Como** Cliente, **quiero** ver «Sin stock» y un placeholder cuando no hay foto, **para** entender la disponibilidad sin una imagen rota.
 
 - **Given** un producto con `disponible = 0`, **Then** el detalle muestra “Sin stock” y no ofrece
   agregarlo.
@@ -79,28 +83,13 @@ baja sea real.
 
 ### HU-5 · Mobile y accesibilidad
 
+**Como** Cliente, **quiero** leer el detalle en el celular y con el teclado, **para** decidir la compra en cualquier dispositivo.
+
 - **Then** una sola columna en mobile, sin desbordes horizontales, con un solo `h1`.
 - **Then** foco visible, contraste AA y nombre accesible en los controles con ícono.
 - **Then** un id inválido (`/producto/abc`, `/producto/0`, `/producto/-1`) responde 404 y no rompe la página.
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| `consultarCatalogo` contra PGlite migrada (el mismo seam de T1) | que un producto dado de baja desaparezca de la vista: es el invariante que sostiene el 404 | el render del detalle |
-| Estructura de `src/app/producto/[id]/page.tsx` y de `ProductCard.tsx` | reuso de `leerCatalogo`, `notFound()`, enlace desde la card, producción como dato de producción y ausencia de campos inventados | automatización de UI |
-| Verificación en navegador de `/producto/<id>` | jerarquía, responsive, estados | automatización de UI |
-
-No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8).
-
-## 5. Fuera de alcance
-
-- Galería, variantes, reseñas, “productos relacionados” y especificaciones técnicas: el modelo no los tiene
-  y no se inventan (`AGENTS.md` §5.1).
-- Carrito y reserva de stock: ya resueltos en T4; el detalle solo agrega al carrito.
-- Fotos reales: las sube el Administrador desde el panel (T7).
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **Página propia** (`/producto/[id]`), no una card expandida (G2): una URL por producto, compartible, y un
    único lugar donde decidir el 404.
@@ -113,7 +102,31 @@ No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8)
 
 ---
 
-## 7. Estado de implementación (auditoría del 2026-10-27)
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| `consultarCatalogo` contra PGlite migrada (el mismo seam de T1) | que un producto dado de baja desaparezca de la vista: es el invariante que sostiene el 404 | el render del detalle |
+| Estructura de `src/app/producto/[id]/page.tsx` y de `ProductCard.tsx` | reuso de `leerCatalogo`, `notFound()`, enlace desde la card, producción como dato de producción y ausencia de campos inventados | automatización de UI |
+| Verificación en navegador de `/producto/<id>` | jerarquía, responsive, estados | automatización de UI |
+
+No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8).
+
+## 6. Fuera de alcance
+
+- Galería, variantes, reseñas, “productos relacionados” y especificaciones técnicas: el modelo no los tiene
+  y no se inventan (`AGENTS.md` §5.1).
+- Carrito y reserva de stock: ya resueltos en T4; el detalle solo agrega al carrito.
+- Fotos reales: las sube el Administrador desde el panel (T7).
+
+## 7. Notas finales
+
+- G2 (27-10): el detalle es **página propia** (`/producto/<id>`), no una card ampliada.
+- La validez de `activo` es de la vista; la página sólo valida el **formato** del id (`idDeProducto`, #42) y el 404 es el mismo para un id inválido, uno inexistente y un producto dado de baja.
+- El tiempo de producción se presenta como dato de elaboración, nunca como plazo de entrega, y comparte la frase con la card del catálogo.
+- La verificación en navegador (jerarquía, responsive, estados y contraste) queda en #23.
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
 
 `npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde, contra PGlite.
 El render del detalle no se verifica en el suite (no hay jsdom): lo que sigue se apoya en el código y en el

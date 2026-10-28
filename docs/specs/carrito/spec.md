@@ -46,11 +46,15 @@ persistencia en el cliente (zustand). El carrito:
 
 ### HU-2 · Editar y quitar
 
+**Como** Cliente, **quiero** subir, bajar o quitar una línea del carrito, **para** ajustar el pedido antes de confirmarlo.
+
 - **Then** cada línea permite subir y bajar la cantidad, con la cantidad actual visible.
 - **Then** bajar de 1 quita la línea, y hay un botón explícito para quitar.
 - **Then** la cantidad nunca supera lo disponible ni baja de 1 sin quitar la línea.
 
 ### HU-3 · Totales
+
+**Como** Cliente, **quiero** ver el subtotal por línea y el total del pedido, **para** saber cuánto voy a transferir.
 
 - **Then** el resumen muestra el subtotal por línea y el total del pedido.
 - **Then** el total es la suma de los subtotales redondeados de `precio × cantidad` y coincide con lo que
@@ -61,10 +65,14 @@ persistencia en el cliente (zustand). El carrito:
 
 ### HU-4 · Persistencia
 
+**Como** Cliente, **quiero** que el carrito sobreviva a una recarga, **para** no volver a cargar los productos.
+
 - **Then** recargar la página o navegar no pierde el carrito (vive en `localStorage`).
 - **Then** vaciar el carrito deja el contador en 0 y el estado vacío visible.
 
 ### HU-5 · Estado vacío y accesibilidad
+
+**Como** Cliente, **quiero** entender un carrito vacío y manejarlo con el teclado, **para** saber qué hacer y no quedar trabado.
 
 - **Then** el carrito vacío explica qué hacer y lleva al catálogo.
 - **Then** los controles de cantidad tienen nombre accesible, foco visible y llegan con teclado.
@@ -72,26 +80,13 @@ persistencia en el cliente (zustand). El carrito:
 
 ### HU-6 · Sin reserva de stock
 
+**Como** Cliente, **quiero** que el carrito no toque la base, **para** que navegar no me reserve ni me descuente stock.
+
 - **Then** agregar, editar o quitar **no** hace ninguna llamada a la base: el módulo es puro y el
   adaptador sólo escribe en `localStorage`.
 - **Then** el botón del carrito lleva al checkout, que es quien va a reservar stock en T5.
 
-## 4. Seams bajo test
-
-| Seam | Cubre | Deja afuera |
-|---|---|---|
-| Módulo `src/lib/carrito.ts` (funciones puras, sin DOM) | una línea por producto, tope por disponible, sin stock no agrega, editar/quitar, total y contador, redondeo a dos decimales | render, `localStorage` |
-| Verificación en navegador de `/` y `/cart` | agregar, contador, persistencia al recargar, estado vacío | automatización de UI |
-
-No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8).
-
-## 5. Fuera de alcance
-
-- Confirmar el pedido, subir el comprobante y reservar stock: **T5**.
-- Cuentas de Cliente y carrito persistido en Supabase: fuera del MVP.
-- Cupones, descuentos y envío: no están en el modelo.
-
-## 6. Decisiones tomadas
+## 4. Decisiones de implementación
 
 1. **Módulo puro + adaptador:** la aritmética se testea sin DOM y el adaptador sólo persiste.
 2. **Clave de almacenamiento `esenciatecnica-carrito`:** se retira el nombre legacy del proyecto.
@@ -101,7 +96,29 @@ No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8)
 
 ---
 
-## 7. Estado de implementación (auditoría del 2026-10-27)
+## 5. Decisiones de testing
+
+| Seam | Cubre | Deja afuera |
+|---|---|---|
+| Módulo `src/lib/carrito.ts` (funciones puras, sin DOM) | una línea por producto, tope por disponible, sin stock no agrega, editar/quitar, total y contador, redondeo a dos decimales | render, `localStorage` |
+| Verificación en navegador de `/` y `/cart` | agregar, contador, persistencia al recargar, estado vacío | automatización de UI |
+
+No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8).
+
+## 6. Fuera de alcance
+
+- Confirmar el pedido, subir el comprobante y reservar stock: **T5**.
+- Cuentas de Cliente y carrito persistido en Supabase: fuera del MVP.
+- Cupones, descuentos y envío: no están en el modelo.
+
+## 7. Notas finales
+
+- La regla del dinero es una sola: `subtotalDeLinea` redondea en la aritmética y `formatPrice` sólo muestra el número (#44). Si el carrito muestra un importe y el pedido se aprueba contra otro, es un bug.
+- El carrito vive en `localStorage` y **no** reserva stock (AGENTS §5.2): reservar es del pedido confirmado.
+- El contador del header cuenta unidades, no líneas: con un producto y cantidad 3 el Cliente espera ver «3».
+- La verificación en navegador de `/cart` queda en #23, con la base migrada y las claves puestas.
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
 
 `npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde. La aritmética se
 testea contra el módulo puro; `localStorage` y el render **no** se ejecutan en el suite, así que la
@@ -126,7 +143,7 @@ persistencia y el contador quedan para la verificación manual.
 | HU-5 · una sola columna en mobile, sin desbordes | pendiente | `src/components/Carrito.tsx:56` usa una grilla de una columna, pero no hay test ni medición: verificación manual, bloqueada por #16/#20 |
 | HU-6 · agregar, editar o quitar no llaman a la base | implementado, sin verificar en vivo | test *«el módulo es puro: no habla con la base ni con la red»* en `tests/front/carrito.test.ts:109` y *«el adaptador de persistencia usa el módulo y guarda sólo en el navegador»* en `tests/front/carrito.test.ts:115` |
 | HU-6 · el botón del carrito lleva al checkout | implementado, sin verificar en vivo | `src/components/Carrito.tsx:126-129`; `src/app/checkout/page.tsx:48` recalcula con `totalDelPedido` |
-| §4 · un solo carrito, sin componentes legacy | implementado, sin verificar en vivo | test *«hay un solo carrito: los componentes legacy se retiraron»* en `tests/front/carrito.test.ts:126` y *«no quedan nombres legacy en el camino del carrito»* en `:146` |
+| §5 · un solo carrito, sin componentes legacy | implementado, sin verificar en vivo | test *«hay un solo carrito: los componentes legacy se retiraron»* en `tests/front/carrito.test.ts:126` y *«no quedan nombres legacy en el camino del carrito»* en `:146` |
 | HU-3 · el total "coincide con lo que se cobra" | implementado, sin verificar en vivo | Regla única: `subtotalDeLinea` suma subtotales ya redondeados (`src/lib/carrito.ts:71-89`) y `formatPrice` muestra entero sin decimales y con centavos con dos exactos (`src/lib/format.ts`). El carrito y el checkout comparten `subtotalDeLinea`; tests *«un monto con centavos se muestra con dos decimales exactos»*, *«el total del carrito es el número que el checkout precarga»* y *«el carrito y el checkout no multiplican a mano»* en `tests/front/formato-dinero.test.ts`. Cierra el issue **#44** |
 | §1 · `/cart` sin el vocabulario legacy | implementado, sin verificar en vivo | `src/app/cart/page.tsx:1-5` monta `src/components/Carrito.tsx`; test `tests/front/carrito.test.ts:146` |
 
