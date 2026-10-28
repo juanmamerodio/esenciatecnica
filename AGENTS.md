@@ -121,6 +121,7 @@ Antes de codificar una feature no trivial:
 ### 6.2 Spec y tickets
 
 - La spec vive en un issue de GitHub (ver [`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md)). Si necesita detalle, se adjunta `docs/specs/<feature>/spec.md` y el issue lo linkea.
+- El documento se escribe con [`docs/specs/PLANTILLA.md`](docs/specs/PLANTILLA.md): el encabezado, las siete secciones canónicas en orden y la forma de HU `Como <actor>, quiero <feature>, para <beneficio>`. La plantilla ordena el documento; la spec publicada sigue siendo el issue.
 - Cada ticket es una **tajada vertical**: base + API + UI + test en un entregable mínimo.
 - Prohibido dividir por capas horizontales (“ticket de toda la base”, “ticket de toda la API”).
 - Cada ticket declara sus **blockers**; se trabaja blockers-first.

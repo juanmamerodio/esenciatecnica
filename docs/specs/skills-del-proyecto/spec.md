@@ -55,7 +55,8 @@ un solo nivel, frontmatter sin `model` ni `tools`) y en español.
    duplicar `teams.md` ni `AGENTS.md`.
 7. Como revisor, quiero que `AGENTS.md` §11 liste las skills reales, para que el documento no prometa un
    directorio vacío.
-8. Como integrante del equipo, quiero que las skills estén en español, como el resto del proyecto.
+8. Como integrante del equipo, quiero que las skills estén en español, como el resto del proyecto, para
+   que cualquier integrante las lea sin traducir.
 9. Como integrante del equipo, quiero que las skills no traigan `model:` ni `tools:` en el frontmatter,
    para que el runtime las cargue.
 10. Como Celeste, quiero un test que verifique que cada skill tiene nombre kebab-case y descripción, para

@@ -1,6 +1,6 @@
 # Spec · Plantilla de spec
 
-> **Feature:** `plantilla-de-spec` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#29](https://github.com/juanmamerodio/esenciatecnica/issues/29).
+> **Feature:** `plantilla-de-spec` · **Estado:** implementada en repo (issue #40) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#29](https://github.com/juanmamerodio/esenciatecnica/issues/29) · **Tajada:** [#40](https://github.com/juanmamerodio/esenciatecnica/issues/40).
 > **Origen:** hallazgo 🟡 de `memory.md` (ningún spec tiene sección de notas finales y 25 HU no enuncian
 > actor ni beneficio) y tarea `BAJA` del tablero:
 > *Plantilla de spec: notas finales y HU con actor y beneficio*.
@@ -68,7 +68,7 @@ Secciones de la plantilla:
 12. Como Celeste, quiero que las notas finales registren las correcciones de evidencia, para que un dato
     falso no vuelva a circular.
 13. Como integrante del equipo, quiero que la plantilla esté en español, como el resto de la
-    documentación.
+    documentación, para no introducir un idioma nuevo en el repo.
 14. Como Juanma, quiero que la plantilla quepa en una pantalla, para que se lea antes de escribir, no
     después.
 
@@ -115,3 +115,25 @@ Secciones de la plantilla:
   decisiones, testing, fuera de alcance) y agrega lo que faltaba: notas finales y HU con actor.
 - Si un spec viejo se toca por otro motivo, se retrofitea en ese momento: la plantilla avanza por
   contacto, no por barrido.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #40)
+
+`npm run typecheck` sin errores, `npm run lint` en 0 y la suite en verde con el test nuevo.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Existe `docs/specs/PLANTILLA.md`, en español y en una pantalla | implementado | `docs/specs/PLANTILLA.md` (86 líneas); tests *«está en español y cabe en una pantalla»* |
+| Declara las siete secciones en orden y la forma exacta de una HU | implementado | tests *«declara las siete secciones, en orden»* y *«declara la forma exacta de una HU»* |
+| No prescribe rutas de archivo ni fragmentos de código | implementado | test *«no prescribe rutas de archivo ni fragmentos de código»* |
+| `AGENTS.md` §6.2 linkea la plantilla | implementado | test *«`AGENTS.md` §6.2 linkea la plantilla sin copiarla»*; §6.2 sólo la nombra y la linkea |
+| Test estructural sobre `docs/specs/*/spec.md` | implementado | `tests/front/plantilla-de-spec.test.ts`: siete secciones en orden y forma de HU en cada spec, con los pendientes nombrados y su motivo |
+| `npm run docs:links` en verde | implementado | 0 links sin resolver |
+
+**Hallazgos del propio test** (los tres se corrigieron acá, porque son de una línea): las HU 13 de este
+spec, 8 de `skills-del-proyecto` y 8 de `trazabilidad-issues` no enunciaban beneficio.
+
+**Pendiente de la tanda:** el retrofit de los siete specs que toca la tanda del 27-10 es **#47**; los
+otros tres specs que no siguen la plantilla (`bd-mvp`, `front-mvp` y `migracion-otjph`) quedan como están
+hasta que una tarea los alcance, y están nombrados en el test con ese motivo.

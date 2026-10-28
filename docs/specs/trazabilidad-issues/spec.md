@@ -53,7 +53,7 @@ verificada. La regla que ordena el cierre:
 7. Como integrante del equipo, quiero que cada spec de tajada pierda su `### Pendiente` de cierre de
    ticket, para que el documento no siga pidiendo algo ya hecho.
 8. Como revisor externo, quiero poder reconstruir por qué un issue se cerró leyendo el issue, sin abrir
-   el commit ni el tablero.
+   el commit ni el tablero, para auditar el trabajo sin depender de ningún entorno.
 9. Como integrante del equipo, quiero que los issues nuevos de deuda y deuda técnica queden linkeados
    desde su spec, para que la trazabilidad no se corte al abrir trabajo nuevo.
 10. Como Celeste, quiero que el checklist de cierre del issue mencione la evidencia pegada (comando y
