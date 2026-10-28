@@ -736,26 +736,17 @@ describe('T7 · lectura de pedidos y URL firmada', () => {
     expect(vacio.pedidos).toEqual([]);
   });
 
-  it('urlFirmadaDelComprobante rechaza una clave que intenta salir del bucket', async () => {
-    const { puerto, llamadas } = puertoFalso();
-    const panel = crearPanel(puerto);
+  it('la superficie pública del panel no expone la firma suelta del comprobante (#34)', () => {
+    const modulo = leer('src/lib/admin.ts');
 
-    const travesia = await panel.urlFirmadaDelComprobante('../../secreto.png');
-    const vacia = await panel.urlFirmadaDelComprobante('   ');
+    // El símbolo sin consumidor se retiró: si vuelve, este test falla.
+    expect(modulo).not.toMatch(/urlFirmadaDelComprobante/);
+    expect(modulo).not.toMatch(/ResultadoUrlFirmada/);
+    expect(modulo).not.toMatch(/ESQUEMA_CLAVE/);
 
-    expect(travesia.estado).toBe('error');
-    expect(vacia.estado).toBe('error');
-    expect(llamadas).toEqual([]);
-  });
-
-  it('urlFirmadaDelComprobante devuelve la URL firmada por el adaptador', async () => {
-    const { puerto } = puertoFalso();
-
-    const resultado = await crearPanel(puerto).urlFirmadaDelComprobante('comprobantes/42/foto.png');
-
-    expect(resultado.estado).toBe('ok');
-    if (resultado.estado !== 'ok') return;
-    expect(resultado.url).toContain('token=firma');
+    // El panel sigue firmando dentro de su lectura de pedidos, que es su único consumidor real.
+    expect(modulo).toMatch(/firmarComprobante/);
+    expect(modulo).toMatch(/urlFirmada/);
   });
 });
 

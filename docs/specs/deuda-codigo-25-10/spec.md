@@ -166,8 +166,8 @@ Decisiones por hallazgo:
 |---|---|---|
 | 1 · `buscarCliente` por patrón | [#33](https://github.com/juanmamerodio/esenciatecnica/issues/33) | ✅ implementado |
 | 3 · `tiempo_produccion` en el catálogo | [#38](https://github.com/juanmamerodio/esenciatecnica/issues/38) | pendiente |
-| 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | pendiente |
-| 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | pendiente |
+| 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
+| 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | pendiente |
 | 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
 | 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
@@ -214,3 +214,20 @@ Nacieron dos módulos compartidos y profundos, y el formato de la fecha se separ
 | La fecha del panel se separa del transporte HTTP | implementado | `src/lib/fecha.ts`; test *«`comun.ts` queda con el transporte y sin formato de fecha»* |
 | Tests que fijan la importación canónica de los dos módulos | implementado | `tests/front/archivo-y-errores.test.ts` (25 tests, 6 estructurales) |
 | Cobertura migrada sin duplicar el mapeo | implementado | `tests/front/admin.test.ts` y `tests/front/checkout.test.ts` usan `LIMITES_DE_ARCHIVO` y `ArchivoSubido` del módulo |
+
+### Hallazgos 4 y 5 · cerrados (#34)
+
+- **Hallazgo 4:** `urlFirmadaDelComprobante` y `ResultadoUrlFirmada` salen de la superficie pública
+  del panel; el esquema de la clave se retira con ellos. `firmarComprobante` sigue en el puerto, que
+  es lo que usa `pedidos()` para firmar cada comprobante al leerlos.
+- **Hallazgo 5:** `totalAVisualizar(totalDeLaBase, totalDelCarrito)` decide el número que muestra el
+  «Total a transferir»: **manda el de la base** apenas la respuesta lo trae (también precarga el
+  campo «Monto transferido»), y el del carrito sólo antes de confirmar.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Tras `monto-no-coincide`, la pantalla muestra el total de la base | implementado | `totalAVisualizar` en `src/lib/checkout.ts`; `src/app/checkout/page.tsx` lo usa en el resumen y en la precarga del monto, y guarda el total de la respuesta |
+| Antes de confirmar, manda el total del carrito | implementado | test *«antes de confirmar manda el total del carrito»* en `tests/front/checkout.test.ts` |
+| Ningún archivo importa la función retirada | implementado | `npm run typecheck` sin errores tras retirarla del puerto y del módulo |
+| Test estructural que falla si el símbolo vuelve | implementado | test *«la superficie pública del panel no expone la firma suelta del comprobante (#34)»* en `tests/front/admin.test.ts` |
+| La lista de pedidos sigue mostrando la signed URL del comprobante | implementado | test *«firma el comprobante de cada pedido»*/`urlFirmada` en `tests/front/admin.test.ts`; `firmarSinRomper` sigue en `admin.ts` |

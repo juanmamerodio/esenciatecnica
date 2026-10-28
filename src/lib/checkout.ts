@@ -197,6 +197,17 @@ export async function confirmarPedido(
   }
 }
 
+/**
+ * El total que el Cliente ve en el resumen de la transferencia.
+ *
+ * **Manda el de la base** apenas lo devuelve la respuesta (por ejemplo, tras `monto-no-coincide`):
+ * el Cliente tiene que transferir el número del pedido que el Administrador va a comparar. El total
+ * del carrito sólo manda antes de confirmar (#34 · hallazgo 5 de `deuda-codigo-25-10`).
+ */
+export function totalAVisualizar(totalDeLaBase: number | null, totalDelCarrito: number): number {
+  return totalDeLaBase ?? totalDelCarrito;
+}
+
 type Revision =
   | { ok: true; cliente: DatosDelCliente; items: ItemPedido[]; monto: number; idPedido: number | null }
   | { ok: false; resultado: ResultadoCheckout };

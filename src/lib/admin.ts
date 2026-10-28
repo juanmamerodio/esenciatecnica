@@ -158,8 +158,6 @@ export type ResultadoActividad =
 
 export type ResultadoFoto = { estado: "ok"; idProducto: number; url: string } | ErrorDelPanel;
 
-export type ResultadoUrlFirmada = { estado: "ok"; url: string } | ErrorDelPanel;
-
 /**
  * Puerto del panel. En producción lo implementa Supabase con la service role
  * (`src/lib/admin-servidor.ts`); en los tests, un falso sin red.
@@ -201,7 +199,6 @@ export type PanelAdmin = {
   actualizarProducto(idProducto: unknown, datos: unknown): Promise<ResultadoProductoActualizado>;
   cambiarActividad(idProducto: unknown, activo: unknown): Promise<ResultadoActividad>;
   subirFotoProducto(idProducto: unknown, archivo: ArchivoDeFoto): Promise<ResultadoFoto>;
-  urlFirmadaDelComprobante(clave: unknown): Promise<ResultadoUrlFirmada>;
 };
 
 // ── Validación del borde ──────────────────────────────────────────────────────
@@ -248,15 +245,6 @@ const ESQUEMA_PRODUCTO = z.object({
     .nullish()
     .transform((valor) => valor ?? 0),
 });
-
-const ESQUEMA_CLAVE = z
-  .string()
-  .trim()
-  .min(1, "Falta la clave del comprobante.")
-  .refine(
-    (valor) => !valor.includes("..") && !valor.startsWith("/") && !valor.includes("\\"),
-    "La clave del comprobante no es válida.",
-  );
 
 const ESQUEMA_DETALLE = z.object({
   id_producto: ESQUEMA_ID,
@@ -586,21 +574,6 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
       try {
         const subida = await puerto.subirFoto(revisionId.data, clave, revisionArchivo.archivo);
         return { estado: "ok", idProducto: revisionId.data, url: subida.url };
-      } catch (error) {
-        return describirError(error);
-      }
-    },
-
-    async urlFirmadaDelComprobante(clave) {
-      const revision = ESQUEMA_CLAVE.safeParse(clave);
-      if (!revision.success) {
-        return errorDeDatos("La clave del comprobante no es válida.", {
-          clave: revision.error.issues[0]?.message ?? "Clave inválida.",
-        });
-      }
-
-      try {
-        return { estado: "ok", url: await puerto.firmarComprobante(revision.data) };
       } catch (error) {
         return describirError(error);
       }

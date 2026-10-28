@@ -88,7 +88,9 @@ leer. No se maquilla con datos de muestra.
 **Como** Administrador, **quiero** que el Cliente declare el monto que transfirió **para** poder compararlo
 con la imagen y con el total (`AGENTS.md` §5.3).
 
-- **Then** el campo "Monto transferido" viene precargado con el total del carrito y es editable.
+- **Then** el campo "Monto transferido" viene precargado con el total del carrito y es editable; si la
+  respuesta trae el total de la base (tras `monto-no-coincide`), la precarga y el «Total a transferir» usan
+  **ese** número (#34 · hallazgo 5 de `deuda-codigo-25-10`).
 - **Given** un monto declarado distinto del total del pedido, **Then** no se sube el comprobante y se
   explica que el importe tiene que coincidir (aprobar sin coincidencia es imposible: `ET005`).
 - **Then** el `monto` guardado es el declarado por el Cliente, mayor que cero (`COMPROBANTE.monto > 0`); el
@@ -167,10 +169,12 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
    *upsert* por email con la service role, acotado a esta tajada.
 2. **`foto_url` guarda la clave del objeto, no una URL:** el bucket es privado; la signed URL se genera al
    leer, en el servidor.
-3. **El monto llega precargado con el total del carrito y es editable; el servidor guarda lo que declara
+3. **El monto llega precargado con el total a transferir y es editable; el servidor guarda lo que declara
    el Cliente:** la precarga es una comodidad de la pantalla, pero el dato que se persiste es el que el
-   Cliente confirma. Si no coincide con el total de la base, no se sube el comprobante (`ET005`).
-   > Contradicción resuelta en la auditoría del 2026-10-27: HU-3 y la §4 ya decían “monto precargado”; el código (`src/app/checkout/page.tsx:54-57`) lo confirma, así que se corrigió este punto y manda el código.
+   Cliente confirma. Si no coincide con el total de la base, no se sube el comprobante (`ET005`) y, desde
+   #34, el total que se muestra pasa a ser el de la base (`totalAVisualizar`): el Cliente transfiere el
+   número del pedido que el Administrador va a comparar.
+   > Contradicción resuelta en la auditoría del 2026-10-27: HU-3 y la §4 ya decían “monto precargado”; el código (`src/app/checkout/page.tsx`) lo confirma, así que se corrigió este punto y manda el código.
 4. **Reintento idempotente después de crear el pedido:** el `id_pedido` se conserva en el intento, así un
    fallo de subida no duplica pedido ni reserva.
 5. **Se retira el camino legacy de compra en esta misma tajada:** dos caminos de pedido conviviendo es
@@ -202,29 +206,32 @@ criterio como “verde en producción” sin esa verificación.
 | HU-1 · DNI, email y teléfono fuera del alcance de la anon key | implementado, sin verificar en vivo | `tests/db/rls.test.ts:89`; `tests/db/rls-supabase.test.ts:56`; `src/lib/checkout-servidor.ts:8-10` |
 | HU-2 · Reserva de stock y total derivado en la base | implementado, sin verificar en vivo | `tests/db/pedidos.test.ts:19`; `src/lib/checkout-servidor.ts:77-84` |
 | HU-2 · Stock insuficiente: error y carrito intacto | implementado, sin verificar en vivo | `src/lib/checkout.ts:376-380`; `src/app/checkout/page.tsx:91-99`; test `tests/front/checkout.test.ts:318` |
-| HU-2 · Total del carrito vs total de la base | implementado | `src/app/checkout/page.tsx:48,100-103`; `src/lib/checkout.ts:176`; test `tests/front/checkout.test.ts:252` |
-| HU-2 · Items `{ id_producto, cantidad }` sin precios | implementado | `src/app/checkout/page.tsx:81`; `src/lib/checkout.ts:133-144`; test `tests/front/checkout.test.ts:220` |
+| HU-2 · Total del carrito vs total de la base | implementado | `totalAVisualizar` en `src/lib/checkout.ts` y su uso en `src/app/checkout/page.tsx` (#34); test *«apenas la base devuelve su total, ese número manda»* en `tests/front/checkout.test.ts` |
+| HU-2 · Items `{ id_producto, cantidad }` sin precios | implementado | `ESQUEMA_ITEMS` en `src/lib/checkout.ts`; `items.map` en `src/app/checkout/page.tsx`; test `tests/front/checkout.test.ts:220` |
 | HU-2 · Producto inactivo o inexistente rechazado | implementado, sin verificar en vivo | `src/lib/checkout.ts:381-385`; test `tests/front/checkout.test.ts:332`; `tests/db/pedidos.test.ts:71` |
-| HU-3 · Monto precargado con el total del carrito y editable | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:54-57,216-227` |
-| HU-3 · Monto distinto del total: no sube y explica | implementado | `src/lib/checkout.ts:176-178,339-348`; test `tests/front/checkout.test.ts:252` |
-| HU-3 · `monto` guardado como lo declaró el Cliente, > 0 | implementado | `src/lib/checkout.ts:128-131,326`; test `tests/front/checkout.test.ts:239` |
-| HU-3 · Sin validación automática de la imagen | implementado | `src/components/SubirComprobante.tsx:95-103`; `src/lib/checkout.ts:225-238`; test `tests/front/checkout.test.ts:384` |
-| HU-4 · PNG, JPEG y WebP de hasta 5 MB, rechazo previo | implementado | `src/lib/checkout.ts:26-29,225-238,270-276`; tests `tests/front/checkout.test.ts:164,180` |
+| HU-3 · Monto precargado con el total a transferir y editable | implementado, sin verificar en vivo | `totalAVisualizar` y la precarga en `src/app/checkout/page.tsx`; tests *«antes de confirmar manda el total del carrito»* y *«apenas la base devuelve su total, ese número manda»* (#34) |
+| HU-3 · Monto distinto del total: no sube y explica | implementado | `montoQueNoCoincide` en `src/lib/checkout.ts`; test `tests/front/checkout.test.ts:252` |
+| HU-3 · `monto` guardado como lo declaró el Cliente, > 0 | implementado | `ESQUEMA_MONTO` y `registrarComprobante` en `src/lib/checkout.ts`; test `tests/front/checkout.test.ts:239` |
+| HU-3 · Sin validación automática de la imagen | implementado | `src/components/SubirComprobante.tsx` usa `revisarTipoYTamano` (`src/lib/archivo.ts`); el servidor revisa con `revisarArchivo`; test `tests/front/checkout.test.ts:384` |
+| HU-4 · PNG, JPEG y WebP de hasta 5 MB, rechazo previo | implementado | `LIMITES_DE_ARCHIVO` y `revisarArchivo` en `src/lib/archivo.ts` (#35); tests `tests/front/checkout.test.ts:164,180` y `tests/front/archivo-y-errores.test.ts` |
 | HU-4 · Bucket privado con clave por pedido en `foto_url` | implementado, sin verificar en vivo | `src/lib/checkout-servidor.ts:97-104,106-126`; `src/lib/checkout.ts:320`; tests `tests/front/checkout.test.ts:206,358` |
 | HU-4 · Estado inicial `Comprobante Subido` en el historial | implementado, sin verificar en vivo | `tests/db/aprobacion.test.ts:64-71` |
 | HU-4 · La anon key no lee el bucket ni el comprobante | implementado, sin verificar en vivo | `tests/db/rls.test.ts:89`; `tests/db/rls-supabase.test.ts:56`; `npm run bd:viva` (issue #15) |
 | HU-5 · Reintento con `idPedido` no vuelve a crear el pedido | implementado | `src/app/checkout/page.tsx:45,83,99`; `src/lib/checkout.ts:158`; test `tests/front/checkout.test.ts:269` |
 | HU-5 · Reemplazo del comprobante pendiente en la misma fila | implementado, sin verificar en vivo | `src/lib/checkout.ts:319,328`; `src/lib/checkout-servidor.ts:107-117`; tests `tests/front/checkout.test.ts:278`; `tests/db/aprobacion.test.ts:137` |
 | HU-5 · Falla de subida: reserva intacta y cron de viernes | implementado, sin verificar en vivo | test `tests/front/checkout.test.ts:344`; `tests/db/aprobacion.test.ts:147` |
-| HU-5 · Falta `SUPABASE_SERVICE_ROLE_KEY`: error explícito | implementado | `src/lib/checkout-servidor.ts:21-25`; `src/app/api/checkout/route.ts:72-82` |
+| HU-5 · Falta `SUPABASE_SERVICE_ROLE_KEY`: error explícito | implementado | `FaltaConfiguracion` (lanzada por `src/lib/checkout-servidor.ts`) y el borde que distingue 503 de 500 en `src/app/api/checkout/route.ts` (#35) |
 | HU-6 · Pantalla de éxito con número y total; carrito vaciado | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:91-94,119-127` |
 | HU-6 · Sin promesas de envío, seguimiento ni estados posteriores | implementado | `src/app/checkout/page.tsx:124-126` |
 | HU-6 · Carrito vacío y confirmación distinguidos | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:115,136` |
 | HU-6 · Mobile y accesibilidad (foco, `aria-label`, errores anunciados) | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:166,233`; `src/components/SubirComprobante.tsx:65,88` |
 | HU-7 · El navegador no recibe la service role ni listados | implementado | `src/app/api/checkout/route.ts:33-84`; test `tests/front/checkout.test.ts:403` |
-| HU-7 · Zod y `400` con detalle de campos | implementado | `src/lib/checkout.ts:112-144`; `src/app/api/checkout/route.ts:15-24,71` |
+| HU-7 · Zod y `400` con detalle de campos | implementado | `ESQUEMA_CLIENTE`/`ESQUEMA_ITEMS` en `src/lib/checkout.ts`; `camposDeZod` en `src/lib/errores-bd.ts`; `ESTADO_HTTP` compartido (#35) |
 | HU-7 · Adaptador tipado con `database.types.ts`, sin `any` | implementado | `src/lib/checkout-servidor.ts:1-3,27` |
 | Camino legacy de compra (`/api/orders`, `/api/verify-payment`, `ReceiptUploader`) | retirado | `tests/front/checkout.test.ts:384-401`; spec §2 |
+
+> Las referencias `archivo:línea` de las filas sin símbolo son la foto de la auditoría del 2026-10-27;
+> la tanda de #33–#46 movió código, así que las filas que esa tanda tocó citan el **símbolo**.
 
 ### Pendiente
 

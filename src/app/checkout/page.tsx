@@ -15,7 +15,7 @@ import {
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 import SubirComprobante from "@/components/SubirComprobante";
 import { subtotalDeLinea, totalDelPedido } from "@/lib/carrito";
-import type { ResultadoCheckout } from "@/lib/checkout";
+import { totalAVisualizar, type ResultadoCheckout } from "@/lib/checkout";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
 import { datosDeTransferencia } from "@/lib/transferencia";
@@ -44,6 +44,8 @@ export default function CheckoutPage() {
   const [campos, setCampos] = useState<Record<string, string>>({});
   const [idPedido, setIdPedido] = useState<number | null>(null);
   const [confirmacion, setConfirmacion] = useState<Confirmacion | null>(null);
+  /** Total que devolvió la base: apenas existe, manda sobre el del carrito (#34). */
+  const [totalDeLaBase, setTotalDeLaBase] = useState<number | null>(null);
 
   const total = totalDelPedido(items);
   const transferencia = datosDeTransferencia();
@@ -51,10 +53,13 @@ export default function CheckoutPage() {
   // El carrito vive en localStorage: hasta hidratar no se puede afirmar que esté vacío.
   useEffect(() => setMontado(true), []);
 
-  // El monto llega precargado con el total del carrito; si el Cliente lo editó, se respeta.
+  // El monto llega precargado con el total a transferir; si el Cliente lo editó, se respeta.
   useEffect(() => {
-    if (montado && !montoEditado) setMonto(total > 0 ? total.toFixed(2) : "");
-  }, [montado, montoEditado, total]);
+    if (montado && !montoEditado) {
+      const aTransferir = totalAVisualizar(totalDeLaBase, total);
+      setMonto(aTransferir > 0 ? aTransferir.toFixed(2) : "");
+    }
+  }, [montado, montoEditado, total, totalDeLaBase]);
 
   const enviar = async (evento: React.FormEvent) => {
     evento.preventDefault();
@@ -97,6 +102,8 @@ export default function CheckoutPage() {
       setError(cuerpo.mensaje);
       setCampos(cuerpo.campos ?? {});
       if (cuerpo.idPedido) setIdPedido(cuerpo.idPedido);
+      // La base ya calculó el total del pedido: desde acá es el número que se muestra y se cobra.
+      if (typeof cuerpo.total === "number") setTotalDeLaBase(cuerpo.total);
       if (cuerpo.motivo === "monto-no-coincide" && typeof cuerpo.total === "number") {
         setMonto(cuerpo.total.toFixed(2));
         setMontoEditado(false);
@@ -280,7 +287,7 @@ export default function CheckoutPage() {
             <p className="flex items-center justify-between border-t border-border-soft pt-4">
               <span className="font-semibold text-text">Total a transferir</span>
               <span className="font-mono text-2xl font-bold tracking-tight text-text">
-                {formatPrice(total)}
+                {formatPrice(totalAVisualizar(totalDeLaBase, total))}
               </span>
             </p>
           </section>

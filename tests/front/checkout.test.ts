@@ -3,6 +3,7 @@ import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   confirmarPedido,
+  totalAVisualizar,
   type EntradaCheckout,
   type PuertoCheckout,
 } from '../../src/lib/checkout';
@@ -370,6 +371,29 @@ describe('T5 · la clave del objeto no sale del bucket', () => {
     await confirmarPedido(puerto, entrada({ monto: 2500, archivo: archivo({ nombre: '...' }) }));
 
     expect(clavesSubidas[0]).toBe('comprobantes/42/comprobante.png');
+  });
+});
+
+describe('#34 · el total que se muestra en el resumen', () => {
+  it('antes de confirmar manda el total del carrito', () => {
+    expect(totalAVisualizar(null, 2500)).toBe(2500);
+  });
+
+  it('apenas la base devuelve su total, ese número manda', () => {
+    // El caso que originó el hallazgo: tras `monto-no-coincide` el pedido vale 3000, no 2500.
+    expect(totalAVisualizar(3000, 2500)).toBe(3000);
+  });
+
+  it('un total de la base en cero sigue siendo un número de la base', () => {
+    expect(totalAVisualizar(0, 2500)).toBe(0);
+  });
+
+  it('la pantalla muestra el total de la base y no el del carrito', () => {
+    const pagina = leer('src/app/checkout/page.tsx');
+    expect(pagina).toMatch(/totalAVisualizar\(/);
+    expect(pagina).toMatch(/setTotalDeLaBase\(cuerpo\.total\)/);
+    // El bug era renderizar el total del carrito en el resumen de la transferencia.
+    expect(pagina).not.toMatch(/\{formatPrice\(total\)\}/);
   });
 });
 
