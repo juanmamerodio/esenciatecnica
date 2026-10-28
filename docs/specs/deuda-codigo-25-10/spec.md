@@ -165,7 +165,7 @@ Decisiones por hallazgo:
 | Hallazgo | Ticket | Estado |
 |---|---|---|
 | 1 · `buscarCliente` por patrón | [#33](https://github.com/juanmamerodio/esenciatecnica/issues/33) | ✅ implementado |
-| 3 · `tiempo_produccion` en el catálogo | [#38](https://github.com/juanmamerodio/esenciatecnica/issues/38) | pendiente |
+| 3 · `tiempo_produccion` en el catálogo | [#38](https://github.com/juanmamerodio/esenciatecnica/issues/38) | ✅ implementado |
 | 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | ✅ implementado |
@@ -272,3 +272,17 @@ No hubo cambio de comportamiento: el código mandaba y el spec se completó.
 |---|---|---|
 | El spec enuncia cada límite con su valor | implementado | `checkout/spec.md` §6.1; test *«el spec enuncia cada límite con su valor»* |
 | Un test fija cada límite y su caso válido en el borde | implementado | tests *«nombre: dos caracteres pasan, uno no»*, *«teléfono: 30 pasan, 31 no»*, *«items: 50 pasan, 51 no»*, *«cada producto una sola vez»* y *«monto: el mínimo positivo pasa, cero no»* |
+
+### Hallazgo 3 · cerrado (#38)
+
+La card del catálogo publica el tiempo de producción; la Home no. La frase vive en
+`textoDeProduccion` (`src/lib/catalogo.ts`) y la usan la card y el detalle: cero días es
+«Elaboración inmediata», nunca un «0 días». `GrillaProductos` recibe `muestraProduccion` y sólo
+`/catalog` lo activa.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| La card del catálogo publica el tiempo con su unidad en días | implementado | `ProductCard` con `muestraProduccion`; `/catalog` pasa la prop; tests *«la card lo publica sólo cuando el que la usa lo pide»* y *«el catálogo lo publica y la Home no»* |
+| La Home no lo publica | implementado | `src/app/page.tsx` no menciona `muestraProduccion` ni `tiempoProduccion`; mismo test |
+| Un producto sin tiempo cargado no muestra un vacío ni un cero suelto | implementado | `textoDeProduccion(0) === "Elaboración inmediata"`; test *«se dice en días, en singular y en plural, y sin inventar un cero»* |
+| El detalle usa la misma frase que la card | implementado | test *«el detalle usa la misma frase que la card»* |

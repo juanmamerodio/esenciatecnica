@@ -13,11 +13,14 @@ export default function GrillaProductos({
   mensajeVacio,
   detalleVacio,
   accionVacio,
+  muestraProduccion = false,
 }: {
   resultado: ResultadoCatalogo;
   mensajeVacio: string;
   detalleVacio?: string;
   accionVacio?: ReactNode;
+  /** El catálogo publica el tiempo de producción en la card; la Home no (#38). */
+  muestraProduccion?: boolean;
 }) {
   if (resultado.estado === "error") {
     return (
@@ -54,7 +57,7 @@ export default function GrillaProductos({
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {resultado.productos.map((producto) => (
-        <ProductCard key={producto.id} producto={producto} />
+        <ProductCard key={producto.id} producto={producto} muestraProduccion={muestraProduccion} />
       ))}
     </div>
   );

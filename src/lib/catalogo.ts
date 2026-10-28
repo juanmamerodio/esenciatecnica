@@ -49,6 +49,16 @@ export function idDeProducto(valor: string): number | null {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 }
 
+/**
+ * El tiempo de producción en palabras: es el dato de elaboración del Departamento de Química, no un
+ * plazo de entrega. Cero días es «elaboración inmediata» —nunca un «0 días» suelto— y una sola
+ * unidad se dice en singular. Lo usan la card del catálogo (#38) y el detalle.
+ */
+export function textoDeProduccion(dias: number): string {
+  if (dias <= 0) return "Elaboración inmediata";
+  return `${dias} ${dias === 1 ? "día" : "días"}`;
+}
+
 export type ResultadoCatalogo =
   | { estado: "ok"; productos: ProductoCatalogo[]; categorias: string[] }
   | { estado: "error"; mensaje: string };

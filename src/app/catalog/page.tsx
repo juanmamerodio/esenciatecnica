@@ -112,6 +112,8 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
 
       <GrillaProductos
         resultado={resultado}
+        // El catálogo publica el tiempo de producción (la Home no): el Cliente decide sin abrir el detalle.
+        muestraProduccion
         mensajeVacio={hayConsulta ? "Sin resultados para tu búsqueda" : "Todavía no hay productos publicados"}
         detalleVacio={
           hayConsulta

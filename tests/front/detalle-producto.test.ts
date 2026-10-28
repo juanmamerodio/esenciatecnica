@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { consultarCatalogo, idDeProducto } from '../../src/lib/catalogo';
+import { consultarCatalogo, idDeProducto, textoDeProduccion } from '../../src/lib/catalogo';
 import { crearBase, crearCliente, crearProducto, type Base } from '../db/ayudantes';
 import { lectorDe, leer } from './ayudantes';
 
@@ -131,6 +131,40 @@ describe('#42 · la página delega el 404 y no valida `activo`', () => {
     // Sin comentarios: la página puede explicar que la vista filtra `activo`, pero no puede usarlo.
     const codigo = pagina.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
     expect(codigo).not.toMatch(/activo/);
+  });
+});
+
+describe('#38 · el tiempo de producción en la card del catálogo', () => {
+  it('se dice en días, en singular y en plural, y sin inventar un cero', () => {
+    expect(textoDeProduccion(1)).toBe('1 día');
+    expect(textoDeProduccion(3)).toBe('3 días');
+    expect(textoDeProduccion(0)).toBe('Elaboración inmediata');
+    expect(textoDeProduccion(0)).not.toMatch(/0/);
+  });
+
+  it('la card lo publica sólo cuando el que la usa lo pide', () => {
+    const card = leer('src/components/ProductCard.tsx');
+    expect(card).toMatch(/muestraProduccion/);
+    expect(card).toMatch(/textoDeProduccion\(/);
+
+    const grilla = leer('src/components/GrillaProductos.tsx');
+    expect(grilla).toMatch(/muestraProduccion/);
+    expect(grilla).toMatch(/<ProductCard[\s\S]*muestraProduccion=\{muestraProduccion\}/);
+  });
+
+  it('el catálogo lo publica y la Home no', () => {
+    const catalogo = leer('src/app/catalog/page.tsx');
+    expect(catalogo).toMatch(/muestraProduccion/);
+
+    const home = leer('src/app/page.tsx');
+    expect(home).not.toMatch(/muestraProduccion/);
+    expect(home).not.toMatch(/tiempoProduccion|textoDeProduccion/);
+  });
+
+  it('el detalle usa la misma frase que la card', () => {
+    const detalle = leer(PAGINA);
+    expect(detalle).toMatch(/textoDeProduccion\(/);
+    expect(detalle).not.toMatch(/Elaboración inmediata/);
   });
 });
 

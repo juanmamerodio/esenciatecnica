@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { Clock } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import type { ProductoCatalogo } from "@/lib/catalogo";
+import { textoDeProduccion, type ProductoCatalogo } from "@/lib/catalogo";
 import AgregarAlCarrito from "@/components/AgregarAlCarrito";
 import ImagenProducto from "@/components/ImagenProducto";
 
@@ -8,8 +9,18 @@ import ImagenProducto from "@/components/ImagenProducto";
  * Card de producto: única, con estados `ok`, `sin-stock` y `sin-imagen` (HU-2, HU-3,
  * HU-5). No muestra unidades disponibles — la Home no las publica. La imagen y el título
  * llevan al detalle (T3), que es donde está la descripción completa.
+ *
+ * `muestraProduccion` publica el tiempo de producción en la card del **catálogo** (el Cliente
+ * decide sin abrir cada producto); la Home no lo publica (#38). Un producto con cero días
+ * —elaboración inmediata— no inventa un «0 días»: se dice con palabras.
  */
-export default function ProductCard({ producto }: { producto: ProductoCatalogo }) {
+export default function ProductCard({
+  producto,
+  muestraProduccion = false,
+}: {
+  producto: ProductoCatalogo;
+  muestraProduccion?: boolean;
+}) {
   const urlDelDetalle = `/producto/${producto.id}`;
 
   return (
@@ -25,6 +36,12 @@ export default function ProductCard({ producto }: { producto: ProductoCatalogo }
             {producto.nombre}
           </Link>
         </h3>
+        {muestraProduccion ? (
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-muted">
+            <Clock aria-hidden className="h-3.5 w-3.5 shrink-0 text-accent" />
+            {textoDeProduccion(producto.tiempoProduccion)}
+          </p>
+        ) : null}
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted">{producto.descripcion}</p>
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-soft pt-4">

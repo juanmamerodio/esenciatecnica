@@ -5,7 +5,7 @@ import AgregarAlCarrito from "@/components/AgregarAlCarrito";
 import GrillaProductos from "@/components/GrillaProductos";
 import ImagenProducto from "@/components/ImagenProducto";
 import { formatPrice } from "@/lib/format";
-import { idDeProducto } from "@/lib/catalogo";
+import { idDeProducto, textoDeProduccion } from "@/lib/catalogo";
 import { leerCatalogo } from "@/lib/catalogo-servidor";
 
 /**
@@ -89,9 +89,7 @@ export default async function DetalleProductoPage({ params }: { params: Promise<
                 Producción estimada
               </dt>
               <dd className="text-sm font-semibold text-text">
-                {producto.tiempoProduccion > 0
-                  ? `${producto.tiempoProduccion} ${producto.tiempoProduccion === 1 ? "día" : "días"}`
-                  : "Elaboración inmediata"}
+                {textoDeProduccion(producto.tiempoProduccion)}
               </dd>
               <dd className="mt-1 text-xs leading-relaxed text-muted">
                 Es el tiempo de elaboración del Departamento de Química, no un plazo de entrega.
