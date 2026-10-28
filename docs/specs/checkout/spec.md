@@ -180,6 +180,25 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
 5. **Se retira el camino legacy de compra en esta misma tajada:** dos caminos de pedido conviviendo es
    exactamente la contradicción que la auditoría marcó (`docs/estado/AUDITORIA.md` §6).
 
+### 6.1 Límites del borde
+
+El código manda: estos son los límites que el módulo aplica hoy (`ESQUEMA_CLIENTE`, `ESQUEMA_MONTO`,
+`ESQUEMA_ITEMS` y los límites del archivo), escritos acá para no depender de leer el módulo (#37 ·
+hallazgo 7 de `deuda-codigo-25-10`). Cada uno tiene su test en `tests/front/checkout.test.ts` y, en el
+borde del archivo, en `tests/front/archivo-y-errores.test.ts`.
+
+| Campo / regla | Límite | Rechazo |
+|---|---|---|
+| `nombre` | al menos 2 caracteres después de recortar espacios | `datos-invalidos`, campo `nombre` |
+| `email` | formato `algo@algo.algo`; se normaliza a minúsculas | `datos-invalidos`, campo `email` |
+| `dni` | 7 u 8 dígitos, sin puntos | `datos-invalidos`, campo `dni` |
+| `telefono` | hasta 30 caracteres; vacío es `null` | `datos-invalidos`, campo `telefono` |
+| `monto` | número finito mayor que cero | `datos-invalidos`, campo `monto` |
+| `items` | entre 1 y 50 líneas; cada `id_producto` una sola vez; `cantidad` entera positiva | `items-invalidos` |
+| archivo | PNG, JPEG o WebP de hasta 5 MB, con al menos un byte | `archivo-invalido` |
+| `idPedido` (reintento) | entero positivo dentro del rango seguro, o ausente | `datos-invalidos`, campo `idPedido` |
+
+
 ## 7. Blockers declarados
 
 1. **Migraciones aplicadas en `otjph…`** (Isabella). Hoy en producción: `vista_catalogo` no existe, las RPC
@@ -227,6 +246,7 @@ criterio como “verde en producción” sin esa verificación.
 | HU-6 · Mobile y accesibilidad (foco, `aria-label`, errores anunciados) | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:166,233`; `src/components/SubirComprobante.tsx:65,88` |
 | HU-7 · El navegador no recibe la service role ni listados | implementado | `src/app/api/checkout/route.ts:33-84`; test `tests/front/checkout.test.ts:403` |
 | HU-7 · Zod y `400` con detalle de campos | implementado | `ESQUEMA_CLIENTE`/`ESQUEMA_ITEMS` en `src/lib/checkout.ts`; `camposDeZod` en `src/lib/errores-bd.ts`; `ESTADO_HTTP` compartido (#35) |
+| §6.1 · Límites del borde escritos en el spec y fijados con test | implementado | [`§6.1`](#61-límites-del-borde) con la tabla de límites; tests *«los límites del borde, con su caso válido en el borde»* en `tests/front/checkout.test.ts` (#37) |
 | HU-7 · Adaptador tipado con `database.types.ts`, sin `any` | implementado | `src/lib/checkout-servidor.ts:1-3,27` |
 | Camino legacy de compra (`/api/orders`, `/api/verify-payment`, `ReceiptUploader`) | retirado | `tests/front/checkout.test.ts:384-401`; spec §2 |
 

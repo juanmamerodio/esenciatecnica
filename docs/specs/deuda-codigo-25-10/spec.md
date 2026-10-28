@@ -169,7 +169,7 @@ Decisiones por hallazgo:
 | 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | ✅ implementado |
 | 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | ✅ implementado |
-| 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
+| 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | ✅ implementado |
 | 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
 | 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
 | 10 · el borde del cliente castea la respuesta | [#46](https://github.com/juanmamerodio/esenciatecnica/issues/46) | ✅ implementado |
@@ -260,3 +260,15 @@ se retiró. La tabla y su trigger no cambian.
 | Con una alerta sin atender, la fila marca alerta y el popup la muestra | implementado | segunda fila del mismo test; `alertas()` ordena las pendientes primero y `AvisoDeAlertas` las muestra |
 | La fila y el popup nunca dicen cosas distintas | implementado | los dos salen de `alerta_de_estado`; test estructural `el panel no recalcula la alerta…` (sin `hayAlerta`, con `alerta_pendiente` y `atendida`) |
 | El spec de admin se corrige a una sola fuente | implementado | [`admin/spec.md` HU-6 y HU-7](../admin/spec.md) y su tabla |
+
+### Hallazgo 7 · cerrado (#37)
+
+Los límites que el módulo ya aplicaba quedaron escritos en [`checkout/spec.md` §6.1](../checkout/spec.md)
+—nombre ≥ 2, email con formato, DNI de 7 u 8 dígitos, teléfono ≤ 30, monto > 0, entre 1 y 50 líneas con
+cada producto una sola vez, archivo PNG/JPEG/WebP ≤ 5 MB, `idPedido` entero positivo— y fijados con test.
+No hubo cambio de comportamiento: el código mandaba y el spec se completó.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| El spec enuncia cada límite con su valor | implementado | `checkout/spec.md` §6.1; test *«el spec enuncia cada límite con su valor»* |
+| Un test fija cada límite y su caso válido en el borde | implementado | tests *«nombre: dos caracteres pasan, uno no»*, *«teléfono: 30 pasan, 31 no»*, *«items: 50 pasan, 51 no»*, *«cada producto una sola vez»* y *«monto: el mínimo positivo pasa, cero no»* |

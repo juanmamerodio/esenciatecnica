@@ -398,6 +398,81 @@ describe('#34 · el total que se muestra en el resumen', () => {
   });
 });
 
+describe('#37 · los límites del borde, con su caso válido en el borde', () => {
+  const LINEAS = (cantidad: number) =>
+    Array.from({ length: cantidad }, (_, indice) => ({ id_producto: indice + 1, cantidad: 1 }));
+
+  it('nombre: dos caracteres pasan, uno no', async () => {
+    const { puerto } = puertoFalso();
+
+    const corto = await confirmarPedido(puerto, entrada({ cliente: { ...CLIENTE_OK, nombre: 'A' } }));
+    expect(corto.estado).toBe('error');
+    if (corto.estado === 'error') expect(corto.campos?.nombre).toBeTruthy();
+
+    const enElBorde = await confirmarPedido(puerto, entrada({ cliente: { ...CLIENTE_OK, nombre: 'Al' } }));
+    expect(enElBorde.estado).toBe('ok');
+  });
+
+  it('teléfono: 30 caracteres pasan, 31 no, y vacío es válido', async () => {
+    const { puerto } = puertoFalso();
+    const treinta = '1'.repeat(30);
+
+    const largo = await confirmarPedido(
+      puerto,
+      entrada({ cliente: { ...CLIENTE_OK, telefono: `${treinta}1` } }),
+    );
+    expect(largo.estado).toBe('error');
+    if (largo.estado === 'error') expect(largo.campos?.telefono).toBeTruthy();
+
+    expect((await confirmarPedido(puerto, entrada({ cliente: { ...CLIENTE_OK, telefono: treinta } }))).estado).toBe('ok');
+    expect((await confirmarPedido(puerto, entrada({ cliente: { ...CLIENTE_OK, telefono: '' } }))).estado).toBe('ok');
+  });
+
+  it('items: 50 líneas pasan, 51 no', async () => {
+    const { puerto } = puertoFalso();
+
+    const demasiadas = await confirmarPedido(puerto, entrada({ items: LINEAS(51) }));
+    expect(demasiadas.estado).toBe('error');
+    if (demasiadas.estado === 'error') {
+      expect(demasiadas.motivo).toBe('items-invalidos');
+      expect(demasiadas.mensaje).toMatch(/demasiados/i);
+    }
+
+    const enElBorde = await confirmarPedido(puerto, entrada({ items: LINEAS(50) }));
+    expect(enElBorde.estado).toBe('ok');
+  });
+
+  it('cada producto va una sola vez: 50 repeticiones de uno solo no pasan', async () => {
+    const { puerto } = puertoFalso();
+
+    const repetido = await confirmarPedido(
+      puerto,
+      entrada({ items: Array.from({ length: 50 }, () => ({ id_producto: 1, cantidad: 1 })) }),
+    );
+
+    expect(repetido.estado).toBe('error');
+    if (repetido.estado === 'error') expect(repetido.mensaje).toMatch(/una sola vez|repetid/i);
+  });
+
+  it('monto: el mínimo positivo pasa, cero no', async () => {
+    const { puerto } = puertoFalso();
+
+    const cero = await confirmarPedido(puerto, entrada({ monto: 0 }));
+    expect(cero.estado).toBe('error');
+    if (cero.estado === 'error') expect(cero.campos?.monto).toBeTruthy();
+
+    // El pedido falso vale 2500: el borde del monto válido se prueba contra ese total.
+    expect((await confirmarPedido(puerto, entrada({ monto: 2500 }))).estado).toBe('ok');
+  });
+
+  it('el spec enuncia cada límite con su valor', () => {
+    const spec = leer('docs/specs/checkout/spec.md');
+    for (const limite of ['al menos 2 caracteres', '7 u 8 dígitos', 'hasta 30 caracteres', 'entre 1 y 50 líneas', 'una sola vez', '5 MB']) {
+      expect(spec, `el spec no enuncia "${limite}"`).toContain(limite);
+    }
+  });
+});
+
 describe('#46 · el borde del cliente valida la respuesta, no la castea', () => {
   it('el camino feliz sigue igual: el mismo cuerpo que responde la ruta se entiende', async () => {
     const { puerto } = puertoFalso();
