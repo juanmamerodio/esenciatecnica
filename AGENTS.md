@@ -190,6 +190,13 @@ npm run bd:viva   # compara las migraciones con el proyecto Supabase vivo (en re
 npm run docs:links # verifica los enlaces relativos de la documentación
 ```
 
+**La puerta es local y de GitHub, con los mismos comandos.** El workflow de **GitHub Actions**
+([`ci.yml`](.github/workflows/ci.yml)) corre
+en cada push y cada PR contra `main`, en este orden: `typecheck` → `lint` → `test` → `docs:links` →
+`build`; el primer paso que falla corta el job. Ninguno de los cuatro primeros lee secretos, así que
+también corre en un fork. `npm run bd:viva` **no entra en CI**: depende de la base viva y hoy está rojo
+por diseño; su lugar es el cierre de la migración ([issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15)).
+
 Estado actual (2026-10-27, tras el cierre beta en repo: `00` corregida, `06`, cron, A1, `bd:viva` y seed):
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.

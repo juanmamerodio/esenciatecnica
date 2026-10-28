@@ -1,13 +1,28 @@
 name: E-Commerce CI
 
+# Puerta de entrada del repo (#39): un push o un PR contra `main` con un error de tipos, un warning de
+# lint, un test rojo o un link roto falla acá antes que en la máquina de nadie.
+#
+# Los cinco controles de repo corren en este orden y el primero que falla corta el job:
+# typecheck → lint → test → docs:links → build. Ninguno de los cuatro primeros lee variables de
+# entorno, así que también corren en un fork o en un PR sin secretos; el build conserva los suyos.
+#
+# `npm run bd:viva` NO entra: es un control contra la base viva y hoy está rojo por diseño hasta que se
+# apliquen las migraciones. Su lugar es el cierre de la migración (issue #15), no cada push.
+
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+# Un push nuevo cancela la corrida anterior de la misma rama: no se espera dos veces por el mismo commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  verificacion:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +35,27 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      # `npm ci` respeta el lockfile: CI y producción usan las mismas versiones.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+        env:
+          # Vitest detecta el modo CI: la salida del test se ve completa en el log, sin colores.
+          CI: true
+
+      - name: Docs links
+        run: npm run docs:links
+
+      # Se mantiene `ignoreBuildErrors: true` en `next.config.ts`: sacarlo es una decisión aparte y,
+      # mientras tanto, el agujero de tipos ya lo cubre el paso `typecheck`.
       - name: Build Next.js
         run: npm run build
         env:

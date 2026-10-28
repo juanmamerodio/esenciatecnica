@@ -1,6 +1,6 @@
 # Spec · Integración continua: typecheck, lint y test en cada push
 
-> **Feature:** `integracion-continua` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#30](https://github.com/juanmamerodio/esenciatecnica/issues/30).
+> **Feature:** `integracion-continua` · **Estado:** implementada en repo (issue #39) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#30](https://github.com/juanmamerodio/esenciatecnica/issues/30) · **Tajada:** [#39](https://github.com/juanmamerodio/esenciatecnica/issues/39).
 > **Origen:** tarea `MEDIA` del tablero: *CI: correr typecheck, lint y test en cada push*.
 > **Fuente de verdad:** [`AGENTS.md`](../../../AGENTS.md) §8 (definición de terminado) ·
 > [`package.json`](../../../package.json) (comandos de verificación).
@@ -102,3 +102,28 @@ marca el commit en rojo.
   de la base viva convierte todos los pushes en rojos esperados y enseña a ignorar el CI.
 - Si mañana se saca `ignoreBuildErrors`, el paso `build` pasa a ser una segunda puerta de tipos; no hay
   que cambiar el workflow para eso.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #39)
+
+`npm run typecheck` sin errores, `npm run lint` en 0 y la suite en verde con el test nuevo.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Los cinco pasos en orden en cada push y PR contra `main` | implementado | [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml): `npm run typecheck` → `npm run lint` → `npm run test` → `npm run docs:links` → `npm run build` |
+| El workflow **no** invoca `bd:viva` | implementado | el único `bd:viva` del workflow es un comentario que explica por qué queda afuera; test *«no invoca bd:viva y explica por qué queda afuera»* |
+| Node 20 con `npm ci` y cache de npm | implementado | `actions/setup-node@v4` con `node-version: 20` y `cache: 'npm'`; paso `Install dependencies` con `npm ci` |
+| La corrida anterior de la misma rama se cancela | implementado | bloque `concurrency` con `group: ${{ github.workflow }}-${{ github.ref }}` y `cancel-in-progress: true` |
+| Los controles sin secretos corren siempre | implementado | sólo el paso `Build Next.js` recibe `secrets.*`; test *«los controles de repo no reciben secretos; el build conserva los suyos»* |
+| La salida del test se ve completa en el log | implementado | paso `Test` con `CI: true` y sin `--silent` ni reporter escueto |
+| `AGENTS.md` §8 dice que la puerta es local y de GitHub | implementado | [`AGENTS.md`](../../../AGENTS.md) §8, párrafo **«La puerta es local y de GitHub, con los mismos comandos»** |
+| Test estructural liviano que fija los comandos y la ausencia de `bd:viva` | implementado | `tests/front/integracion-continua.test.ts` (10 tests) |
+| `npm run docs:links` en verde | implementado | el spec linkea el workflow y `AGENTS.md` |
+
+### Pendiente
+
+- **Evidencia en GitHub de la verificación real del issue:** una rama de prueba con un error de tipos
+  deliberado que haga fallar el job, la salida pegada en el issue y la rama borrada. Requiere un push a
+  GitHub, así que no se puede cerrar desde una sesión local.
+- Un push limpio posterior queda en verde (misma dependencia anterior).
