@@ -154,6 +154,6 @@ falló” está implementado en `src/components/admin/comun.ts` y `PanelDePedido
 - El fallo de correo y el reenvío ya están implementados (issue #19); no queda código pendiente en esa
   parte.
 
-> El ticket `T8 · Remito y email al Cliente` (**#14**) se cerró el 2026-10-28 con su comentario de
+> El ticket `T8 · Remito y email al Cliente` ([#14](https://github.com/juanmamerodio/esenciatecnica/issues/14)) se cerró el 2026-10-28 con su comentario de
 > evidencia: la implementación y sus tests están en `main` y lo único que falta es la verificación en vivo
 > de arriba.

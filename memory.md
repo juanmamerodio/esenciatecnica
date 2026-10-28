@@ -23,9 +23,9 @@
   puertas quedaron verdes; de ahí en adelante un cierre por mensaje sólo vale si el commit se sube.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
-- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): 44 tareas. La
-  auditoría del 27-10 dejó 41 → 20 `done`, 7 `review`, 14 `backlog`; el 28-10 se movió **trazabilidad
-  de issues a `done`** con su bitácora. Las de `review` son las que ya tienen código y test pero esperan
+- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): **44 tareas** hoy —9
+  `backlog`, 8 `review`, 27 `done`—. La auditoría del 27-10 midió **41** (20/7/14) y creó las tareas
+  nuevas que faltaban; el 28-10 se movió **trazabilidad de issues a `done`** con su bitácora. Las de `review` son las que ya tienen código y test pero esperan
   la base viva o las claves. Siguen publicadas las dos notas de la bandeja de la auditoría: **AVANCE**
   (cierre beta) y **BLOQUEO** (los 26 desajustes de `otjph`).
   **Ojo:** el issue #48 suponía que su fila ya decía `done` y en realidad estaba en `backlog` — la
@@ -71,11 +71,12 @@
 ## Hecho (2026-10-28, #48 · trazabilidad de issues)
 | Cambio | Qué dejó |
 |---|---|
-| GitHub · #48 (spec `trazabilidad-issues`) | **Los nueve issues `T0`–`T8` (#2, #5, #6, #8, #9, #10, #12, #13, #14) cerrados** con el comentario uniforme de cinco bloques: qué se construyó, commits que lo contienen, tests que lo cubren, qué queda pendiente de verificación en vivo y el spec de la tajada linkeado. Se sumó **#3 (F0)** con el mismo formato. `gh issue list --state open` queda en el cierre beta (#15–#23), los paraguas (#24, #25, #28, #29) y las tajadas de la tanda. |
+| GitHub · #48 (spec `trazabilidad-issues`) | **Los nueve issues `T0`–`T8` (#2, #5, #6, #8, #9, #10, #12, #13, #14) cerrados** con el comentario uniforme de cinco bloques: qué se construyó, commits que lo contienen, tests que lo cubren, qué queda pendiente de verificación en vivo y el spec de la tajada linkeado. Se sumó **#3 (F0)** con el mismo formato. `gh issue list --state open` queda en **#1** (paraguas del front), el cierre beta (**#15–#23**) y los paraguas de los specs nuevos (**#24, #25, #28, #29**). |
 | Verificación de los cierres | No se cerró por confianza: los **22 commits** citados existen en `main` y los **17 archivos de test** también, con **sus conteos idénticos** a la corrida de la suite (388/29). #15–#23 sin tocar. |
 | Tres correcciones de evidencia | **#14** tenía el comentario publicado a las 23:14:56Z y seguía **abierto** (la sesión anterior se cortó antes del `close`). Los comentarios de **#10** y **#13** mandaban al §8, que en `checkout` y `admin` es *Blockers declarados*: el estado vive en el §9, y se editaron los dos. **#3** estaba fuera de la lista de #48 aunque era la misma clase (código + test, sólo falta la pantalla). |
-| `docs/specs/*/spec.md` | Los cinco specs que pedían «cerrar el ticket TN» pierden ese `### Pendiente` y quedan con la nota del cierre y el puntero a la verificación en vivo (**#23**). `front-mvp` §11 anota el cierre de los nueve. La spec de `trazabilidad-issues` pasa a *implementada* con su §8 de estado. |
-| Push a `origin/main` | El repo venía **27 commits atrás**: se subió, que es lo que hace correr CI y lo que cierra **#45** y **#47** por mensaje de commit. |
+| `docs/specs/*/spec.md` | Los cinco specs que pedían «cerrar el ticket TN» pierden **ese punto** (el `### Pendiente` queda, con lo que de verdad falta) y suman la nota del cierre, con el issue hyperlinkeado, y el puntero a la verificación en vivo (**#23**). `front-mvp` §11 anota el cierre de los nueve y `migracion-otjph` deja de dar por pendientes `.agents/skills/` y `FlaskConical`. La spec de `trazabilidad-issues` pasa a *implementada* con su §8 de estado. |
+| Push a `origin/main` | El repo venía **27 commits atrás**: se subió, que es lo que hace correr las cuatro puertas nuevas de CI y lo que cerró **#45**, **#47** y **#48** por mensaje de commit. `main` local y `origin/main` quedaron iguales. A los tres se les agregó después su comentario de evidencia: cerrar por mensaje de commit **no** exime del comentario. |
+| Revisión en contexto limpio | Dos ejes (Estándares y Spec) sobre `7fd1f72...HEAD`. **Seis hallazgos, los seis corregidos:** el §8 de `checkout`/`admin` citado mal desde #10/#13, un `checkout` §4.3 renumerado en `migracion-otjph`, los cinco specs sin hyperlink al issue cerrado, el rojo de `bd:viva` atribuido a #21 en los nueve comentarios, el «pierden ese `### Pendiente`» ambiguo y el criterio del header que decía #15–#22. El único punto que **no** se toca es de contrato: `teams.md` §3 define `done` como commit + test y no nombra la excepción de documentación de `AGENTS.md` §8. |
 
 ## Hecho (2026-10-28, tanda del 27-10)
 | Cambio | Qué dejó |
@@ -144,6 +145,15 @@
    tablero *«Deuda de las skills del proyecto: revisión del 28-10»*; el issue #48 ya no es el destino.
 5. 🟡 **Verificación en pantalla:** ninguna de las nueve tajadas del front se vio en un navegador con la
    base migrada. Vive en **#23** (B6, Celeste), bloqueada por #16 y #20.
+6. 🟡 **Contrato del tablero vs excepción de documentación:** `docs/agentes/teams.md` §3 define `done`
+   como «el commit y el test existen», pero `AGENTS.md` §8 exceptúa documentación y configuración, y
+   `npm run teams` rechaza escribir una nota sobre una tarea que ya está en su estado (no hay `--forzar`).
+   Una tajada de gobernanza como #48 no puede declarar la excepción en su propia bitácora. Decidir con
+   el equipo si §3 la nombra.
+7. ⏳ **Línea base de tests desactualizada:** `AGENTS.md` §8 (y `carrito`, `catalogo` y
+   `detalle-producto` en su §8) sigue diciendo «279 tests en 23 archivos» cuando la suite da **388 en
+   29**. Lo detectó la revisión del 28-10; queda **fuera del alcance de #48** y ya tiene tarea `backlog`
+   en el tablero.
 
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit. TDD. Español único. Sin IA. Sin envío.

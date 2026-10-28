@@ -146,6 +146,6 @@ la base viva sigue a medio migrar, así que nada de esto está verificado en pro
    de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**). Vive en la punta a punta
    **#23**.
 
-> El ticket `T2 · Catálogo` (**#6**) se cerró el 2026-10-28 con su comentario de evidencia: la
+> El ticket `T2 · Catálogo` ([#6](https://github.com/juanmamerodio/esenciatecnica/issues/6)) se cerró el 2026-10-28 con su comentario de evidencia: la
 > implementación y sus tests están en `main`, la desviación de búsqueda se cerró en **#41** y lo único que
 > falta es la verificación en vivo de arriba.

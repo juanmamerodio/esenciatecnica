@@ -272,5 +272,5 @@ criterio como “verde en producción” sin esa verificación.
   éxito, carrito que no se vacía), con la base migrada y las claves puestas. Vive en la punta a punta
   **#23**.
 
-> El ticket `T5 · Checkout y comprobante` (**#10**) se cerró el 2026-10-28 con su comentario de evidencia:
+> El ticket `T5 · Checkout y comprobante` ([#10](https://github.com/juanmamerodio/esenciatecnica/issues/10)) se cerró el 2026-10-28 con su comentario de evidencia:
 > la implementación y sus tests están en `main` y lo único que falta es la verificación en vivo de arriba.

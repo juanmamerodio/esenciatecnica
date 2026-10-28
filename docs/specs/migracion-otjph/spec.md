@@ -256,7 +256,7 @@ El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
 | Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por #16 y #20. |
 | Scheduler del cron (antes fuera de alcance) | implementado | B4 · #18: `vercel.json` + `CRON_SECRET`; fallback manual en `bd-mvp` §9.3. |
 | `.agents/skills/` | implementado | `.agents/skills/tablero-teams/SKILL.md` y `.agents/skills/bd-viva/SKILL.md`, nombradas en `AGENTS.md` §11; `tests/front/skills-del-proyecto.test.ts`; commit `7fd1f72` (#45). |
-| Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19, `checkout` §4.3 contra su HU-3 se resolvió el 27-10 y `FlaskConical` en `/about` y el footer se retiró en **#43**; `productos` en la spec de admin queda documentado como el bucket, con excepción explícita. |
+| Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19; la contradicción entre la HU-3 de `checkout` y sus decisiones de implementación (§4: el monto se precarga y es editable) se resolvió el 27-10; `FlaskConical` en `/about` y el footer se retiró en **#43**; `productos` en la spec de admin queda documentado como el bucket, con excepción explícita. |
 | `npm test` como evidencia de la base viva | retirado | Corre contra PGlite y deja `otjph` a medio migrar en verde; el único control es `bd:viva` (`memory.md`, reglas). |
 
 En verde **en repo**: `typecheck` y `lint` en 0, `npm test` con 388 tests en 29 archivos y `npm run build`
