@@ -46,7 +46,7 @@ Confirmación de compra de un Cliente. Agrupa uno o más Detalles del pedido, ti
 
 ### Pedido vencido
 
-Pedido que llega al cierre del viernes sin Comprobante aprobado. Se cancela y libera la reserva de stock. También se lo puede llamar “pedido expirado”; el término canónico es **Pedido vencido**.
+Pedido que llega al cierre del viernes sin Comprobante aprobado. Se cancela y libera la reserva de stock. El cierre es el **viernes 23:59 de la hora argentina** (`America/Argentina/Buenos_Aires`). También se lo puede llamar “pedido expirado”; el término canónico es **Pedido vencido**.
 
 ### Producto
 
@@ -98,7 +98,7 @@ No usar en código, documentación ni conversaciones nuevas:
 
 | Término retirado | Por qué |
 |---|---|
-| `productos`, `pedidos`, `verificaciones` | Nombres del esquema legacy; la base nueva usa `producto`, `pedido`, `comprobante`, etc. |
+| `productos`, `pedidos`, `verificaciones` | Nombres del esquema legacy; la base nueva usa `producto`, `pedido`, `comprobante`, etc. **Excepción:** el bucket de Storage `productos` conserva ese nombre a propósito; no es la tabla legacy ni se renombra. |
 | `nombre_es` / `nombre_en` | El sistema es español único; el Producto tiene un solo nombre. |
 | `precio_ars` | El precio canónico es `precio`; la moneda es ARS por contexto. |
 | `pre_aprobado`, `comprobante_subido`, `pendiente` | Nombres de estado del código legacy; usar los estados canónicos de este glosario. |

@@ -1,8 +1,10 @@
 # Spec · Panel `/admin` (`T7`)
 
-> **Feature:** `front-mvp/admin` · **Estado:** publicada para implementación · **Fecha:** 2026-10-25.
+> **Feature:** `front-mvp/admin` · **Estado:** aprobada para el cierre beta · **Fecha:** 2026-10-27.
 > **Origen:** gate de arranque del issue [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13);
 > `docs/specs/front-mvp/spec.md` §4 (tajada T7) no fijaba criterios propios y este documento los fija.
+> **Cierre beta:** esta versión agrega los criterios que faltaban para que el panel explique los
+> rechazos de la base (`ET007`, nombre duplicado) y no oculte un remito que no salió por email.
 > **Depende de:** `T5 · Checkout + comprobante` ([#10](https://github.com/juanmamerodio/esenciatecnica/issues/10)),
 > que dejó los pedidos con su reserva y el comprobante en el bucket privado, y de la migración `02`, que ya
 > expone los RPC `aprobar_comprobante` y `rechazar_comprobante` con sus códigos de error `ET001`/`ET004`/
@@ -47,7 +49,9 @@ tienda pueda mostrar.
    (`AGENTS.md` §5.10). El comprobante se ve con `createSignedUrl` del bucket privado `comprobantes`; la
    columna guarda la **clave**, no una URL pública.
 4. **Fotos de producto:** migración `20261023090500_05_storage_productos.sql` que crea el bucket **público**
-   `productos` (PNG/JPEG/WebP, 5 MB). `producto.imagen_url` guarda la URL pública del objeto.
+   `productos` (PNG/JPEG/WebP, 5 MB). `producto.imagen_url` guarda la URL pública del objeto. El nombre
+   del bucket es una **excepción explícita** al término legacy `productos` (tabla): ver
+   [`GLOSSARY.md`](../../../GLOSSARY.md) y [`docs/MODELO.md`](../../MODELO.md) §9.
 5. **Bordes HTTP server-side** en `src/app/api/admin/`: `comprobantes`, `stock`, `productos`,
    `productos/foto` y `alertas`. Nunca devuelven la clave del bucket, la service role, `ADMIN_PASSWORD` ni
    datos de otros Clientes.
@@ -198,11 +202,40 @@ productos de la tienda.
 - **Then** la UI y los mensajes están en español: no hay vocabulario legacy (`pre_aprobado`,
   `comprobante_subido`, `precio_ars`, `nombre_es`, `verificación por IA`, `Gemini`).
 
+### HU-12 · El panel explica los rechazos de la base
+
+**Como** Administrador, **quiero** que un rechazo de la base se entienda **para** corregir el dato sin
+adivinar.
+
+- **Given** intento dejar `cantidad_actual` por debajo de `cantidad_reservada`, **When** guardo,
+  **Then** la base responde `ET007`, el panel muestra “No podés dejar la cantidad por debajo de lo
+  reservado…” asociado al campo, y el stock no cambia. Nunca se muestra el `23514` crudo.
+- **Given** un producto activo con un nombre que ya existe, **When** creo o edito, **Then** la base
+  responde `23505` y el panel muestra “Ya hay un producto activo con ese nombre.” sin crear ni
+  modificar nada.
+- **Given** cualquier otro error de la base, **Then** el panel muestra un mensaje explícito y no deja
+  la acción como si hubiera salido bien.
+- **Then** el mapeo vive en `src/lib/admin.ts` (módulo puro) y se testea con un puerto falso, sin red.
+
+### HU-13 · El remito que no salió se ve
+
+**Como** Administrador, **quiero** enterarme si el email del remito no salió **para** reenviarlo.
+
+- **Given** que apruebo un comprobante y Resend falla, **When** la ruta responde
+  `{ estado: "ok", aviso }`, **Then** el panel muestra ese aviso (`role="alert"`) y ofrece
+  **Reenviar el remito**; no dice “el Cliente lo recibió”.
+- **Given** el reenvío manual falla, **Then** el mensaje dice que el remito existe pero el email no
+  salió, y el botón sigue disponible.
+- **Given** el reenvío sale bien, **Then** el aviso dice que se reenvió al Cliente.
+- **Then** un fallo de correo **no** revierte la venta ni duplica el remito: la base ya cerró la
+  transacción (`specs/remito/spec.md` §2.4).
+
 ## 4. Seams bajo test
 
 | Seam | Cubre | Deja afuera |
 |---|---|---|
-| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006` como mensajes del dominio, stock que no cambia en `ET005`, disponible y alerta recalculados, orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
+| `src/lib/admin.ts` con un `PuertoAdmin` falso (sin DOM, sin red) | validación del borde antes de llamar al puerto, decisión por RPC y no reimplementada, `ET001`/`ET004`/`ET005`/`ET006`/`ET007` como mensajes del dominio, `23505` de nombre duplicado, stock que no cambia en `ET005`, disponible y alerta recalculados, orden de las alertas, baja lógica, saneo de la clave de la foto, firma de la URL del comprobante | Supabase, Storage, render |
+| `src/components/admin/comun.ts` + `PanelDePedidos.tsx` | el `aviso` de remito no se descarta: se muestra y no se confunde con éxito | el envío real de Resend |
 | `src/lib/admin-auth.ts` (módulo puro) | sin credenciales, encabezado mal formado, contraseña incorrecta, correcta y `sin-configurar` | el runtime Edge del middleware |
 | `tests/db/aprobacion.test.ts` (ya existe) | aprobar/rechazar contra PGlite: reserva, venta, remito y el monto que no coincide | el borde HTTP y el panel |
 | Estructura de los archivos | el matcher del middleware cubre sólo `/admin` y `/api/admin` y no negocia idioma, secretos sólo del lado servidor, RPC presentes en el adaptador, `delete` ausente, legacy retirado | automatización de UI |
@@ -214,15 +247,19 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 ## 5. Fuera de alcance
 
 - **El email del remito**: **T8** ([#14](https://github.com/juanmamerodio/esenciatecnica/issues/14)). Acá el
-  remito se muestra con el número que emitió la base; no se envía nada.
+  remito se muestra con el número que emitió la base y, desde HU-13, el panel **avisa** si el correo no
+  salió; el envío en sí no se reimplementa.
 - **Administradores en base** (`ADMIN`/`ROL`), roles y permisos por perfil: fase 2 (`AGENTS.md` §5.9).
 - **Reimplementar la regla en el front**: reservas, descuentos de stock, estados y numeración del remito son
   de la base.
 - **Ver el comprobante sin autenticación**: el bucket es privado y la URL firmada vence.
-- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); la
-  migración `05` sólo crea el bucket y entra en el handoff para su revisión.
+- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); las
+  migraciones `05` y `06` entran en el handoff para su revisión.
 - **Búsqueda, filtros y paginación del panel**: el MVP tiene un solo Administrador y un catálogo chico.
 - **Envío, seguimiento y estados posteriores a `Pago Validado`**: fuera del MVP (`AGENTS.md` §5.5).
+- **Reabrir un pedido rechazado**: el rechazo es terminal (spec `bd-mvp` §7, decisión 3); el Cliente vuelve a comprar.
+- **Ejecutar el cron desde el panel**: el viernes lo dispara Vercel; el fallback es SQL Editor (spec `bd-mvp`
+  HU-5).
 
 ## 6. Decisiones tomadas
 
@@ -251,12 +288,20 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
    consumidor era esa ruta. `/api/products` no se toca.
 10. **La confirmación del monto es en pantalla, no un `confirm()` del navegador**: muestra el monto del
     comprobante y el total del pedido, se anuncia con `role="alert"` y se puede cancelar.
+11. **El rechazo de la base se traduce, no se muestra crudo.** `ET007` (stock por debajo de la reserva)
+    y `23505` (nombre activo duplicado) tienen mensaje propio y campo asociado; el mapeo vive en el
+    módulo puro (`HU-12`).
+12. **Un remito sin email no es un éxito.** La ruta devuelve `aviso` y el panel lo muestra; el reenvío
+    manual sigue disponible (`HU-13`). La venta no se revierte.
+13. **`productos` es el bucket, no la tabla legacy.** Se conserva el nombre con excepción explícita en
+    `GLOSSARY.md` y `docs/MODELO.md` §9; renombrarlo no aporta al MVP y toca migración, adaptador y tests.
 
 ## 7. Blockers declarados
 
-1. **Migración `05` revisada y aplicada en `otjph…`** (Isabella). Sin el bucket `productos`, subir una foto
-   falla; el DDL está en [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a producción
-   desde acá.
+1. **Migraciones `05` y `06` aplicadas en `otjph…`** (Juanma aplica, Isabella revisa). Sin el bucket
+   `productos`, subir una foto falla; sin `06`, el panel no puede recibir `ET007` ni la restricción de
+   precio. El DDL está en [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a
+   producción desde acá.
 2. **`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_PASSWORD`** en `.env.local` y en Vercel (Enzo, tarea *Secretos y
    entorno*): sin la primera el panel no puede leer ni escribir; sin la segunda responde `503`.
 3. **Esta spec** aprobada y linkeada en [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13).

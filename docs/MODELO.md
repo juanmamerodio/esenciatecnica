@@ -145,7 +145,9 @@ erDiagram
 - **Estado actual + historial.** `PEDIDO.estado_actual` y `COMPROBANTE.estado_actual` son la lectura rápida del panel; `ESTADO_PEDIDO` y `ESTADO_COMPROBANTE` son el historial auditable. Se actualizan en la misma transacción.
 - **Total derivado.** `PEDIDO.total = SUM(DETALLE_PEDIDO.subtotal)` y `DETALLE_PEDIDO.subtotal = cantidad × precio_unitario`.
 - **Comprobante contra pedido.** `COMPROBANTE.monto` debe coincidir con `PEDIDO.total` para que el Admin pueda aprobar.
-- **Reserva.** Al confirmar el pedido: `STOCK.cantidad_reservada += cantidad`. Al aprobar: `cantidad_actual -= cantidad` y `cantidad_reservada -= cantidad`. Al rechazar o vencer: solo `cantidad_reservada -= cantidad`.
+- **Reserva.** Al confirmar el pedido: `STOCK.cantidad_reservada += cantidad`. Al aprobar: `cantidad_actual -= cantidad` y `cantidad_reservada -= cantidad`. Al rechazar o vencer: solo `cantidad_reservada -= cantidad`. La base rechaza con `ET007` dejar `cantidad_actual < cantidad_reservada`.
+- **Dinero.** `PRODUCTO.precio > 0` y `COMPROBANTE.monto > 0`: un pedido de total 0 no se puede aprobar.
+- **Vencimiento.** El cron de los **viernes 23:59 (America/Argentina/Buenos_Aires)** cancela todos los pedidos `Pendiente de Pago`, rechaza su comprobante pendiente y libera la reserva. Es idempotente.
 - **Disponible.** `STOCK.cantidad_actual - STOCK.cantidad_reservada`; el umbral de aviso es `cantidad_warning`.
 - **Remito.** Se genera al aprobar el comprobante; es el estado final del MVP. No hay envío ni seguimiento.
 - **Borrado lógico.** `PRODUCTO.activo = false`; no se borran productos con historial.
@@ -299,5 +301,7 @@ dicen “decisión” son acuerdos de implementación, no invariantes que la bas
 | Operaciones | — | RPC `crear_pedido`, `aprobar_comprobante`, `rechazar_comprobante`, `cancelar_pedidos_vencidos` | Transacciones atómicas y permisos por función. |
 | Identidad del Cliente | — | el checkout lo resuelve por `email` desde el servidor (upsert con service role), sin RPC nueva | No hay RPC de Cliente en el contrato aprobado (4 RPC) y el único real es `email`. | decisión — spec `checkout` §6.1 |
 | `comprobante.foto_url` | `string` | clave del objeto dentro del bucket privado; la signed URL se genera al leer | El bucket es privado: no hay URL pública que guardar. | decisión — spec `checkout` §6.2 |
-| `producto.imagen_url` | `string` | URL pública del objeto en el bucket público `productos` (PNG/JPEG/WebP, 5 MB) | La foto es contenido público de la tienda y la sube el Administrador desde el panel: no hay dato sensible que firmar. La clave queda bajo `productos/<id_producto>/`. | `admin.test.ts` (clave saneada) · decisión — spec `admin` §6.5 y migración `05` |
+| `producto.imagen_url` | `string` | URL pública del objeto en el bucket público `productos` (PNG/JPEG/WebP, 5 MB) | La foto es contenido público de la tienda y la sube el Administrador desde el panel: no hay dato sensible que firmar. La clave queda bajo `productos/<id_producto>/`. **`productos` es el nombre del bucket de Storage, no la tabla legacy**: excepción explícita en `GLOSSARY.md`. | `admin.test.ts` (clave saneada) · decisión — spec `admin` §6.5 y migración `05` |
+| Vencimiento | regla del MVP | cron de Vercel (`59 2 * * 6` UTC = viernes 23:59 ART) + RPC `cancelar_pedidos_vencidos()` | La reserva no puede quedar tomada para siempre. El cron es idempotente y no toca `Pago Validado`. | `aprobacion.test.ts` · spec `bd-mvp` HU-5 |
+| Errores de dominio | — | `ET001`–`ET007` + `23505` (nombre duplicado) | El panel traduce el código a un mensaje; nunca muestra el error crudo de PostgreSQL. | `admin.test.ts` · spec `bd-mvp` §3.5 |
 
