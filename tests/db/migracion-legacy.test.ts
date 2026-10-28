@@ -194,6 +194,157 @@ values (1, '30111222', 'Admin Principal', 'admin123');
 insert into roll (id_rol, descripcion_rol) values (1, 'Cliente'), (2, 'Administrador');
 `;
 
+/**
+ * Forma medida en `otjph` el 2026-10-27 (spec `bd-mvp` §9.1): `producto` ya no tiene
+ * `id_stock`, pero quedan `detalle_carrito` y `stock.porcentaje`. El marcador viejo de la
+ * migración `00` no los veía y el respaldo se salteaba en silencio.
+ */
+const ESQUEMA_LEGACY_SIN_ID_STOCK = `
+create table producto (
+  id_producto serial primary key,
+  nombre text,
+  categoria text,
+  tipo text,
+  descripcion text,
+  precio numeric,
+  tiempo_produccion integer
+);
+
+create table stock (
+  id_stock serial primary key,
+  id_producto integer references producto (id_producto),
+  cantidad_actual integer,
+  cantidad_warning integer,
+  porcentaje integer,
+  cantidad_reservada integer
+);
+
+create table detalle_carrito (
+  id_detalle_carrito serial primary key,
+  id_carrito integer,
+  id_producto integer,
+  cantidad integer
+);
+
+create table cliente (
+  id_cliente serial primary key,
+  dni text,
+  nombre text,
+  email text,
+  telefono text
+);
+
+create table admin (
+  id_admin serial primary key,
+  dni text,
+  nombre text,
+  contrasenia text
+);
+
+create table roll (
+  id_rol serial primary key,
+  descripcion_rol text
+);
+
+insert into producto (id_producto, nombre, categoria, tipo, descripcion, precio, tiempo_produccion)
+values
+  (1, 'Crema Hidratante Facial', 'Cosmética', 'Emulsión', 'Base de aloe vera', 2500, 3),
+  (2, 'Crema Hidratante Facial', 'Cosmética', 'Emulsión', 'Base de aloe vera', 2500, 3),
+  (3, 'Jabón Líquido Neutro', 'Higiene', 'Líquido', 'Fórmula suave', 1800, 2);
+
+insert into stock (id_stock, id_producto, cantidad_actual, cantidad_warning, porcentaje, cantidad_reservada)
+values
+  (1, 1, 48, 10, 100, 5),
+  (2, 2, 50, 10, 100, 3),
+  (3, 3, 6, 10, 40, 0);
+
+insert into detalle_carrito (id_detalle_carrito, id_carrito, id_producto, cantidad)
+values (1, 10, 1, 2);
+
+insert into cliente (id_cliente, dni, nombre, email)
+values (1, '30111222', 'María Gomez', 'maria@ejemplo.com');
+
+insert into admin (id_admin, dni, nombre, contrasenia)
+values (1, '30111222', 'Admin Principal', 'admin123');
+`;
+
+describe('migración sobre el esquema legacy sin producto.id_stock', () => {
+  let db: Base;
+
+  beforeAll(async () => {
+    db = new PGlite();
+    await db.waitReady;
+    await db.exec(ESQUEMA_LEGACY_SIN_ID_STOCK);
+    await simularPrivilegiosSupabase(db);
+    await aplicarMigraciones(db);
+  });
+
+  afterAll(async () => {
+    await db.close();
+  });
+
+  it('respalda aunque producto ya no tenga id_stock', async () => {
+    const producto = await db.query<{ total: string }>(
+      'select count(*)::text as total from respaldo_legacy.producto',
+    );
+    const carrito = await db.query<{ total: string }>(
+      'select count(*)::text as total from respaldo_legacy.detalle_carrito',
+    );
+    const admin = await db.query<{ total: string }>(
+      'select count(*)::text as total from respaldo_legacy.admin',
+    );
+
+    expect(producto.rows[0].total).toBe('3');
+    expect(carrito.rows[0].total).toBe('1');
+    expect(admin.rows[0].total).toBe('1');
+  });
+
+  it('deja anotados los conteos previos de las 14 tablas del listado', async () => {
+    const { rows } = await db.query<{ tabla: string; filas: string | null; presente: boolean }>(
+      'select tabla, filas::text, presente from respaldo_legacy.conteos order by tabla',
+    );
+
+    expect(rows).toHaveLength(14);
+
+    expect(rows.filter((fila) => fila.presente)).toEqual([
+      { tabla: 'admin', filas: '1', presente: true },
+      { tabla: 'cliente', filas: '1', presente: true },
+      { tabla: 'detalle_carrito', filas: '1', presente: true },
+      { tabla: 'producto', filas: '3', presente: true },
+      { tabla: 'roll', filas: '0', presente: true },
+      { tabla: 'stock', filas: '3', presente: true },
+    ]);
+
+    // Una tabla que no existía queda registrada como ausente, no como vacía.
+    for (const fila of rows.filter((registro) => !registro.presente)) {
+      expect(fila.filas).toBeNull();
+    }
+  });
+
+  it('el respaldo y sus conteos quedan cerrados a la anon key', async () => {
+    for (const tabla of ['producto', 'detalle_carrito', 'conteos']) {
+      await expect(
+        comoAnon(db, () => db.query(`select * from respaldo_legacy.${tabla}`)),
+        tabla,
+      ).rejects.toThrow(/permission denied|permiso denegado/i);
+    }
+  });
+
+  it('aborta si detecta legacy y no puede dejar un respaldo con los mismos conteos', async () => {
+    const dbSinRed = new PGlite();
+    await dbSinRed.waitReady;
+    await dbSinRed.exec(ESQUEMA_LEGACY_SIN_ID_STOCK);
+    // Un respaldo previo incompleto: el conteo no coincide y `01` no puede correr sin red.
+    await dbSinRed.exec(`
+      create schema respaldo_legacy;
+      create table respaldo_legacy.producto as table public.producto with no data;
+    `);
+
+    await expect(aplicarMigraciones(dbSinRed)).rejects.toThrow(/respaldo/i);
+    await dbSinRed.close();
+  });
+});
+
 describe('migración sobre el esquema legacy', () => {
   let db: Base;
 
