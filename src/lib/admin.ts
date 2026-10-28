@@ -47,9 +47,15 @@ export type MotivoDeErrorAdmin =
   /** La fila leída no cumple el contrato del modelo. */
   | "datos-inconsistentes"
   | "stock-insuficiente"
+  /** `ET007`: la cantidad quedaría por debajo de lo que ya está reservado (migración 06). */
+  | "stock-bajo-reserva"
   | "comprobante-no-pendiente"
   | "monto-no-coincide"
   | "pedido-no-pendiente"
+  /** `23505`: ya hay un producto activo con ese nombre (alta o edición de producto). */
+  | "nombre-duplicado"
+  /** `23505` en cualquier otra tabla: el dato choca con un índice único del modelo. */
+  | "datos-duplicados"
   | "error-del-servidor";
 
 export type ErrorDelPanel = {
@@ -549,7 +555,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
         const creado = await puerto.crearProducto(revision.data);
         return { estado: "ok", idProducto: creado.id_producto };
       } catch (error) {
-        return describirError(error);
+        return describirError(error, "producto");
       }
     },
 
@@ -568,7 +574,7 @@ export function crearPanel(puerto: PuertoAdmin): PanelAdmin {
         await puerto.actualizarProducto(revisionId.data, revision.data);
         return { estado: "ok", idProducto: revisionId.data };
       } catch (error) {
-        return describirError(error);
+        return describirError(error, "producto");
       }
     },
 
@@ -773,10 +779,14 @@ function camposDe(error: z.ZodError): Record<string, string> {
 }
 
 /**
- * Los errores de la base llegan con su `errcode` (ET001..ET006, migración 02): el panel los
- * convierte en mensajes del dominio en vez de mostrar el texto crudo de PostgreSQL.
+ * Los errores de la base llegan con su `errcode` (ET001..ET007, `23505` y `23514`; migraciones
+ * 02 y 06): el panel los convierte en mensajes del dominio en vez de mostrar el texto crudo de
+ * PostgreSQL.
+ *
+ * `23505` no siempre es el nombre del producto: `01` tiene índices únicos en cliente, comprobante,
+ * remito, alerta y detalle. El contexto de la operación decide el mensaje.
  */
-function describirError(error: unknown): ErrorDelPanel {
+function describirError(error: unknown, contexto: "producto" | "general" = "general"): ErrorDelPanel {
   switch (codigoDeError(error)) {
     case "ET001":
       return {
@@ -803,6 +813,40 @@ function describirError(error: unknown): ErrorDelPanel {
         estado: "error",
         motivo: "pedido-no-pendiente",
         mensaje: "El pedido ya no está pendiente de pago, así que el comprobante no se puede validar.",
+      };
+    case "ET007":
+      return {
+        estado: "error",
+        motivo: "stock-bajo-reserva",
+        mensaje:
+          "No podés dejar la cantidad por debajo de lo reservado: hay pedidos pendientes que ya tomaron esas unidades. Revisá las cantidades.",
+        campos: {
+          cantidad_actual:
+            "No podés dejar la cantidad por debajo de lo reservado: revisá la cantidad actual.",
+        },
+      };
+    case "23505":
+      if (contexto === "producto") {
+        return {
+          estado: "error",
+          motivo: "nombre-duplicado",
+          mensaje: "Ya hay un producto activo con ese nombre.",
+          campos: { nombre: "Ya hay un producto activo con ese nombre." },
+        };
+      }
+      return {
+        estado: "error",
+        motivo: "datos-duplicados",
+        mensaje:
+          "Ya existe otro registro con esos datos. Revisá los valores antes de volver a intentar.",
+      };
+    case "23514":
+      // Último recurso: una constraint sin código de dominio. No se muestra el texto crudo.
+      return {
+        estado: "error",
+        motivo: "datos-invalidos",
+        mensaje:
+          "Alguno de los datos no cumple las reglas del catálogo. Revisá los valores e intentá de nuevo.",
       };
     default:
       return {

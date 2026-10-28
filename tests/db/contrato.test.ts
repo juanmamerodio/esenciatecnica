@@ -166,7 +166,7 @@ describe('contrato de la base MVP', () => {
         update stock set cantidad_reservada = 3
          where id_producto = (select id_producto from producto where nombre = 'Producto Invariante');
       `),
-    ).rejects.toThrow(/stock_reserva_valida|reservada/i);
+    ).rejects.toThrow(/ET007|reservad/i);
   });
 
   it('genera una fila de stock al crear un producto', async () => {

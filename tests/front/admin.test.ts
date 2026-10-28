@@ -399,6 +399,61 @@ describe('T7 · aprobar y rechazar llaman a los RPC del dominio', () => {
     }
   });
 
+  it('traduce ET007, 23505 y 23514 a mensajes del dominio (issue #17)', async () => {
+    const bajoReserva = puertoFalso({
+      falla: { en: 'actualizarStock', error: errorDeLaBase('ET007') },
+    });
+    const et007 = await crearPanel(bajoReserva.puerto).editarStock(1, {
+      cantidad_actual: 1,
+      cantidad_warning: 1,
+    });
+
+    expect(et007.estado).toBe('error');
+    if (et007.estado !== 'error') return;
+    expect(et007.motivo).toBe('stock-bajo-reserva');
+    expect(et007.campos?.cantidad_actual).toMatch(/reservad/i);
+    expect(et007.mensaje).toMatch(/reservad/i);
+    expect(et007.mensaje).not.toMatch(/ET007/);
+
+    const nombreRepetido = puertoFalso({
+      falla: { en: 'crearProducto', error: errorDeLaBase('23505') },
+    });
+    const duplicado = await crearPanel(nombreRepetido.puerto).crearProducto(DATOS_DE_PRODUCTO);
+
+    expect(duplicado.estado).toBe('error');
+    if (duplicado.estado !== 'error') return;
+    expect(duplicado.motivo).toBe('nombre-duplicado');
+    expect(duplicado.campos?.nombre).toMatch(/nombre/i);
+    expect(duplicado.mensaje).not.toMatch(/23505/);
+
+    const checkGenerico = puertoFalso({
+      falla: { en: 'actualizarProducto', error: errorDeLaBase('23514') },
+    });
+    const otroCheck = await crearPanel(checkGenerico.puerto).actualizarProducto(
+      1,
+      DATOS_DE_PRODUCTO,
+    );
+
+    expect(otroCheck.estado).toBe('error');
+    if (otroCheck.estado !== 'error') return;
+    expect(otroCheck.motivo).toBe('datos-invalidos');
+    expect(otroCheck.mensaje).not.toMatch(/23514/);
+    expect(otroCheck.mensaje).toMatch(/reglas|datos/i);
+
+    // Un 23505 fuera del alta/edición de producto no es "nombre duplicado": hay otros índices
+    // únicos en el modelo (cliente, comprobante pendiente, remito, alerta, detalle).
+    const otroUnico = puertoFalso({
+      falla: { en: 'atenderAlerta', error: errorDeLaBase('23505') },
+    });
+    const duplicadoAjeno = await crearPanel(otroUnico.puerto).atenderAlerta(5);
+
+    expect(duplicadoAjeno.estado).toBe('error');
+    if (duplicadoAjeno.estado !== 'error') return;
+    expect(duplicadoAjeno.motivo).toBe('datos-duplicados');
+    expect(duplicadoAjeno.mensaje).not.toMatch(/producto activo/i);
+    expect(duplicadoAjeno.mensaje).toMatch(/ya existe|datos/i);
+  });
+
   it('una falla que no es del dominio queda como error del servidor con su propio mensaje', async () => {
     const { puerto } = puertoFalso({
       falla: { en: 'rechazarComprobante', error: new Error('connection refused') },

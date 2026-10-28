@@ -14,9 +14,12 @@ export const ESTADO_HTTP: Record<MotivoDeErrorAdmin, number> = {
   "datos-invalidos": 400,
   "datos-inconsistentes": 500,
   "stock-insuficiente": 409,
+  "stock-bajo-reserva": 409,
   "comprobante-no-pendiente": 409,
   "monto-no-coincide": 422,
   "pedido-no-pendiente": 409,
+  "nombre-duplicado": 409,
+  "datos-duplicados": 409,
   "error-del-servidor": 500,
 };
 
