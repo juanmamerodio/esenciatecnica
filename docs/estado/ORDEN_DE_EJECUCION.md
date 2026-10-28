@@ -41,7 +41,7 @@ Los blockers declarados mandan sobre todo lo anterior: `#47` no empieza sin `#40
 | 12 | **#43** · La marca y el producto dejan de ser un vaso de laboratorio | #26 | Cosmética con regla de dominio: un ícono por concepto, con test que lo prohíbe. |
 | 13 | **#40** · Nace `docs/specs/PLANTILLA.md`, con test que la fija | #29 | Habilita el retrofit; sin plantilla publicada no hay nada que aplicar. |
 | 14 | **#47** · Retrofit de la plantilla en los siete specs de la tanda | #29 | **Bloqueado por #40.** No cambia comportamiento: sólo ordena documentos. |
-| 15 | **#45** · Nacen las dos skills del proyecto y §11 dice la verdad | #28 | Conocimiento operativo (`tablero-teams`, `bd-viva`); se escribe cuando los procedimientos ya están estables. |
+| 15 | **#45** · Nacen las dos skills del proyecto y §11 dice la verdad | #28 | Conocimiento operativo (`tablero-teams`, `bd-viva`); se escribe cuando los procedimientos ya están estables. **Implementado el 2026-10-28.** |
 | 16 | **#48** · Trazabilidad: cerrar los nueve issues ya implementados | #24 | Último: cierra #2, #5, #6, #8, #9, #10, #12, #13 y #14 citando commits y tests que ya están en `main`. |
 
 ## 3. Qué queda afuera del orden

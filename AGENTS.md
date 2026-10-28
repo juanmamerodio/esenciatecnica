@@ -274,17 +274,23 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 - [`docs/agentes/domain.md`](docs/agentes/domain.md) — cómo consumir glosario y ADRs.
 - [`docs/agentes/teams.md`](docs/agentes/teams.md) — tablero y bandeja de Teams: estados, contrato y ritual de cierre.
 - [`GLOSSARY.md`](GLOSSARY.md) — vocabulario.
-- `.agents/skills/` — skills propias del proyecto (anatomía en [`docs/metodo/brain.md`](docs/metodo/brain.md) §4.1).
+- `.agents/skills/` — [`tablero-teams`](.agents/skills/tablero-teams/SKILL.md) (tablero y bandeja de Teams con `npm run teams`) y [`bd-viva`](.agents/skills/bd-viva/SKILL.md) (control de la base viva con `npm run bd:viva`).
 - `docs/adr/` — decisiones de arquitectura.
 
 **Skills del proyecto.** Las skills propias de Esencia Técnica viven en el repo, en
 `.agents/skills/<nombre-kebab>/SKILL.md`, para que todo el equipo las tenga; las globales de la máquina
-quedan para las genéricas de la agencia. Reglas que impone el entorno real (DeepSeek Harness), no el gusto:
+quedan para las genéricas de la agencia. Las del repo son **`tablero-teams`** y **`bd-viva`**; cada una
+resume su procedimiento y apunta a su fuente en vez de copiarla. Reglas que impone el entorno real
+(DeepSeek Harness), no el gusto:
 
 - El archivo se llama **`SKILL.md`** y el descubrimiento es de **un solo nivel**: `skills/<categoría>/<skill>/SKILL.md` **no** se carga.
 - El frontmatter leído es `name` (kebab-case obligatorio), `description` (obligatorio), `whenToUse`, `metadata`, `disable-model-invocation` y `user-invocable`. **No** se escriben `model:` ni `tools:`.
 - El nombre canónico sale del frontmatter, no del directorio.
 - Las skills del proyecto **pisan** a las globales del mismo nombre.
+
+Cada skill nueva se agrega a esta lista en el mismo commit; el test
+[`tests/front/skills-del-proyecto.test.ts`](tests/front/skills-del-proyecto.test.ts) falla si un
+directorio de `.agents/skills/` no está nombrado acá o si el frontmatter trae `model:`/`tools:`.
 
 No se instalan colecciones de skills de terceros completas: si una tajada necesita una skill puntual, se
 adapta a esta regla, en español y con guardrails propios. Escribir una skill que el entorno no carga es

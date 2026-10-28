@@ -1,7 +1,7 @@
 # memory.md · estado de build
 
 > Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (tanda del 27-10 casi
-> cerrada: #33–#44 y #46 en repo, y el retrofit de la plantilla, #47).
+> cerrada: #33–#47 en repo; queda #48 · trazabilidad).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -12,8 +12,8 @@
 - **Tanda nueva ordenada el 28-10:** los nueve specs del 27-10 se publican y sus dieciséis tajadas
   (#33–#48) tienen un orden de ejecución en [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md).
   **Implementadas en repo, una por commit:** #39 · CI, #33, #41, #42, #35, #34, #46, #36, #37, #38, #43,
-  #44 · dinero y #40 · plantilla de spec, con su retrofit **#47**. Quedan **#45 · skills del proyecto** y
-  **#48 · trazabilidad de issues**, los dos últimos del orden.
+  #44 · dinero, #40 · plantilla de spec, con su retrofit **#47**, y #45 · skills del proyecto.
+  Queda **#48 · trazabilidad de issues**, el último del orden.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
 - **Tablero de Teams auditado el 27-10** contra el repo: 41 tareas → 20 `done`, 7 `review`, 14 `backlog`.
@@ -23,7 +23,7 @@
   laboratorio, redondeo del dinero, `.agents/skills/` y plantilla de spec.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **381 tests** en 28 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **388 tests** en 29 archivos ·
   `npm run build` compila sin `RESEND_API_KEY` y ya incluye `/api/cron/vencidos`.
 - BD prod `otjph…`: **ROJA**, **26 desajustes** medidos con el `bd:viva` nuevo. Además de los 13
   originales, ahora ve:
@@ -57,6 +57,7 @@
 | Cambio | Qué dejó |
 |---|---|
 | `docs/estado/ORDEN_DE_EJECUCION.md` | Los dieciséis tickets de la tanda ordenados por cuatro criterios (dinero/seguridad, puerta automática, lo fundacional antes de quien lo usa, gobernanza al final), con las dependencias nativas de GitHub (#47 ← #40/#41/#42/#44; #46 ← #35; #48 ← los otros quince). |
+| **#45 · Skills del proyecto** | Nace `.agents/skills/` con **`tablero-teams`** (leer/mover/crear/publicar con `npm run teams`, los cuatro estados, `--autor`, bitácora y auditoría) y **`bd-viva`** (correr `bd:viva`, el cache de PostgREST y la trampa del `200 []`, y por qué `npm test` no prueba la base viva). Cada `SKILL.md` en un solo nivel, con `name`/`description`/`whenToUse` y sin `model:` ni `tools:`; el runtime las descubrió. `AGENTS.md` §11 lista las dos reales y `tests/front/skills-del-proyecto.test.ts` (7 tests) fija la forma y que ninguna quede sin nombrar en §11. |
 | **#47 · Retrofit de la plantilla** | Los siete specs de la tanda siguen `docs/specs/PLANTILLA.md`: secciones canónicas en orden, notas finales y 21 HU con `Como … quiero … para`. No cambió ninguna decisión de comportamiento; sí se corrigieron las referencias cruzadas a los números viejos (MODELO, ADR 0005, handoff, guías y specs vecinos). El test estructural deja de nombrar a los siete como pendientes; `bd-mvp`, `front-mvp` y `migracion-otjph` siguen fuera, con su motivo y nombrados en el test. Commit `1a66dc5`. |
 | Nueve specs de `docs/specs/` | Publicados: busqueda-por-campos, detalle-404, deuda-codigo-25-10, formato-del-dinero, iconos-y-copy-del-dominio, integracion-continua, plantilla-de-spec, skills-del-proyecto y trazabilidad-issues. |
 | `src/lib/format.ts` | `redondearACentavos` (aritmética) y `formatPrice` adaptativo: entero sin decimales (`$ 3.000`), con centavos con dos exactos (`$ 4,50`). Una sola regla de dinero para tienda, panel, remito y checkout. |
@@ -110,8 +111,16 @@
    los alcance sin que nadie tenga que acordarse.
 5. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
    por hechas; los del cierre beta también. → **#48**.
-6. 🟡 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación. → **#45**.
+6. ✅ `.agents/skills/` **ya existe** con las dos skills del repo y `AGENTS.md` §11 dice la verdad; el test
+   estructural las cubre. Cerrado el 2026-10-28 con **#45**.
 7. 🔴 **Seguridad:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
+8. 🟡 **Revisión del 28-10 sobre las skills (#45):** ninguno toca comportamiento; se dejaron sin parchear por
+   la regla de §6.5 (no parchear en la sesión de review). La skill de `bd-viva` no nombra
+   `scripts/verificar-bd-viva.mjs` y `tablero-teams` copia el bloque de comandos de `teams.md` §5 en vez
+   de apuntarlo; falta `PARÁMETROS DE ENTRADA` y el orden de `brain.md` §4.1, y §11 perdió el puntero
+   «anatomía en `brain.md` §4.1»; el test fija exactamente dos skills (la spec §5 dice «al menos una») y
+   sus guardias de `task_notes`/`§11` son más débiles que lo que §8 afirma. → tarea en el tablero y
+   **#48** para la trazabilidad.
 
 Siguen abiertos los hallazgos de la revisión de código del 25-10 (`buscarCliente` con `ilike`,
 duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod): son las

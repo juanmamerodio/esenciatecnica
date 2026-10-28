@@ -1,6 +1,6 @@
 # Spec · Skills del proyecto en `.agents/skills/`
 
-> **Feature:** `skills-del-proyecto` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#28](https://github.com/juanmamerodio/esenciatecnica/issues/28).
+> **Feature:** `skills-del-proyecto` · **Estado:** implementada en repo (issue #45) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#28](https://github.com/juanmamerodio/esenciatecnica/issues/28) · **Tajada:** [#45](https://github.com/juanmamerodio/esenciatecnica/issues/45).
 > **Origen:** hallazgo 🟡 de `memory.md` (el directorio no existe) y tarea `BAJA` del tablero:
 > *Publicar `.agents/skills/` o corregir `AGENTS.md` §11*.
 > **Fuente de verdad:** [`AGENTS.md`](../../../AGENTS.md) §11 ·
@@ -106,3 +106,23 @@ un solo nivel, frontmatter sin `model` ni `tools`) y en español.
   estructura, no sólo el texto.
 - La decisión «publicar las dos skills» (en vez de sólo corregir `AGENTS.md`) se tomó el 27-10.
 - Si mañana aparece una tercera skill propia, se suma a la lista de §11 en el mismo commit.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #45)
+
+`npm run typecheck` sin errores, `npm run lint` en 0, la suite en verde con el test nuevo y
+`npm run docs:links` sin links rotos. El runtime descubrió las dos skills al escribirlas: el catálogo de
+la sesión pasó a listar `tablero-teams` y `bd-viva`.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| `.agents/skills/` existe con las dos skills | implementado | `.agents/skills/tablero-teams/SKILL.md` y `.agents/skills/bd-viva/SKILL.md`, cada una en su `<nombre-kebab>/` |
+| `name` kebab-case, igual al directorio | implementado | test *«el frontmatter es el mínimo que el entorno lee»* (`tests/front/skills-del-proyecto.test.ts`) |
+| `description` y `whenToUse` presentes; sin `model:` ni `tools:` | implementado | mismo test; guardias `<nombre>: el frontmatter no puede tener «model:»` y `«tools:»` |
+| Cada skill apunta a su fuente en vez de duplicarla | implementado | `tablero-teams` linkea `docs/agentes/teams.md`; `bd-viva`, `docs/specs/migracion-otjph/spec.md` y `docs/entrega/GUIA-ISABELLA.md` §4.4; ambas por debajo de 100 líneas |
+| La skill del tablero exige `--autor` y deja bitácora y auditoría | implementado | test *«la skill del tablero exige `--autor` y deja bitácora y auditoría»*: los cuatro estados, `task_notes` y `task_audit_logs` |
+| La skill de `bd:viva` explica el cache de PostgREST y la diferencia con `npm test` | implementado | test *«la skill de `bd:viva` distingue el cache de PostgREST…»*; `notify pgrst, 'reload schema'` y la trampa del `200 []` |
+| `AGENTS.md` §11 lista las dos skills reales y mantiene la regla del entorno | implementado | §11 nombra `tablero-teams` y `bd-viva`, linkea cada `SKILL.md` y conserva el un-solo-nivel y el «sin `model:` ni `tools:`» |
+| Test estructural que recorre `.agents/skills/` | implementado | `tests/front/skills-del-proyecto.test.ts`: exige la lista exacta, el frontmatter y que cada skill esté nombrada en §11 |
+| `npm run docs:links` en verde | implementado | 0 links sin resolver |
