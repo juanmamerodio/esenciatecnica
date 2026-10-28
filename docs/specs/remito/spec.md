@@ -1,6 +1,7 @@
 # Spec · Remito y email al Cliente (`T8`)
 
-> **Feature:** `front-mvp/remito` · **Estado:** publicada para implementación · **Fecha:** 2026-10-25.
+> **Feature:** `front-mvp/remito` · **Estado:** implementada en repo · **Fecha:** 2026-10-25, revisado el 2026-10-27.
+> **Verificación en vivo:** pendiente (depende del issue #16 y de las claves del issue #20).
 > **Origen:** gate de arranque del issue [#14](https://github.com/juanmamerodio/esenciatecnica/issues/14);
 > `docs/specs/front-mvp/spec.md` §4 (tajada T8) no fijaba criterios propios y este documento los fija.
 > **Depende de:** `T7 · Admin` ([#13](https://github.com/juanmamerodio/esenciatecnica/issues/13)), que dejó
@@ -104,3 +105,36 @@ venta al correo, de modo que un fallo de Resend revierta o duplique una aprobaci
    correos sin que nadie lo note.
 4. **Remito HTML, sin PDF**: el documento se imprime desde el navegador si hace falta.
 5. **Sin datos fiscales**: el modelo no los tiene y no se inventan.
+
+## 7. Estado de implementación (auditoría del 2026-10-27)
+
+Auditoría de cada HU contra el código de `src/` y los tests de `tests/front/` y `tests/db/`. El remito lo
+emite la base (RPC); el front lo lee, lo compone y lo envía por Resend. El email es posterior y no
+bloqueante: si falla, la venta ya está cerrada y el panel ofrece reenviar. El comportamiento de “el email
+falló” está implementado en `src/components/admin/comun.ts` y `PanelDePedidos.tsx` (issue #19).
+
+| Criterio / HU | Estado | Evidencia |
+|---|---|---|
+| HU-1 · La aprobación devuelve `numero` y `total` del remito | implementado, sin verificar en vivo | `src/lib/admin.ts:413-427`; `src/app/api/admin/comprobantes/route.ts:34-46`; test `tests/db/aprobacion.test.ts:31-39` |
+| HU-1 · Un solo remito por comprobante; el módulo no crea ni numera | implementado, sin verificar en vivo | `src/lib/remito.ts:7-8`; test `tests/front/remito.test.ts:191`; `tests/db/aprobacion.test.ts:86,97` |
+| HU-2 · El email sale al `email` del Cliente con número, fecha, líneas y total | implementado, sin verificar en vivo | `src/lib/remito.ts:157-188,190-282`; tests `tests/front/remito.test.ts:115,155` |
+| HU-2 · Asunto y cuerpo con Esencia Técnica y la institución | implementado | `src/lib/remito.ts:191,229,259`; test `tests/front/remito.test.ts:127-128` |
+| HU-2 · `RESEND_API_KEY` solo en el servidor | implementado | `src/lib/remito-servidor.ts:93`; tests `tests/front/remito.test.ts:229,237` |
+| HU-3 · Sin promesas de envío, seguimiento ni estados posteriores | implementado | `src/lib/remito.ts:214-215,255`; test `tests/front/remito.test.ts:132` |
+| HU-3 · Sin datos fiscales inventados | implementado | `src/lib/remito.ts:190-282`; test `tests/front/remito.test.ts:139` |
+| HU-4 · Fallo de Resend no revierte la venta y vuelve como `aviso` | implementado | `src/app/api/admin/comprobantes/route.ts:40-46`; `src/lib/remito.ts:173-184`; `src/components/admin/comun.ts:51-52`; `src/components/admin/PanelDePedidos.tsx:80-86,117-121`; tests `tests/front/aviso-remito.test.ts:30,99`; `tests/front/remito.test.ts:169` |
+| HU-4 · Reenvío manual sin emitir un segundo remito | implementado | `src/app/api/admin/remito/route.ts:16-44`; `src/components/admin/PanelDePedidos.tsx:40-56,261-276`; tests `tests/front/remito.test.ts:191,204` |
+| HU-4 · El fallo queda en el log del servidor | implementado | `src/lib/remito.ts:175-178`; `src/app/api/admin/remito/route.ts:33` |
+| HU-5 · El panel muestra número de remito y link imprimible | implementado | `src/components/admin/PanelDePedidos.tsx:244-259`; test `tests/front/remito.test.ts:221` |
+| HU-5 · Página imprimible sin el resto del panel, mobile y AA | implementado, sin verificar en vivo | `src/app/admin/remito/[idComprobante]/page.tsx:48,77,80-83`; test `tests/front/remito.test.ts:212` |
+
+### Pendiente
+
+- Verificación en vivo del envío real por Resend (el email llega y se ve bien): issue #20 (`RESEND_API_KEY`)
+  y #14 (T8).
+- Verificación en vivo de `aprobar_comprobante` y `remitos_de_venta` contra `otjph…`: issue #15/#16. Los
+  tests de PGlite ya cubren la regla; falta la base real.
+- Verificación manual de la página imprimible (mobile, foco, contraste AA): cierre de T8 (#14) con la base
+  migrada.
+- El fallo de correo y el reenvío ya están implementados (issue #19); no queda código pendiente en esa
+  parte.

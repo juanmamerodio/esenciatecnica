@@ -1,6 +1,6 @@
 # Spec · Cerrar la migración del MVP en `otjph`
 
-> **Feature:** `migracion-otjph` · **Estado:** lista para implementar · **Fecha:** 2026-10-26.
+> **Feature:** `migracion-otjph` · **Estado:** migraciones escritas, falta aplicarlas · **Fecha:** 2026-10-26, revisado el 2026-10-27.
 > **Origen:** auditoría de la sesión del 26-10 sobre el estado real de `otjphjnrwihqzzhbfnmh`.
 > **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) + `supabase/migrations/`.
 > **Responsable:** Isabella Infante (Database & SQL Architecture).
@@ -13,6 +13,7 @@
 Isabella movió a `review` el 24-10 las dos tareas de base del Teams — *«Aplicar DDL del MVP en otjph»* y
 *«RLS y Storage: cerrar lectura anónima y bucket comprobantes»* —, pero el proyecto vivo **no coincide**
 con el esquema versionado. La verificación del 26-10 encuentra **13 desajustes** (tabla completa en §7).
+La medición del **27-10**, con el `bd:viva` ampliado (B2 · #21), sube a **26 desajustes** (§7.4).
 
 Desde el punto de vista de quien usa la tienda:
 
@@ -29,7 +30,7 @@ corre contra PGlite con las migraciones del repo, así que un proyecto Supabase 
 
 ## 2. Solución (Solution)
 
-Aplicar las seis migraciones versionadas sobre `otjph` **en orden**, sin escribir SQL nuevo, y dejar
+Aplicar las migraciones versionadas del repo sobre `otjph` **en orden**, sin escribir SQL nuevo, y dejar
 `npm run bd:viva` como la puerta de cierre que compara el proyecto vivo contra el esquema versionado.
 
 La migración `01` ya está escrita para esto: hace `drop table if exists … cascade` de las diez tablas del
@@ -38,9 +39,28 @@ columna por columna lo que quedó a medias.
 
 Después de aplicar, el front no cambia: el único cambio de código ya está hecho (§5).
 
+**Actualización 2026-10-27 (cierre beta en repo).** Ya no son seis migraciones: el repo versiona
+`00`–`06` y `supabase/seed.sql`, escritos, probados y **listos para aplicar**. No hay que escribir SQL
+nuevo:
+
+| Migración | Qué hizo |
+|---|---|
+| `20261023090000_00_respaldo_legacy.sql` | Respaldo legacy con marcador real (`detalle_carrito`/`stock.porcentaje`), `respaldo_legacy.conteos` y **aborta** si los conteos de origen y copia no coinciden (B1 · #16). |
+| `20261023090100_01_esquema_mvp.sql` | Reconstruye las diez tablas canónicas, la vista `vista_catalogo`, los constraints y los índices. |
+| `20261023090200_02_reglas_y_rpc.sql` | Triggers de historial y de total derivado, alertas y las cuatro RPC. |
+| `20261023090300_03_rls.sql` | RLS, grants y permisos de ejecución: cierra las diez tablas y deja las RPC sólo para `service_role`. |
+| `20261023090400_04_storage_comprobantes.sql` | Bucket privado `comprobantes` (5 MB, png/jpeg/webp). |
+| `20261023090500_05_storage_productos.sql` | Bucket público `productos` (fotos de la tienda). |
+| `20261027120000_06_cierre_beta.sql` | `producto.precio > 0` y trigger de stock con **`ET007`** (no dejar `cantidad_actual` por debajo de la reserva) (B3 · #17). |
+| `supabase/seed.sql` | Tres productos de demo idempotentes, stock no destructivo y uno bajo el umbral (B5 · #22). |
+
+`bd:viva` también se amplió (B2 · #21): exige `401`/`403` en las **diez** tablas cerradas (no “cero
+filas”), verifica que `anon` **no pueda ejecutar** las cuatro RPC, mira los dos buckets y la ausencia de
+`detalle_carrito`. El criterio de cierre no cambia: **`npm run bd:viva` en verde**.
+
 ## 3. Historias de usuario (User Stories)
 
-1. Como Isabella, quiero correr las seis migraciones en orden sobre `otjph`, para que la base coincida con `docs/MODELO.md` sin SQL nuevo.
+1. Como Isabella, quiero correr las migraciones del repo (`00`–`06`) en orden sobre `otjph`, para que la base coincida con `docs/MODELO.md` sin SQL nuevo.
 2. Como Isabella, quiero respaldar las tablas actuales antes de reconstruir, para poder volver atrás si algo sale mal.
 3. Como Isabella, quiero que la migración de respaldo no se saltee en silencio, para que la próxima reconstrucción no corra sin red.
 4. Como Isabella, quiero que `vista_catalogo` exponga `disponible`, `cantidad_actual`, `cantidad_reservada` y `cantidad_warning`, para que el catálogo lea la disponibilidad real.
@@ -75,15 +95,20 @@ dominio (`drop … cascade` + `create`), así que la convergencia no depende de 
 va después de `01` (los `create trigger` de `02` necesitan que `01` haya dropeado los triggers viejos por
 cascade), `03` después de `02`, y `04`/`05` al final. Cierra con `notify pgrst, 'reload schema'`.
 
-**No se agrega una migración `06` de reconciliación** ni se reescribe la semántica de una migración ya
-aplicada.
+**Actualización 2026-10-27 (B3 · #17).** La secuencia termina en `06`: `20261027120000_06_cierre_beta.sql`
+corre **después de `05`** y sólo **agrega** dos reglas (`producto.precio > 0` y el trigger `ET007`), sin
+reescribir la semántica de `01`–`05`. Es re-ejecutable si la ventana del SQL Editor se corta.
 
-**Datos: respaldo manual obligatorio antes de correr `01`.** La migración `00` usa `producto.id_stock`
-como marcador de esquema legacy, y esa columna ya no existe en `otjph`: **`00` no hace nada** y `01`
-destruiría las filas actuales sin red. Además, con la anon key no se puede contar filas de las tablas
-protegidas por RLS, así que **no se puede afirmar desde afuera que estén vacías**. Decisión: respaldar a
-mano el esquema `public` antes de aplicar, y corregir el marcador de `00` para que la falta de respaldo
-no vuelva a pasar inadvertida.
+**No se agrega una migración `06` de reconciliación** ni se reescribe la semántica de una migración ya
+aplicada. (La `06` del cierre beta no reconcilia: endurece una constraint y agrega un trigger.)
+
+**Datos: respaldo manual obligatorio antes de correr `01`.** La versión original de `00` usaba
+`producto.id_stock` como marcador de esquema legacy, y esa columna ya no existe en `otjph`: **`00` no hacía
+nada** y `01` destruiría las filas actuales sin red. Además, con la anon key no se puede contar filas de
+las tablas protegidas por RLS, así que **no se puede afirmar desde afuera que estén vacías**. **Corregido el
+2026-10-27 (B1 · #16):** `00` detecta el legacy por `detalle_carrito`/`stock.porcentaje`, anota los conteos
+en `respaldo_legacy.conteos` y **aborta** si origen y copia no coinciden; no hay que correr `01` sin
+verificar esos conteos.
 
 **Firmas.** Las RPC usan `integer`, no `bigint`: `bd-mvp/spec.md` §4 las declara mal y hay que corregirlo.
 
@@ -103,8 +128,10 @@ Un test tiene que sobrevivir a que se reescriba la migración y seguir diciendo 
 **Seam nuevo, el único:** `npm run bd:viva` (`scripts/verificar-bd-viva.mjs`). Compara el esquema
 versionado, aplicado en PGlite, contra el proyecto vivo consultado con la anon key.
 
-- **Cubre:** columnas por tabla y vista, existencia de las cuatro RPC por su firma, ausencia de las tablas
-  retiradas, RLS de lectura y escritura anónima, y los dos buckets.
+- **Cubre:** columnas por tabla y vista, columnas legacy que sobran, existencia de las cuatro RPC **y que
+  `anon` no pueda ejecutarlas**, ausencia de las tablas retiradas (incluida `detalle_carrito`), RLS de
+  lectura y escritura anónima en las **diez** tablas cerradas (`401`/`403`, no “cero filas”), y los dos
+  buckets.
 - **Deja afuera:** los cuerpos de las funciones (verifica firma, no comportamiento), los datos fila por
   fila, el contenido de `respaldo_legacy` y cualquier cosa que exija la service role.
 
@@ -122,15 +149,18 @@ en CI.
 
 ## 6. Fuera de alcance (Out of Scope)
 
-- **Secretos y entorno de Enzo:** `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` y `RESEND_API_KEY`.
+- **Secretos y entorno de Enzo:** `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` y `RESEND_API_KEY` (hoy
+  `RESEND_FROM_EMAIL` y `CRON_SECRET` también).
 - **Datos de transferencia de la Cooperadora (G4)** y `NEXT_PUBLIC_TRANSFERENCIA_*`.
-- **Verificación manual en navegador** de las rutas del front.
+- **Verificación manual en navegador** de las rutas del front (#23).
 - **Scheduler del cron de los viernes:** `cancelar_pedidos_vencidos()` existe pero ningún job lo llama.
-  Es una tajada propia.
+  Es una tajada propia. **(Cerrado el 2026-10-27 en B4 · #18:** `vercel.json` dispara
+  `/api/cron/vencidos` con `CRON_SECRET`; el fallback manual queda en `bd-mvp` §9.3.)**
 - **`.agents/skills/`:** `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran y el directorio no existe. Tajada propia.
 - **Inconsistencias de specs detectadas en la auditoría** (se listan en §7): `checkout` §6.3 contra su HU-3,
-  el `aviso` de fallo de correo que se descarta en `comun.ts`, `FlaskConical` en `/about` y el footer,
-  `bd-mvp` huérfano de issue, y el término `productos` en la spec de admin contra `GLOSSARY.md`.
+  el `aviso` de fallo de correo que se descartaba en `comun.ts` (**cerrado en A1 · #19, 2026-10-27**),
+  `FlaskConical` en `/about` y el footer, y el término `productos` en la spec de admin contra
+  `GLOSSARY.md`. (`bd-mvp` ya no está huérfano de issue: cuelga de [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15).)
 - **RLS por perfil y `admin`/`roll` operativos:** fase 2.
 
 ## 7. Notas adicionales (Further Notes)
@@ -157,6 +187,9 @@ En verde ya están: `estados_pedidos` y `remitos_de_venta` completas, la ausenci
 y `verificaciones`, las tres RPC restantes, la RLS de lectura y escritura anónima en las seis tablas
 sensibles, y `cliente`/`pedido`/`producto` con sus columnas del modelo.
 
+**Actualización 2026-10-27:** esta tabla es el historial del 26-10 y se conserva tal cual. La medición
+vigente, con el `bd:viva` ampliado, está en §7.4.
+
 ### 7.2 Correcciones a lo que dice `memory.md`
 
 - **No faltan las cuatro RPC: falta solo `crear_pedido`.** `aprobar_comprobante`, `rechazar_comprobante` y
@@ -166,9 +199,78 @@ sensibles, y `cliente`/`pedido`/`producto` con sus columnas del modelo.
 - **`vista_catalogo` ya no da `PGRST205`:** existe, pero con la forma vieja (`stock_actual`,
   `stock_warning`, `porcentaje`) en vez de la del contrato.
 - **La suite son 230 tests, no 227** (`AGENTS.md` §8 y `memory.md` están desactualizados por 3).
+  **Actualizado el 2026-10-27:** son **279 tests en 23 archivos**, ya con `tests/front/` además de
+  `tests/db/`.
 
 ### 7.3 Por qué esto no lo vio nadie
 
 `npm test` aplica las migraciones del repo sobre PGlite y pasa en verde con el proyecto vivo roto. La
 auditoría lo dejó medible: es exactamente el agujero que `bd:viva` cierra, y la razón por la que este
 criterio de cierre no debería volver a ser un `SELECT` a mano en el SQL Editor.
+
+### 7.4 Los 26 desajustes medidos el 27-10 (salida del `bd:viva` ampliado)
+
+La medición del 27-10 no reescribe la de §7.1: la amplía. Los 13 desajustes del 26-10 siguen vigentes y el
+`bd:viva` de B2 (#21) agrega la superficie que antes no miraba (lectura anónima de las diez tablas, las
+RPC cerradas a `anon`, los buckets y `detalle_carrito`). El total medido es **26 desajustes**:
+
+| Control | Resultado el 27-10 |
+|---|---|
+| lectura anónima de las diez tablas cerradas | `200 []` en las diez, incluidas `admin` y `roll`: una tabla cerrada no puede responder, ni siquiera vacía |
+| `stock.porcentaje` | columna legacy todavía visible |
+| `vista_catalogo` | forma vieja (`stock_actual`, `stock_warning`, `porcentaje`, `activo`) en vez del contrato |
+| `detalle_del_pedido.id_detalle` | columna legacy visible (la tabla todavía está abierta) |
+| `detalle_carrito` | sigue existiendo |
+| RPC `aprobar_comprobante`, `rechazar_comprobante`, `cancelar_pedidos_vencidos` | la anon key **las ejecuta** (`204` / `25006`) |
+| `crear_pedido` | sigue sin la firma de dos argumentos |
+| buckets `comprobantes` y `productos` | no existen |
+| columnas faltantes de §7.1 | `creado_en`, `actualizado_en`, `subido_en`, `mensaje`, `atendida`, `id_comprobante` siguen faltando |
+
+El detalle por superficie está en [`bd-mvp/spec.md`](../bd-mvp/spec.md) §9.1 y §9.2, y el resumen vigente
+en [`memory.md`](../../../memory.md). La escritura anónima ya está denegada: la fuga es de **lectura**.
+`respaldo_legacy` tampoco existe en `otjph` (`404`): lo crea `00`, que hay que correr **antes** de `01`.
+El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
+
+---
+
+## 8. Notas adicionales (cierre beta)
+
+### Estado de implementación (auditoría del 2026-10-27)
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Migraciones `00`–`06` escritas y versionadas | implementado | `supabase/migrations/20261023090000_00_respaldo_legacy.sql` … `20261027120000_06_cierre_beta.sql`; commits `ef36427`, `3ee339d`, `c1c904a`. |
+| `00` respaldo legacy con verificación de conteos | implementado | Marcador por `detalle_carrito`/`stock.porcentaje`, `respaldo_legacy.conteos` y aborto si origen y copia no coinciden; `tests/db/migracion-legacy.test.ts`; commit `3ee339d`. |
+| `01` esquema, `02` reglas y RPC, `03` RLS | implementado | `tests/db/contrato.test.ts`, `tests/db/pedidos.test.ts`, `tests/db/aprobacion.test.ts`, `tests/db/rls.test.ts`, `tests/db/rls-supabase.test.ts`. |
+| `04`/`05` Storage (`comprobantes` privado, `productos` público) | implementado | `04_storage_comprobantes.sql`, `05_storage_productos.sql`; PGlite no tiene el esquema `storage`, así que quedan sin cobertura automática (`AUDITORIA_BD.md` §8.3). |
+| `06` `precio > 0` + trigger `ET007` con reserva de stock | implementado | `06_cierre_beta.sql`; `tests/db/cierre-beta.test.ts`; `src/lib/admin.ts` traduce `ET007` a `stock-bajo-reserva`; commit `c1c904a`. |
+| `supabase/seed.sql` | implementado | Tres productos idempotentes, stock no destructivo y uno bajo el umbral; `tests/db/seed.test.ts`; commit `943e380`. |
+| `bd:viva` con las diez tablas cerradas, las RPC cerradas a `anon`, los buckets y `detalle_carrito` | implementado | `scripts/bd-viva-reglas.mjs:11-73`, `scripts/verificar-bd-viva.mjs:186-222`; `tests/front/bd-viva.test.ts`; commit `fed815a`. |
+| Cron de vencidos los viernes | implementado | `vercel.json` (`59 2 * * 6`), `src/app/api/cron/vencidos/route.ts`; `tests/front/cron.test.ts`; commit `8d0bf44`. |
+| Aplicar `00`–`06` y el seed en `otjph` | pendiente | El proyecto vivo sigue con el esquema legacy y **26 desajustes** (B1 · #16, B3 · #17). Es el único camino crítico. |
+| `npm run bd:viva` en verde | pendiente | Es el criterio de cierre y hoy está **rojo** (#15). |
+| Cerrar la lectura anónima y borrar lo retirado | pendiente | El `200 []` de las diez tablas, `stock.porcentaje` y `detalle_carrito` los mide `bd:viva`; los cierran `01`–`03` al aplicarse. |
+| Buckets `comprobantes` y `productos` | pendiente | Hoy dan `NoSuchBucket` con la anon key; los crean `04` y `05` (B2 · #21 lo verifica). |
+| `respaldo_legacy` | pendiente | No existe en `otjph` (`404`); lo crea `00`, que hay que correr **antes** de `01`. |
+| Secretos y entorno de producción | pendiente | O1 · #20 (Enzo): `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*`. |
+| Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por #16 y #20. |
+| Scheduler del cron (antes fuera de alcance) | implementado | B4 · #18: `vercel.json` + `CRON_SECRET`; fallback manual en `bd-mvp` §9.3. |
+| `.agents/skills/` | pendiente | `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran y el directorio no existe. |
+| Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19; siguen abiertos `checkout` §6.3, `FlaskConical` en `/about` y el footer, y el término `productos` de la spec de admin. |
+| `npm test` como evidencia de la base viva | retirado | Corre contra PGlite y deja `otjph` a medio migrar en verde; el único control es `bd:viva` (`memory.md`, reglas). |
+
+En verde **en repo**: `typecheck` y `lint` en 0, `npm test` con 279 tests en 23 archivos y `npm run build`
+que compila sin `RESEND_API_KEY`. Nada de eso dice que la base viva esté bien: la medición del 27-10 la
+deja en **26 desajustes** y `bd:viva` sigue **rojo** hasta aplicar las migraciones.
+
+### Pendiente
+
+- **Aplicar** `00`–`06` y `supabase/seed.sql` en `otjph`, en orden y con `respaldo_legacy.conteos`
+  verificado antes de `01` (B1 · #16, B3 · #17; Juanma con revisión de Isabella). Runbook en `bd-mvp` §9.3.
+- **Cargar los secretos** de producción (O1 · #20, Enzo): sin la service role no hay checkout, panel ni cron.
+- **Firmar el cierre** con `npm run bd:viva` en verde (#15): es el único control que mira la base viva.
+- **Verificación punta a punta en navegador** (B6 · #23, Celeste), bloqueada por #16 y #20.
+- **Fotos reales de la beta**: subirlas desde `/admin` al bucket `productos` (B5 · #22).
+- **`.agents/skills/`**: el directorio no existe aunque `AGENTS.md` §11 y `front-mvp` §3.4 lo declaran.
+- **Inconsistencias de specs**: `checkout` §6.3 contra su HU-3, `FlaskConical` en `/about` y el footer, y
+  el término `productos` en la spec de admin contra `GLOSSARY.md`.

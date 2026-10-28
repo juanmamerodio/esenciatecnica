@@ -1,6 +1,7 @@
 # Spec · Página institucional (`T6`)
 
-> **Feature:** `front-mvp/sobre-el-proyecto` · **Estado:** publicada para implementación · **Fecha:** 2026-10-25.
+> **Feature:** `front-mvp/sobre-el-proyecto` · **Estado:** implementada en repo · **Fecha:** 2026-10-25 (revisado el 2026-10-27).
+> **Verificación en vivo:** pendiente (depende del issue #16 y de las claves del issue #20).
 > **Origen:** gate de arranque del issue [#12](https://github.com/juanmamerodio/esenciatecnica/issues/12);
 > las decisiones **G3** ([#11](https://github.com/juanmamerodio/esenciatecnica/issues/11)) y **G1**
 > ([#4](https://github.com/juanmamerodio/esenciatecnica/issues/4), decisiones 3 y 5) se cerraron el
@@ -98,3 +99,24 @@ se agregan dependencias (`AGENTS.md` §4 y §8).
 3. **Sin datos de contacto inventados**: se usa el email que ya está en el footer.
 4. **El plazo de la reserva es contenido de dominio**, no una promesa comercial: la página lo comunica tal
    como lo aplica el cron de los viernes (`AGENTS.md` §5.6).
+
+---
+
+## 7. Estado de implementación (auditoría del 2026-10-27)
+
+Auditoría de cada historia contra el código del repo y sus tests. La página está escrita y el contenido del
+dominio está cubierto por tests; la verificación en navegador queda pendiente (depende del issue #16 y de las
+claves del issue #20), igual que el resto del front.
+
+| Criterio / HU | Estado | Evidencia |
+|---|---|---|
+| HU-1 · Qué es el proyecto | desviación | El texto cumple: `src/app/about/page.tsx:80-90` (cosmética e higiene, Departamento de Química, 7mo año, E.E.S.T N°1); tests `habla de cosmética e higiene de la escuela` y `no quedó vocabulario de laboratorio ni de IA`. **Desviación de §1:** sigue el ícono de vaso de laboratorio `FlaskConical` en `src/app/about/page.tsx:5,26`, `src/components/Footer.tsx:2,18`, `src/components/Header.tsx:6,42` y `src/components/ImagenProducto.tsx:5,32`, que el problema daba por retirado. Ningún test lo cubre: la verificación es de texto, no de íconos. |
+| HU-2 · Cómo se compra | implementado | `src/app/about/page.tsx:44-63` (transferencia validada a mano, reserva que se libera el viernes, retiro o entrega acordados y sin envío ni seguimiento); tests `explica la validación manual del pago` y `comunica el plazo de la reserva sin prometer envío`. |
+| HU-3 · Franja de valores en un solo lugar | implementado | `src/app/about/page.tsx:23-42` y `:152-165`; `src/app/page.tsx:88-129` (el bloque de pago de la Home no repite los valores); tests `está en la página institucional`, `no se repite en la Home` y `el bloque de pago de la Home habla del pago y la reserva…`. |
+| HU-4 · Contacto, mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/about/page.tsx:168-191` (contacto e institución) y `src/components/Footer.tsx:36-39`; tests `usa el contacto institucional aprobado en G1` y `tiene un solo h1 y no vuelve a montar la navegación`; la jerarquía, el responsive y el foco se verifican en navegador (#23). |
+| Ruta activa marcada desde el shell | implementado | `src/components/Header.tsx:20-23` y `:60` (`aria-current`); test `tiene un solo h1 y no vuelve a montar la navegación`. |
+
+### Pendiente
+
+- Retirar `FlaskConical` de `src/app/about/page.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx` y `src/components/ImagenProducto.tsx`, y reemplazarlo por un ícono del dominio (cosmética/higiene): es la desviación de HU-1 y va como tarea aparte. **No** está cubierta por ningún ticket de #1..#23.
+- Verificación en navegador de `/about` (jerarquía de encabezados, responsive, foco visible, ruta activa) dentro de la punta a punta (#23).

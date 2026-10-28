@@ -1,6 +1,7 @@
 # Spec · Panel `/admin` (`T7`)
 
-> **Feature:** `front-mvp/admin` · **Estado:** aprobada para el cierre beta · **Fecha:** 2026-10-27.
+> **Feature:** `front-mvp/admin` · **Estado:** implementada en repo · **Fecha:** 2026-10-27 (revisado el 2026-10-27).
+> **Verificación en vivo:** pendiente (depende del issue #16 y de las claves del issue #20).
 > **Origen:** gate de arranque del issue [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13);
 > `docs/specs/front-mvp/spec.md` §4 (tajada T7) no fijaba criterios propios y este documento los fija.
 > **Cierre beta:** esta versión agrega los criterios que faltaban para que el panel explique los
@@ -312,3 +313,36 @@ muestra ni se leen tablas legacy.
 
 El módulo puro y sus tests **no** dependen de 1 ni 2: se puede implementar y dejar en verde con el puerto
 falso mientras se cierran los blockers.
+
+---
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
+
+Auditoría de cada historia contra el código del repo y sus tests. El panel está codificado, pero la
+verificación en vivo no está hecha: la base `otjph…` está a medio migrar y faltan `SUPABASE_SERVICE_ROLE_KEY`
+y `ADMIN_PASSWORD`. Por eso casi todo queda “implementado, sin verificar en vivo”, que no es lo mismo que
+“verificado”.
+
+| Criterio / HU | Estado | Evidencia |
+|---|---|---|
+| HU-1 · Entrada con Basic Auth | implementado, sin verificar en vivo | `src/middleware.ts:19-21` (matcher sólo `/admin` y `/api/admin`), `src/middleware.ts:36-52` (`503` sin `ADMIN_PASSWORD`, `401` con `WWW-Authenticate`), `src/lib/admin-auth.ts:26-45`; tests `sin encabezado no hay credenciales`, `sin ADMIN_PASSWORD el panel no está configurado…`, `los secretos y el adaptador no aparecen en ningún archivo "use client"`. La entrada real en el navegador depende de `ADMIN_PASSWORD` (#20). |
+| HU-2 · Los pedidos con su estado actual | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:42-131` (lee `estado_actual` y firma con `createSignedUrl`), `src/lib/admin.ts:389-410`; `src/components/admin/PanelDePedidos.tsx:138-242`; tests `pedidos() devuelve el estado actual…`, `un comprobante que no se puede firmar no oculta el pedido`, `una fila que no cumple el contrato…`. |
+| HU-3 · Aprobar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:208-214` (RPC `aprobar_comprobante`), `src/lib/admin.ts:418-427`; `src/components/admin/PanelDePedidos.tsx:244-249` y `:283-304` (confirmación con el monto); tests `aprobar va al RPC…` y `…confirman mostrando el monto`. La transacción de stock y remito vive en la base (`tests/db/aprobacion.test.ts`) y no está aplicada en `otjph` (#16). |
+| HU-4 · Rechazar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:216-222` (RPC `rechazar_comprobante`), `src/lib/admin.ts:430-440`; tests `rechazar va al RPC…` y `traduce ET001, ET004 y ET006…`. |
+| HU-5 · Monto que no coincide | implementado, sin verificar en vivo | `src/lib/admin.ts:804-810` (`ET005` a mensaje del dominio), `src/lib/admin-http.ts:19` (`422`); test `un monto que no coincide llega como mensaje del dominio…`. |
+| HU-6 · Stock editable | implementado, sin verificar en vivo | `src/lib/admin.ts:244-256` y `:474-503`; `src/components/admin/PanelDeStock.tsx:86-185`; tests `rechaza una cantidad de stock o un umbral negativos`, `editarStock devuelve el stock actualizado…`, `stock() calcula el disponible…`. |
+| HU-7 · La alerta de stock vive en el panel | implementado, sin verificar en vivo | `src/components/admin/AvisoDeAlertas.tsx:44-48` (`role="alert"`), `:22-23` (las atendidas no se muestran); `src/app/admin/page.tsx:52-56`; tests `alertas() muestra primero las pendientes…` y `…la alerta de stock es un aviso del panel, nunca un email al Administrador`. |
+| HU-8 · Productos: alta, edición, baja y foto | implementado, sin verificar en vivo | `src/lib/admin.ts:548-619` y `:646-681`; `src/lib/admin-servidor.ts:239-306`; `src/components/admin/PanelDeProductos.tsx`; tests `rechaza un producto sin nombre…`, `la baja es lógica…`, `sanea el nombre…`, `rechaza una foto de otro tipo…`. Sin el bucket `productos` (migración `05`, #16) la subida no corre en vivo. |
+| HU-9 · Borde HTTP | implementado, sin verificar en vivo | `src/app/api/admin/{comprobantes,stock,productos,productos/foto,alertas}/route.ts`; `src/lib/admin-http.ts:13-24` (409/422/503) y `:39-44` (400 con campo); test `existe una ruta server-side por operación…`. Nota: §4 habla de “cinco” rutas y hoy hay una sexta, `src/app/api/admin/remito/route.ts`, del reenvío de T8. |
+| HU-10 · Se retira la deuda legacy | implementado | Tests `la deuda legacy del esquema viejo se retiró del repo` (no existen `src/lib/supabase.ts` ni `src/app/api/sync-sheets/`; `/api/products` se conserva) y `/admin deja de ser el aviso de migración…`. |
+| HU-11 · Mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (foco visible), `src/components/admin/PanelDeStock.tsx:86` y `PanelDePedidos.tsx:160` (`overflow-x-auto`), `aria-label` y `role="alert"` en los componentes; el uso en celular y el contraste AA se verifican en navegador (#23). |
+| HU-12 · El panel explica los rechazos de la base | implementado | `src/lib/admin.ts:817-850` (`ET007`, `23505`, `23514`); test `traduce ET007, 23505 y 23514 a mensajes del dominio (issue #17)`. |
+| HU-13 · El remito que no salió se ve | implementado, sin verificar en vivo | `src/app/api/admin/comprobantes/route.ts:40-46`, `src/components/admin/comun.ts:51`, `src/components/admin/PanelDePedidos.tsx:80-86` y `:117-121`; `tests/front/aviso-remito.test.ts`. El envío real depende de `RESEND_API_KEY` (#20). |
+| Verificación de punta a punta del panel | pendiente | Ninguna corrida contra la base viva: falta el esquema migrado y las claves (#16, #20, #23). |
+
+### Pendiente
+
+- Aplicar las migraciones `00`–`05` (#16) y `06` (#17) en `otjph…`: sin eso no hay bucket `productos`, ni `ET007`, ni RPC en vivo; `npm run bd:viva` sigue rojo (#21).
+- `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` y `RESEND_API_KEY` en `.env.local` y Vercel (#20): sin la primera el panel responde `503`; sin la segunda, el middleware responde `503`.
+- Semilla y fotos de la beta (#22) y verificación en navegador del panel —Basic Auth, popup de alerta, confirmación del monto, edición de stock, subida de foto y reenvío del remito— antes de la punta a punta (#23).
+- Nada de esto bloquea los seams: `src/lib/admin.ts`, `src/lib/admin-auth.ts` y `src/components/admin/comun.ts` corren con puerto falso, sin red.

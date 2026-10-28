@@ -1,7 +1,7 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-27 (cierre beta en
-> repo: `00` corregida, `06`, cron, A1, `bd:viva` y seed).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-27 (auditoría del tablero de
+> Teams y specs al día).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -11,6 +11,11 @@
   verificación de punta a punta (B6/#23, Celeste).
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
+- **Tablero de Teams auditado el 27-10** contra el repo: 41 tareas → 20 `done`, 7 `review`, 14 `backlog`.
+  Las de `review` son las que ya tienen código y test pero esperan la base viva o las claves. Se
+  publicaron dos notas en la bandeja: **AVANCE** (cierre beta) y **BLOQUEO** (los 26 desajustes de
+  `otjph`). Tareas nuevas: B6, semilla y fotos, trazabilidad de issues, deuda de código, íconos de
+  laboratorio, redondeo del dinero, `.agents/skills/` y plantilla de spec.
 
 ## Semáforo
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **279 tests** en 23 archivos ·
@@ -55,25 +60,43 @@
 | `supabase/seed.sql` | Tres productos idempotentes, stock no destructivo, uno bajo el umbral; sin rutas locales muertas. |
 | Docs | Spec `bd-mvp` (runbook + fallback del cron + seams), `.env.example` con `CRON_SECRET`, `AGENTS.md` §8. |
 
+## Hecho (2026-10-27, sesión de auditoría)
+| Cambio | Qué dejó |
+|---|---|
+| Tablero de Teams (`team_tasks`) | 21 tareas auditadas con bitácora y log de auditoría: 8 pasaron a `done`, 5 a `review` y el resto quedó anotado como pendiente. 9 tareas nuevas. |
+| Bandeja de Teams (`team_discussions`) | Nota de **AVANCE** del cierre beta y nota de **BLOQUEO** por los 26 desajustes de `otjph`. |
+| `docs/specs/*/spec.md` | Los nueve specs por tajada y el paraguas `front-mvp` suman su sección **Estado de implementación (auditoría del 2026-10-27)**: criterio por criterio, con evidencia y `### Pendiente`. |
+| `migracion-otjph/spec.md` | §7.4 con la medición del 27-10 (13 → 26 desajustes) y la tabla de las ocho piezas versionadas (`00`–`06` + seed). |
+| `checkout/spec.md` | Se resolvió la contradicción HU-3 vs §6.3: **manda el código** (el monto se precarga, editable). |
+
 ## Hallazgos abiertos
-1. 🔴 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación.
-2. 🟠 `checkout/spec.md` se contradice: HU-3 (`:87`) dice que el monto viene precargado; §6.3 (`:166`)
-   dice que no se auto-completa. El código sigue HU-3.
-3. 🟡 `sobre-el-proyecto/spec.md` §1: `/about` y el footer siguen usando `FlaskConical`.
-4. 🟡 Hueco de plantilla transversal: ningún spec tiene sección de notas finales ni lista numerada de
-   historias; 25 HU no enuncian actor ni beneficio.
-5. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13, #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
-   por hechas.
-6. ✅ A1 cerrado: el `aviso` de fallo de correo ya no se descarta.
-7. 🔴 **Seguridad nueva:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
+1. 🟠 **Redondeo del dinero:** `carrito.ts` redondea el total a dos decimales, pero `format.ts` lo muestra
+   sin decimales (`3001.65` → `$ 3.002`) mientras el checkout manda `3001.65`. Con el seed actual
+   (precios enteros) no se dispara. Tarea nueva en el tablero.
+2. 🟡 **Búsqueda del catálogo:** `catalogo.ts` une nombre + categoría + tipo + descripción con `join(" ")`
+   antes de buscar, así que un término cruza el borde entre campos (`"gel alcohol"` matchea
+   `Alcohol en Gel`). El test sólo cubre coincidencias intra-campo.
+3. 🟡 **Detalle de producto:** el 404 por id inválido tiene código (`producto/[id]/page.tsx:25-34`) pero
+   ningún test lo cubre.
+4. 🟡 `FlaskConical` (ícono de laboratorio) sigue en `about`, `Header`, `Footer` e `ImagenProducto`, y
+   `sobre-el-proyecto/spec.md` §1 lo daba por retirado. Tarea nueva en el tablero.
+5. 🟡 Hueco de plantilla transversal: ningún spec tiene sección de notas finales y 25 HU no enuncian actor
+   ni beneficio. Tarea nueva en el tablero.
+6. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
+   por hechas; los del cierre beta también. Tarea nueva en el tablero.
+7. 🟡 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación. Tarea nueva.
+8. 🔴 **Seguridad:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
 
 Siguen abiertos los hallazgos de la revisión de código del 25-10 (`buscarCliente` con `ilike`,
-duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod).
+duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod): tarea nueva
+en el tablero.
 
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit. TDD. Español único. Sin IA. Sin envío.
 - Dinero `NUMERIC(12,2)`; `precio > 0` y `monto > 0`; total derivado; un remito por comprobante; un
   comprobante pendiente por pedido.
+- El total **se calcula**, se redondea y se **muestra** con la misma regla: si el carrito muestra un
+  número distinto del que viaja al pedido, es un bug (hallazgo 1).
 - El remito lo emite **la base**; el front lo compone y lo envía. El email es posterior y no bloqueante.
 - `anon`: sólo `vista_catalogo`/`producto`/`stock`. Las RPC y el panel, sólo `service_role` + Basic Auth.
 - **`npm test` no prueba la base viva**: para eso está `npm run bd:viva`. Falla si una tabla cerrada
@@ -81,6 +104,10 @@ duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, c
 - **Rechazo terminal:** no se reabre un pedido; el Cliente vuelve a comprar.
 - **Cron:** viernes 23:59 ART = `59 2 * * 6` UTC en `vercel.json`, con `CRON_SECRET`. Fallback manual:
   `select cancelar_pedidos_vencidos();` en el SQL Editor.
+- **El tablero de Teams se escribe por PostgREST** con la anon key pública de
+  `quimicashop/config.js` (RLS `USING (true)`): `team_tasks`, `task_notes`, `task_audit_logs` y
+  `team_discussions`. Estados válidos: `backlog`, `in_progress`, `review`, `done`; prioridades `ALTA`,
+  `MEDIA`, `BAJA`. Un `review` = hecho en repo, sin verificar en vivo.
 
 ## Decisiones que no hay que redescubrir
 - **G2:** el detalle es **página propia** (`/producto/[id]`), no card ampliada.
@@ -100,3 +127,5 @@ duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, c
   puede ejecutarlas.
 - **`npm test` pasa en verde con la base rota** porque aplica las migraciones del repo en PGlite. No es
   evidencia de que `otjph` esté bien.
+- Un spec **no se reescribe para tapar una desviación**: se marca la fila como `desviación` con
+  `archivo:línea` y se abre la tarea. El código y la base mandan sobre el texto.

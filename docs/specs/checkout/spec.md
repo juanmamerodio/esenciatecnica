@@ -1,6 +1,7 @@
 # Spec · Checkout y comprobante (`T5`)
 
-> **Feature:** `front-mvp/checkout` · **Estado:** publicada para implementación · **Fecha:** 2026-10-25.
+> **Feature:** `front-mvp/checkout` · **Estado:** implementada en repo · **Fecha:** 2026-10-25, revisado el 2026-10-27.
+> **Verificación en vivo:** pendiente (depende del issue #16 y de las claves del issue #20).
 > **Origen:** gate de arranque del issue [#10](https://github.com/juanmamerodio/esenciatecnica/issues/10);
 > `docs/specs/front-mvp/spec.md` §4 (tajada T5) no fijaba criterios propios y este documento los fija.
 > **Depende de:** `T4 · Carrito` ([#9](https://github.com/juanmamerodio/esenciatecnica/issues/9)), que dejó el
@@ -84,7 +85,7 @@ leer. No se maquilla con datos de muestra.
 **Como** Administrador, **quiero** que el Cliente declare el monto que transfirió **para** poder compararlo
 con la imagen y con el total (`AGENTS.md` §5.3).
 
-- **Then** el campo "Monto transferido" viene precargado con el total del pedido y es editable.
+- **Then** el campo "Monto transferido" viene precargado con el total del carrito y es editable.
 - **Given** un monto declarado distinto del total del pedido, **Then** no se sube el comprobante y se
   explica que el importe tiene que coincidir (aprobar sin coincidencia es imposible: `ET005`).
 - **Then** el `monto` guardado es el declarado por el Cliente, mayor que cero (`COMPROBANTE.monto > 0`); el
@@ -163,8 +164,10 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
    *upsert* por email con la service role, acotado a esta tajada.
 2. **`foto_url` guarda la clave del objeto, no una URL:** el bucket es privado; la signed URL se genera al
    leer, en el servidor.
-3. **El monto lo declara el Cliente y no se auto-completa:** es el dato que el Administrador compara contra
-   la imagen; completarlo solo convertiría la validación manual en un trámite.
+3. **El monto llega precargado con el total del carrito y es editable; el servidor guarda lo que declara
+   el Cliente:** la precarga es una comodidad de la pantalla, pero el dato que se persiste es el que el
+   Cliente confirma. Si no coincide con el total de la base, no se sube el comprobante (`ET005`).
+   > Contradicción resuelta en la auditoría del 2026-10-27: HU-3 y la §4 ya decían “monto precargado”; el código (`src/app/checkout/page.tsx:54-57`) lo confirma, así que se corrigió este punto y manda el código.
 4. **Reintento idempotente después de crear el pedido:** el `id_pedido` se conserva en el intento, así un
    fallo de subida no duplica pedido ni reserva.
 5. **Se retira el camino legacy de compra en esta misma tajada:** dos caminos de pedido conviviendo es
@@ -181,3 +184,50 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
 
 El módulo puro y sus tests **no** dependen de 1 ni 2: se puede implementar y dejar verde con el puerto
 falso y PGlite mientras se cierran los blockers.
+
+## 8. Estado de implementación (auditoría del 2026-10-27)
+
+Auditoría de cada HU contra el código de `src/` y los tests de `tests/front/` y `tests/db/`. El estado
+`implementado, sin verificar en vivo` significa que el código y los tests lo cubren, pero la base viva
+`otjph…` sigue a medio migrar y las claves del issue #20 todavía no están puestas. No se marca ningún
+criterio como “verde en producción” sin esa verificación.
+
+| Criterio / HU | Estado | Evidencia |
+|---|---|---|
+| HU-1 · Formulario con nombre, email, DNI y teléfono opcional; sin apellido ni contraseña | implementado | `src/app/checkout/page.tsx:172-209`; `src/lib/checkout.ts:112-126` |
+| HU-1 · Reutilización del Cliente por `email` | implementado | `src/lib/checkout.ts:187-188`; test `tests/front/checkout.test.ts:211` |
+| HU-1 · DNI, email y teléfono fuera del alcance de la anon key | implementado, sin verificar en vivo | `tests/db/rls.test.ts:89`; `tests/db/rls-supabase.test.ts:56`; `src/lib/checkout-servidor.ts:8-10` |
+| HU-2 · Reserva de stock y total derivado en la base | implementado, sin verificar en vivo | `tests/db/pedidos.test.ts:19`; `src/lib/checkout-servidor.ts:77-84` |
+| HU-2 · Stock insuficiente: error y carrito intacto | implementado, sin verificar en vivo | `src/lib/checkout.ts:376-380`; `src/app/checkout/page.tsx:91-99`; test `tests/front/checkout.test.ts:318` |
+| HU-2 · Total del carrito vs total de la base | implementado | `src/app/checkout/page.tsx:48,100-103`; `src/lib/checkout.ts:176`; test `tests/front/checkout.test.ts:252` |
+| HU-2 · Items `{ id_producto, cantidad }` sin precios | implementado | `src/app/checkout/page.tsx:81`; `src/lib/checkout.ts:133-144`; test `tests/front/checkout.test.ts:220` |
+| HU-2 · Producto inactivo o inexistente rechazado | implementado, sin verificar en vivo | `src/lib/checkout.ts:381-385`; test `tests/front/checkout.test.ts:332`; `tests/db/pedidos.test.ts:71` |
+| HU-3 · Monto precargado con el total del carrito y editable | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:54-57,216-227` |
+| HU-3 · Monto distinto del total: no sube y explica | implementado | `src/lib/checkout.ts:176-178,339-348`; test `tests/front/checkout.test.ts:252` |
+| HU-3 · `monto` guardado como lo declaró el Cliente, > 0 | implementado | `src/lib/checkout.ts:128-131,326`; test `tests/front/checkout.test.ts:239` |
+| HU-3 · Sin validación automática de la imagen | implementado | `src/components/SubirComprobante.tsx:95-103`; `src/lib/checkout.ts:225-238`; test `tests/front/checkout.test.ts:384` |
+| HU-4 · PNG, JPEG y WebP de hasta 5 MB, rechazo previo | implementado | `src/lib/checkout.ts:26-29,225-238,270-276`; tests `tests/front/checkout.test.ts:164,180` |
+| HU-4 · Bucket privado con clave por pedido en `foto_url` | implementado, sin verificar en vivo | `src/lib/checkout-servidor.ts:97-104,106-126`; `src/lib/checkout.ts:320`; tests `tests/front/checkout.test.ts:206,358` |
+| HU-4 · Estado inicial `Comprobante Subido` en el historial | implementado, sin verificar en vivo | `tests/db/aprobacion.test.ts:64-71` |
+| HU-4 · La anon key no lee el bucket ni el comprobante | implementado, sin verificar en vivo | `tests/db/rls.test.ts:89`; `tests/db/rls-supabase.test.ts:56`; `npm run bd:viva` (issue #15) |
+| HU-5 · Reintento con `idPedido` no vuelve a crear el pedido | implementado | `src/app/checkout/page.tsx:45,83,99`; `src/lib/checkout.ts:158`; test `tests/front/checkout.test.ts:269` |
+| HU-5 · Reemplazo del comprobante pendiente en la misma fila | implementado, sin verificar en vivo | `src/lib/checkout.ts:319,328`; `src/lib/checkout-servidor.ts:107-117`; tests `tests/front/checkout.test.ts:278`; `tests/db/aprobacion.test.ts:137` |
+| HU-5 · Falla de subida: reserva intacta y cron de viernes | implementado, sin verificar en vivo | test `tests/front/checkout.test.ts:344`; `tests/db/aprobacion.test.ts:147` |
+| HU-5 · Falta `SUPABASE_SERVICE_ROLE_KEY`: error explícito | implementado | `src/lib/checkout-servidor.ts:21-25`; `src/app/api/checkout/route.ts:72-82` |
+| HU-6 · Pantalla de éxito con número y total; carrito vaciado | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:91-94,119-127` |
+| HU-6 · Sin promesas de envío, seguimiento ni estados posteriores | implementado | `src/app/checkout/page.tsx:124-126` |
+| HU-6 · Carrito vacío y confirmación distinguidos | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:115,136` |
+| HU-6 · Mobile y accesibilidad (foco, `aria-label`, errores anunciados) | implementado, sin verificar en vivo | `src/app/checkout/page.tsx:166,233`; `src/components/SubirComprobante.tsx:65,88` |
+| HU-7 · El navegador no recibe la service role ni listados | implementado | `src/app/api/checkout/route.ts:33-84`; test `tests/front/checkout.test.ts:403` |
+| HU-7 · Zod y `400` con detalle de campos | implementado | `src/lib/checkout.ts:112-144`; `src/app/api/checkout/route.ts:15-24,71` |
+| HU-7 · Adaptador tipado con `database.types.ts`, sin `any` | implementado | `src/lib/checkout-servidor.ts:1-3,27` |
+| Camino legacy de compra (`/api/orders`, `/api/verify-payment`, `ReceiptUploader`) | retirado | `tests/front/checkout.test.ts:384-401`; spec §2 |
+
+### Pendiente
+
+- Aplicar las migraciones, la RLS y el bucket en `otjph…`: issue #15/#16. Es lo que convierte en
+  “verificado en vivo” casi todo lo que hoy está implementado en repo.
+- Poner `SUPABASE_SERVICE_ROLE_KEY` en `.env.local` y Vercel: issue #20. Sin la clave, el borde responde
+  `503` y no se puede probar el camino completo.
+- Verificación manual en navegador de `/checkout` (formulario, monto precargado, estados de error y de
+  éxito, carrito que no se vacía): cierre de la tajada T5 (#10) con la base migrada y las claves puestas.

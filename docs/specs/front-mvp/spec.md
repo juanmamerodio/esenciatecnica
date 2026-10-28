@@ -1,6 +1,6 @@
 # Spec · Front MVP — unir el prototipo con la app final (Esencia Técnica)
 
-> **Feature:** `front-mvp` · **Estado:** aprobada para implementación por tajadas · **Fecha:** 2026-10-23.
+> **Feature:** `front-mvp` · **Estado:** front implementado; base viva pendiente · **Fecha:** 2026-10-23, revisado el 2026-10-27.
 > **Origen:** sesión de grilling (`/grill-me`) del 2026-10-23; el issue de GitHub es la spec publicada.
 > **Fuente de verdad:** [`GLOSSARY.md`](../../../GLOSSARY.md), [`docs/MODELO.md`](../../MODELO.md),
 > [`src/lib/database.types.ts`](../../../src/lib/database.types.ts) y [`docs/academico/prototype1.html`](../../academico/prototype1.html)
@@ -115,23 +115,32 @@ el runtime, y la regla de ubicación se registra en AGENTS §11.
 
 ## 4. Mapa de tajadas
 
-| Tajada | Objetivo | Blockers |
-|---|---|---|
-| **T0 · Español único** | Borrar i18n y `[lang]`; rutas en la raíz; `typecheck` y `lint` en verde | — |
-| **T1 · Home** | Home canónica con la identidad acordada | T0; OK de UX/UI de Celeste |
-| **T2 · Catálogo** | Grilla real, buscador y filtro por categoría (hoy son placeholders deshabilitados) | T1 |
-| **T3 · Detalle de producto** | Ver un producto en detalle (no existe hoy; el prototipo sí lo tiene) | T2; decisión abierta 1 |
-| **T4 · Carrito** | Carrito del cliente sin reservar stock | T1 |
-| **T5 · Checkout + comprobante** | Confirmar pedido, reservar stock y subir el comprobante | T4 |
-| **T6 · Sobre el proyecto** | Página institucional (hoy `/about`, en el prototipo “Investigación”) | T1; decisión abierta 2 |
-| **T7 · Admin** | Login, stock, pedidos, aprobar/rechazar comprobantes, alertas, subida de fotos | T0; contrato canónico |
-| **T8 · Remito + email** | Remito de venta al aprobar y su envío al Cliente | T7 |
+> **Estado (auditoría del 2026-10-27):** hecho · las nueve tajadas (`T0`–`T8`) están implementadas, cada
+> una con su spec y su test. Lo que falta no es front: es la base viva aplicada y la verificación en
+> navegador (§9 y §11).
+
+| Tajada | Objetivo | Blockers | Estado |
+|---|---|---|---|
+| **T0 · Español único** | Borrar i18n y `[lang]`; rutas en la raíz; `typecheck` y `lint` en verde | — | hecho |
+| **T1 · Home** | Home canónica con la identidad acordada | T0; OK de UX/UI de Celeste | hecho |
+| **T2 · Catálogo** | Grilla real, buscador y filtro por categoría (hoy son placeholders deshabilitados) | T1 | hecho |
+| **T3 · Detalle de producto** | Ver un producto en detalle (no existe hoy; el prototipo sí lo tiene) | T2; decisión abierta 1 | hecho |
+| **T4 · Carrito** | Carrito del cliente sin reservar stock | T1 | hecho |
+| **T5 · Checkout + comprobante** | Confirmar pedido, reservar stock y subir el comprobante | T4 | hecho |
+| **T6 · Sobre el proyecto** | Página institucional (hoy `/about`, en el prototipo “Investigación”) | T1; decisión abierta 2 | hecho |
+| **T7 · Admin** | Login, stock, pedidos, aprobar/rechazar comprobantes, alertas, subida de fotos | T0; contrato canónico | hecho, contra el contrato; las fotos reales de la beta siguen pendientes (#22) |
+| **T8 · Remito + email** | Remito de venta al aprobar y su envío al Cliente | T7 | hecho, sin verificar con Resend real |
 
 Ninguna tajada se implementa sin su spec detallada ni sus criterios de aceptación.
 
 ---
 
 ## 5. Slice 1 · Home (`T1`)
+
+> **Estado (auditoría del 2026-10-27):** hecho, sin verificar en vivo · las ocho HU tienen cobertura de
+> estructura o de datos (`tests/front/home.test.ts`, `tests/front/catalogo.test.ts`) y el vocabulario del
+> dominio está limpio; la verificación en navegador sigue pendiente (#23). La franja institucional del
+> footer y `/about` todavía usa el ícono `FlaskConical` (hallazgo 🟡 de `memory.md`).
 
 ### HU-1 · Propuesta de valor
 
@@ -210,6 +219,10 @@ información institucional.
 
 ## 6. Decisiones de UX (aprobadas el 2026-10-25)
 
+> **Estado (auditoría del 2026-10-27):** hecho · las seis decisiones se implementaron en `T1`, `T3`, `T5`
+> y `T6`. La única que sigue **pendiente** es la 1 en su parte de datos reales: sin
+> `NEXT_PUBLIC_TRANSFERENCIA_*` el checkout no inventa un CBU y lo dice (gate **G4**).
+
 > **Gate G1 ([#4](https://github.com/juanmamerodio/esenciatecnica/issues/4)): cerrado.** Las cinco propuestas
 > de abajo quedan **aprobadas tal cual**, y las decisiones abiertas 3, 4 y 5 se cierran en §10. El texto
 > institucional definitivo del footer es el que ya está en `src/components/Footer.tsx` (contacto
@@ -264,9 +277,14 @@ formas de query ni detalles de implementación.
 
 ## 9. Blockers y gates
 
+> **Estado (auditoría del 2026-10-27):** el front está implementado y en verde **en repo**; siguen
+> **abiertos** el gate de despliegue (aplicar `00`–`06` y el seed en `otjph`, #16/#17), los secretos
+> (#20), los datos de la Cooperadora (G4) y las fotos reales (#22). La fila “T0 sin terminar” quedó
+> vieja: `T0`–`T8` están hechas, y el test de la suite corre contra PGlite, no contra la base viva.
+
 | Blocker | Afecta | Estado |
 |---|---|---|
-| T0 sin terminar | T1 | **Cerrado**: T0/F0/T1/T2/T4 implementados y en verde. |
+| T0 sin terminar | T1 | **Cerrado**: `T0`–`T8` implementados; `typecheck` y `lint` en 0 errores. |
 | OK de UX/UI sobre §6 | Implementar T1 | **Cerrado** (G1/G2/G3, 2026-10-25). |
 | Migraciones del MVP sin aplicar en `otjph…` | Ver la tienda **con datos en producción** | **Abierto** (gate de despliegue, no de desarrollo). |
 | `.env.local` sin `SUPABASE_SERVICE_ROLE_KEY` | Aplicar migraciones, checkout y panel | **Abierto** (Enzo). |
@@ -281,6 +299,10 @@ vacío hasta que se apliquen las migraciones.
 ---
 
 ## 10. Decisiones cerradas (2026-10-25)
+
+> **Estado (auditoría del 2026-10-27):** hecho · las cinco decisiones se implementaron (`T3` para G2,
+> `T6` para G3 y la franja de G1, `T1` para el título de la grilla). El gate nuevo **G4** sigue
+> **pendiente**: los datos bancarios reales los confirma la Cooperadora.
 
 Los gates **G1** ([#4](https://github.com/juanmamerodio/esenciatecnica/issues/4)), **G2**
 ([#7](https://github.com/juanmamerodio/esenciatecnica/issues/7)) y **G3**
@@ -308,3 +330,72 @@ tajadas que bloqueaban. Quedan acá y en la spec de cada tajada:
 - **G4 · Datos de la transferencia:** alias, CBU y titular reales los confirma la Cooperadora. Hasta
   entonces el checkout **no** muestra datos bancarios inventados: publica lo que haya en
   `NEXT_PUBLIC_TRANSFERENCIA_*` y, si falta, lo dice.
+
+---
+
+## 11. Notas adicionales
+
+### Estado de implementación (auditoría del 2026-10-27)
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| T0 · Español único | implementado | `tests/front/espanol-unico.test.ts` (sin `[lang]`, sin diccionarios; el middleware sólo autentica); commit `19073e2`. |
+| F0 · Identidad visual y shell | implementado | `tailwind.config.ts:3-9` referencia los tokens de `src/app/globals.css`; `src/app/layout.tsx:45`; `tests/front/identidad-shell.test.ts`; commit `275d61c`. |
+| T1 · Home | implementado | `src/app/page.tsx`; `src/lib/catalogo.ts:78`; `tests/front/catalogo.test.ts`, `tests/front/home.test.ts`; commit `4c143db`. |
+| T2 · Catálogo | implementado | `src/app/catalog/page.tsx:48-53`; `src/lib/catalogo.ts:118`; `tests/front/catalogo-filtros.test.ts`; commit `4bd6c5d`. |
+| T3 · Detalle de producto | implementado | `src/app/producto/[id]/page.tsx:34,48,93`; `tests/front/detalle-producto.test.ts`; commit `95b5608`. |
+| T4 · Carrito | implementado | `src/lib/carrito.ts:26-77`; `src/app/cart/page.tsx`; `tests/front/carrito.test.ts`; commit `ae1ae1e`. |
+| T5 · Checkout + comprobante | implementado | `src/lib/checkout.ts`, `src/app/checkout/page.tsx`; `tests/front/checkout.test.ts`; commit `20eb571`. |
+| T6 · Sobre el proyecto | implementado | `src/app/about/page.tsx:25-37,52-61`; `tests/front/sobre-el-proyecto.test.ts`; commit `8064dff`. |
+| T7 · Admin | implementado | `src/app/admin/page.tsx`, `src/app/api/admin/*`, `src/middleware.ts:20`; `tests/front/admin.test.ts`; commit `7a6065c`. |
+| T8 · Remito + email | implementado, sin verificar en vivo | `src/lib/remito.ts:190`, `src/app/admin/remito/[idComprobante]/page.tsx`; `tests/front/remito.test.ts`; commit `2ece28f`. |
+| Cierre beta B3/B4/A1/B2/B5 | implementado | commits `c1c904a` (`06` + `ET007`), `8d0bf44` (cron), `620a394` (aviso del remito), `fed815a` (`bd:viva`), `943e380` (seed). |
+| §3.1 Identidad visual: una sola fuente de tokens | implementado | `src/app/globals.css` define los valores y `tailwind.config.ts:3-9` los referencia por variable; `tests/front/identidad-shell.test.ts:40-66`. |
+| §3.2 Componentes base: una sola card y un solo shell | implementado | `src/components/ProductCard.tsx`, `GrillaProductos.tsx`, `Header.tsx`, `Footer.tsx`; `tests/front/home.test.ts:50-54`, `identidad-shell.test.ts:69-88`. |
+| §3.2 `src/app/[lang]/ProductCard.tsx` duplicado | retirado | No existe en el repo; `tests/front/home.test.ts:50-54` fija una sola card. |
+| §3.3 Contrato de datos: `vista_catalogo` y vacío ≠ error | implementado | `src/lib/catalogo.ts:96-104`, `src/lib/catalogo-servidor.ts:35`; `tests/front/catalogo.test.ts:82-136`. |
+| §3.3 Orden por `nombre` sin `created_at` | implementado | `src/lib/catalogo.ts:165`; `tests/front/catalogo.test.ts:33`. |
+| §3.3 Tipo `Producto` legacy de `src/lib/supabase.ts` | retirado | `src/lib/supabase.ts` ya no existe; `tests/front/home.test.ts:67-73`. |
+| §3.4 Skills en `.agents/skills/` | pendiente | El directorio no existe (`Test-Path` da falso) y `AGENTS.md` §11 lo declara fundación. |
+| §5 HU-1 · Propuesta de valor | implementado | `src/app/page.tsx:20-44`; `tests/front/home.test.ts:28-35`. |
+| §5 HU-2 · Productos publicados | implementado | `src/app/page.tsx:71-86`; `tests/front/catalogo.test.ts:22-45`. |
+| §5 HU-3 · Producto sin stock | implementado | `src/components/ProductCard.tsx:35-41`; `tests/front/catalogo.test.ts:47-62`. |
+| §5 HU-4 · Tienda vacía y error | implementado | `src/components/GrillaProductos.tsx:22-52`; `tests/front/catalogo.test.ts:110-136`. |
+| §5 HU-5 · Imagen ausente | implementado | `src/components/ImagenProducto.tsx:29,42-46`; `tests/front/catalogo.test.ts:64-80`. |
+| §5 HU-6 · Navegación | implementado | `src/components/Header.tsx:14-18`, `src/components/Footer.tsx:5-10`; `tests/front/identidad-shell.test.ts:88-107`. |
+| §5 HU-7 · Mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/layout.tsx:30-33,45`; `tests/front/identidad-shell.test.ts:63,97,129-146`; falta el navegador (#23). |
+| §5 HU-8 · Confianza en el pago | implementado | `src/app/page.tsx:88-129`; `tests/front/home.test.ts:37-42`. |
+| §6 Decisión 1 · Datos de transferencia sin inventar (G4) | implementado, sin verificar en vivo | `src/lib/transferencia.ts:14-17`; `src/app/checkout/page.tsx:272`; faltan los datos reales de la Cooperadora. |
+| §6 Decisión 2 · `tiempo_produccion` fuera de la Home | implementado | `src/app/producto/[id]/page.tsx:93-98`; `tests/front/detalle-producto.test.ts`. |
+| §6 Decisiones 3 y 4 · Entrega a acordar y lenguaje institucional | implementado | `src/app/page.tsx:120-127`, `src/app/about/page.tsx:61`. |
+| §6 Decisión 5 · Mobile-first y estados diseñados | implementado | `src/components/GrillaProductos.tsx`, `ProductCard.tsx`, `ImagenProducto.tsx`. |
+| §6 Decisión 6 · Plazo de la reserva | implementado | `src/app/page.tsx:112-119`, `src/app/checkout/page.tsx:307`. |
+| §7 Seam de datos (función pública del catálogo) | implementado | `tests/front/catalogo.test.ts` contra PGlite migrada + seed. |
+| §7 Verificación en navegador de la Home | pendiente | Issue #23 (B6), bloqueada por #16 y #20. |
+| §9 Gate de despliegue y secretos | pendiente | `.env.local` sin `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY` (O1 · #20). |
+| §10 Decisiones 1-5 (G1/G2/G3) | implementado | `src/app/producto/[id]/page.tsx`; `src/app/about/page.tsx:25-37`; `src/components/Footer.tsx:36-42`. |
+| §10 G4 · Datos bancarios reales | pendiente | Cooperadora; hasta entonces el checkout lo dice (`src/app/checkout/page.tsx:272`). |
+| Ícono institucional (`FlaskConical`) en header, footer y `/about` | pendiente | `src/components/Header.tsx:42`, `src/components/Footer.tsx:18`, `src/app/about/page.tsx:5,26`; hallazgo 🟡 de `memory.md`. |
+
+En verde en repo: `npm run typecheck` y `npm run lint` en 0, y `npm test` con **279 tests en 23
+archivos**. Eso **no** dice nada de la base viva: la suite corre contra PGlite y deja `otjph` a medio
+migrar en verde. Para la base viva el único control es `npm run bd:viva`, y hoy está **rojo** (#15).
+
+### Pendiente
+
+- **Aplicar** `00`–`06` y `supabase/seed.sql` en `otjph` y firmar con `npm run bd:viva` en verde
+  (#15, #16/B1, #17/B3). Es el único camino crítico del MVP.
+- **Cargar los secretos** de producción: `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`,
+  `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET` (#20/O1, Enzo).
+- **Verificación manual en navegador** de Home, catálogo, detalle, carrito, checkout y panel con la base
+  migrada y las claves puestas (#23/B6, Celeste), bloqueada por #16 y #20.
+- **Datos bancarios reales** de la Cooperadora (G4); sin ellos el checkout dice que los confirma en vez
+  de mostrar un CBU inventado.
+- **Fotos reales de la beta**: se suben desde `/admin` al bucket `productos`, no se commitean rutas
+  locales (#22/B5).
+- **`.agents/skills/`**: el directorio no existe aunque `AGENTS.md` §11 y §3.4 lo declaran (hallazgo
+  abierto de `memory.md`).
+- **Ícono de laboratorio** (`FlaskConical`) en header, footer y `/about`, contra el vocabulario que
+  retira el glosario (hallazgo 🟡 de `memory.md`).
+- **Fotos y remito real**: la única evidencia de que el email de Resend sale y se ve bien es la
+  verificación manual (#23).
