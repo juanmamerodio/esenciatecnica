@@ -1,7 +1,7 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-27 (auditoría del tablero de
-> Teams, specs al día y puente `npm run teams`).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (orden de ejecución de la
+> tanda del 27-10 y primer ticket implementado: dinero, #44).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -9,6 +9,10 @@
 - Hecho en repo: B3 (#17), B4 (#18), A1 (#19), B2 (#21) y B5 (#22). Falta **aplicar** `00`–`06` y el
   seed en `otjph` (B1/#16, Juanma con revisión de Isabella), cargar secretos (O1/#20, Enzo) y la
   verificación de punta a punta (B6/#23, Celeste).
+- **Tanda nueva ordenada el 28-10:** los nueve specs del 27-10 se publican y sus dieciséis tajadas
+  (#33–#48) tienen un orden de ejecución en [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md).
+  El primero, **#44 · dinero** (redondeo en la aritmética y formato en un solo lugar), está implementado.
+  Sigue **#39 · CI**.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
 - **Tablero de Teams auditado el 27-10** contra el repo: 41 tareas → 20 `done`, 7 `review`, 14 `backlog`.
@@ -18,7 +22,7 @@
   laboratorio, redondeo del dinero, `.agents/skills/` y plantilla de spec.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **279 tests** en 23 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **291 tests** en 24 archivos ·
   `npm run build` compila sin `RESEND_API_KEY` y ya incluye `/api/cron/vencidos`.
 - BD prod `otjph…`: **ROJA**, **26 desajustes** medidos con el `bd:viva` nuevo. Además de los 13
   originales, ahora ve:
@@ -48,7 +52,17 @@
 | #22 · B5 | semilla de la beta | ✅ seed de tres productos; ⏳ fotos desde `/admin` |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste, bloqueada por B1/O1 |
 
-## Hecho (2026-10-27, sesión de implementación)
+## Hecho (2026-10-28, tanda del 27-10)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/estado/ORDEN_DE_EJECUCION.md` | Los dieciséis tickets de la tanda ordenados por cuatro criterios (dinero/seguridad, puerta automática, lo fundacional antes de quien lo usa, gobernanza al final), con las dependencias nativas de GitHub (#47 ← #40/#41/#42/#44; #46 ← #35; #48 ← los otros quince). |
+| Nueve specs de `docs/specs/` | Publicados: busqueda-por-campos, detalle-404, deuda-codigo-25-10, formato-del-dinero, iconos-y-copy-del-dominio, integracion-continua, plantilla-de-spec, skills-del-proyecto y trazabilidad-issues. |
+| `src/lib/format.ts` | `redondearACentavos` (aritmética) y `formatPrice` adaptativo: entero sin decimales (`$ 3.000`), con centavos con dos exactos (`$ 4,50`). Una sola regla de dinero para tienda, panel, remito y checkout. |
+| `src/lib/carrito.ts` + `checkout.ts` + `Carrito.tsx` + `checkout/page.tsx` | `subtotalDeLinea` (precio × cantidad redondeado) y `totalDelPedido` como suma de subtotales redondeados; el checkout usa la misma función de redondeo y dejó la suya. |
+| `tests/front/formato-dinero.test.ts` | Doce tests: formato con y sin centavos, redondeo sin error de punto flotante, total que suma subtotales redondeados, coherencia carrito→checkout, remito con el mismo total y una sola función de formato en carrito, checkout y panel. |
+| `carrito/spec.md` y `checkout/spec.md` | La desviación de formato deja de estar abierta: los dos specs enuncian la regla y el ejemplo falso (`3001.65 → $ 3.002`) se retira. |
+
+
 | Cambio | Qué dejó |
 |---|---|
 | `00_respaldo_legacy.sql` | Marcador por `detalle_carrito`/`stock.porcentaje`; `respaldo_legacy.conteos`; aborta si origen y copia no coinciden. |
@@ -78,33 +92,34 @@
 | `npm run docs:links` | El verificador de links de `docs/` deja de estar suelto: entra en `package.json` y en la definición de terminado de §8. |
 
 ## Hallazgos abiertos
-1. 🟠 **Redondeo del dinero:** `carrito.ts` redondea el total a dos decimales, pero `format.ts` lo muestra
-   sin decimales (`3001.65` → `$ 3.002`) mientras el checkout manda `3001.65`. Con el seed actual
-   (precios enteros) no se dispara. Tarea nueva en el tablero.
-2. 🟡 **Búsqueda del catálogo:** `catalogo.ts` une nombre + categoría + tipo + descripción con `join(" ")`
+> El redondeo del dinero (hallazgo 1 de la auditoría del 27-10) quedó cerrado el 2026-10-28 con el issue
+> **#44**: el formato es adaptativo, el subtotal se redondea en la aritmética y el total suma subtotales
+> redondeados. Los demás hallazgos ya tienen su tajada en el orden de ejecución.
+1. 🟡 **Búsqueda del catálogo:** `catalogo.ts` une nombre + categoría + tipo + descripción con `join(" ")`
    antes de buscar, así que un término cruza el borde entre campos (`"gel alcohol"` matchea
-   `Alcohol en Gel`). El test sólo cubre coincidencias intra-campo.
-3. 🟡 **Detalle de producto:** el 404 por id inválido tiene código (`producto/[id]/page.tsx:25-34`) pero
-   ningún test lo cubre.
-4. 🟡 `FlaskConical` (ícono de laboratorio) sigue en `about`, `Header`, `Footer` e `ImagenProducto`, y
-   `sobre-el-proyecto/spec.md` §1 lo daba por retirado. Tarea nueva en el tablero.
-5. 🟡 Hueco de plantilla transversal: ningún spec tiene sección de notas finales y 25 HU no enuncian actor
-   ni beneficio. Tarea nueva en el tablero.
-6. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
-   por hechas; los del cierre beta también. Tarea nueva en el tablero.
-7. 🟡 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación. Tarea nueva.
-8. 🔴 **Seguridad:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
+   `Alcohol en Gel`). El test sólo cubre coincidencias intra-campo. → **#41**.
+2. 🟡 **Detalle de producto:** el 404 por id inválido tiene código (`producto/[id]/page.tsx:25-34`) pero
+   ningún test lo cubre. → **#42**.
+3. 🟡 `FlaskConical` (ícono de laboratorio) sigue en `about`, `Header`, `Footer` e `ImagenProducto`, y
+   `sobre-el-proyecto/spec.md` §1 lo daba por retirado. → **#43**.
+4. 🟡 Hueco de plantilla transversal: ningún spec tiene sección de notas finales y 25 HU no enuncian actor
+   ni beneficio. → **#40** y **#47**.
+5. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
+   por hechas; los del cierre beta también. → **#48**.
+6. 🟡 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación. → **#45**.
+7. 🔴 **Seguridad:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
 
 Siguen abiertos los hallazgos de la revisión de código del 25-10 (`buscarCliente` con `ilike`,
-duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod): tarea nueva
-en el tablero.
+duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod): son las
+tajadas #33 a #38 y #46.
 
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit. TDD. Español único. Sin IA. Sin envío.
 - Dinero `NUMERIC(12,2)`; `precio > 0` y `monto > 0`; total derivado; un remito por comprobante; un
   comprobante pendiente por pedido.
-- El total **se calcula**, se redondea y se **muestra** con la misma regla: si el carrito muestra un
-  número distinto del que viaja al pedido, es un bug (hallazgo 1).
+- El total **se calcula**, se redondea y se **muestra** con la misma regla: `subtotalDeLinea` y
+  `formatPrice` son las únicas funciones del dinero; si el carrito muestra un número distinto del que
+  viaja al pedido, es un bug.
 - El remito lo emite **la base**; el front lo compone y lo envía. El email es posterior y no bloqueante.
 - `anon`: sólo `vista_catalogo`/`producto`/`stock`. Las RPC y el panel, sólo `service_role` + Basic Auth.
 - **`npm test` no prueba la base viva**: para eso está `npm run bd:viva`. Falla si una tabla cerrada
@@ -133,5 +148,9 @@ en el tablero.
   puede ejecutarlas.
 - **`npm test` pasa en verde con la base rota** porque aplica las migraciones del repo en PGlite. No es
   evidencia de que `otjph` esté bien.
+- **Dinero:** el formato es **adaptativo** (entero sin decimales, con centavos dos decimales exactos); el
+  redondeo vive en la aritmética (`redondearACentavos`, `subtotalDeLinea`) y la vista sólo muestra
+  (`formatPrice`). La decisión está escrita en [`formato-del-dinero`](docs/specs/formato-del-dinero/spec.md)
+  §4 y no se rediscute.
 - Un spec **no se reescribe para tapar una desviación**: se marca la fila como `desviación` con
   `archivo:línea` y se abre la tarea. El código y la base mandan sobre el texto.
