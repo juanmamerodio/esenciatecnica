@@ -1,5 +1,10 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { ArchivoDeComprobante, DatosDelCliente, PuertoCheckout } from "@/lib/checkout";
+import {
+  normalizarEmail,
+  type ArchivoDeComprobante,
+  type DatosDelCliente,
+  type PuertoCheckout,
+} from "@/lib/checkout";
 import type { Database, Json } from "@/lib/database.types";
 
 /**
@@ -34,8 +39,9 @@ export function puertoSobre(cliente: SupabaseClient<Database>): PuertoCheckout {
       const { data, error } = await cliente
         .from("cliente")
         .select("id_cliente")
-        // El único de la base es `lower(email)`: la comparación tiene que ser insensible.
-        .ilike("email", email)
+        // Igualdad contra el email normalizado, nunca un patrón: `%` y `_` son texto, no comodines
+        // (#33). La fila se guarda en minúsculas y la unicidad de la base es `lower(email)`.
+        .eq("email", normalizarEmail(email))
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -44,17 +50,23 @@ export function puertoSobre(cliente: SupabaseClient<Database>): PuertoCheckout {
     async crearCliente(datos: DatosDelCliente) {
       const { data, error } = await cliente
         .from("cliente")
-        .insert({ nombre: datos.nombre, email: datos.email, dni: datos.dni, telefono: datos.telefono })
+        // Se guarda normalizado: así la búsqueda por igualdad siempre encuentra esta fila.
+        .insert({
+          nombre: datos.nombre,
+          email: normalizarEmail(datos.email),
+          dni: datos.dni,
+          telefono: datos.telefono,
+        })
         .select("id_cliente")
         .single();
 
       if (error) {
-        // Carrera: otro intento con el mismo email lo creó primero. Se reutiliza ese.
+        // Carrera: otro intento con el mismo email lo creó primero. Se reutiliza ese, por igualdad.
         if (error.code === "23505") {
           const existente = await cliente
             .from("cliente")
             .select("id_cliente")
-            .ilike("email", datos.email)
+            .eq("email", normalizarEmail(datos.email))
             .maybeSingle();
           if (!existente.error && existente.data) return existente.data;
         }

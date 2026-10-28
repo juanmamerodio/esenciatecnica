@@ -1,6 +1,6 @@
 # Spec · Deuda de código de la revisión del 25-10
 
-> **Feature:** `deuda-codigo-25-10` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#25](https://github.com/juanmamerodio/esenciatecnica/issues/25).
+> **Feature:** `deuda-codigo-25-10` · **Estado:** en implementación (tanda del 28-10) · **Fecha:** 2026-10-27 · **Issue:** [#25](https://github.com/juanmamerodio/esenciatecnica/issues/25).
 > **Origen:** revisión de contexto limpio del 25-10 sobre `1e91c03..HEAD` (dos ejes: Spec y Estándares),
 > registrada en la sección *«Revisión de código (2026-10-25) · hallazgos abiertos»* de `memory.md`, y
 > tarea `MEDIA` del tablero: *Deuda de código de la revisión del 25-10*.
@@ -157,3 +157,34 @@ Decisiones por hallazgo:
   exactamente lo que la regla §6.5 evita.
 - Si un hallazgo resulta no ser cierto al abrir su ticket, se documenta la corrección en el issue y el
   spec se ajusta: el código manda sobre este documento.
+
+---
+
+## 8. Estado de implementación (tanda del 28-10)
+
+| Hallazgo | Ticket | Estado |
+|---|---|---|
+| 1 · `buscarCliente` por patrón | [#33](https://github.com/juanmamerodio/esenciatecnica/issues/33) | ✅ implementado |
+| 3 · `tiempo_produccion` en el catálogo | [#38](https://github.com/juanmamerodio/esenciatecnica/issues/38) | pendiente |
+| 4 · `urlFirmadaDelComprobante` sin consumidor | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | pendiente |
+| 5 · el total del sidebar tras `monto-no-coincide` | [#34](https://github.com/juanmamerodio/esenciatecnica/issues/34) | pendiente |
+| 6 · la alerta de stock con dos fuentes | [#36](https://github.com/juanmamerodio/esenciatecnica/issues/36) | pendiente |
+| 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
+| 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | pendiente |
+| 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | pendiente |
+| 10 · el borde del cliente castea la respuesta | [#46](https://github.com/juanmamerodio/esenciatecnica/issues/46) | pendiente |
+| 11 · juicios del baseline | repartido (ver §2) | pendiente |
+
+### Hallazgo 1 · cerrado (#33)
+
+`buscarCliente` y el camino de carrera del alta buscan **por igualdad** contra el email normalizado
+(`normalizarEmail`: `trim` + minúsculas), nunca con `ilike`. El alta también guarda normalizado, así que
+la igualdad siempre encuentra la fila que creó el sistema.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Un email con comodines no encuentra al Cliente de otra persona | implementado | `tests/db/cliente-email.test.ts` *«el patrón `%@ejemplo.com` no encuentra la fila de la víctima»* y *«el patrón `_ictima@ejemplo.com` tampoco»*, con PGlite real |
+| El mismo email real encuentra siempre al mismo Cliente, con o sin mayúsculas | implementado | test *«con o sin mayúsculas devuelve la misma fila»* (`JUAN@Ejemplo.com`, `  Juan@EJEMPLO.COM  `) |
+| El camino de carrera reutiliza el Cliente correcto, no el que matcheó por patrón | implementado | test *«no reutiliza la fila que matcheó por patrón»*: con `vitima@ejemplo.com` y `%@ejemplo.com` cargados, el alta de `%@ejemplo.com` reutiliza la segunda fila |
+| Test de integración con PGlite que falla con el comportamiento actual | implementado | 6 de los 9 tests fallaban con `ilike`; el seam es `puertoSobre` + el PostgREST falso sobre PGlite (`tests/db/postgrest-falso.ts`) |
+| El adaptador no vuelve a usar patrones | implementado | tests estructurales *«no queda ningún `ilike` en el adaptador del checkout»* y *«busca por igualdad con el email normalizado»* |

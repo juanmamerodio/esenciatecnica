@@ -36,6 +36,17 @@ export type DatosDelCliente = {
   telefono: string | null;
 };
 
+/**
+ * El email del Cliente se guarda y se busca **normalizado**.
+ *
+ * La unicidad de la base es `unique (lower(email))` (migración 01) y el borde ya lo baja a
+ * minúsculas antes de tocar la base; el adaptador vuelve a normalizar porque el puerto es público
+ * y un `%` o un `_` no puede convertirse en un patrón que alcance la fila de otra persona (#33).
+ */
+export function normalizarEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 export type ArchivoDeComprobante = {
   nombre: string;
   tipo: string;
@@ -116,7 +127,7 @@ const ESQUEMA_CLIENTE = z.object({
     .string()
     .trim()
     .regex(/^[^@\s]+@[^@\s]+\.[^@\s]+$/, "Revisá el email: no tiene un formato válido.")
-    .transform((valor) => valor.toLowerCase()),
+    .transform(normalizarEmail),
   dni: z.string().trim().regex(/^[0-9]{7,8}$/, "El DNI tiene que tener 7 u 8 dígitos."),
   telefono: z
     .string()
