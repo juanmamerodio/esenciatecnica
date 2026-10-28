@@ -115,16 +115,29 @@ export async function consultarCatalogo(
   };
 }
 
+/**
+ * La búsqueda es una **conjunción de palabras por campo** (#41): el término se parte en palabras y
+ * cada una tiene que aparecer en alguno de los cuatro campos del **mismo** producto.
+ *
+ * No se busca el término dentro de los campos concatenados: ahí una coincidencia dependía de que
+ * los campos quedaran pegados en cierto orden (`gel` del tipo seguido de `Alcohol` de la
+ * descripción). Con la conjunción, `gel alcohol` sigue encontrando `Alcohol en Gel` porque las dos
+ * palabras están, una en el nombre y otra en el tipo — que es la razón legítima.
+ */
 function filtrar(productos: ProductoCatalogo[], consulta: ConsultaCatalogo): ProductoCatalogo[] {
-  const termino = sinAcentos(consulta.busqueda ?? "").trim();
+  const palabras = sinAcentos(consulta.busqueda ?? "")
+    .split(/\s+/)
+    .filter(Boolean);
   const categoria = consulta.categoria?.trim() ?? "";
 
   return productos.filter((producto) => {
     if (categoria && producto.categoria !== categoria) return false;
-    if (!termino) return true;
+    if (palabras.length === 0) return true;
 
-    const campos = [producto.nombre, producto.categoria, producto.tipo, producto.descripcion].join(" ");
-    return sinAcentos(campos).includes(termino);
+    const campos = [producto.nombre, producto.categoria, producto.tipo, producto.descripcion].map(
+      sinAcentos,
+    );
+    return palabras.every((palabra) => campos.some((campo) => campo.includes(palabra)));
   });
 }
 

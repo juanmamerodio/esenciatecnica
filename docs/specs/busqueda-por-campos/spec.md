@@ -1,6 +1,6 @@
 # Spec · Búsqueda del catálogo por campos
 
-> **Feature:** `busqueda-por-campos` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#31](https://github.com/juanmamerodio/esenciatecnica/issues/31).
+> **Feature:** `busqueda-por-campos` · **Estado:** implementada en repo (issue #41) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#31](https://github.com/juanmamerodio/esenciatecnica/issues/31) · **Tajada:** [#41](https://github.com/juanmamerodio/esenciatecnica/issues/41).
 > **Origen:** desviación de §2 en [`catalogo/spec.md`](../catalogo/spec.md) y hallazgo 🟡 n.º 2 de
 > `memory.md`. No tiene tarea en el tablero.
 > **Fuente de verdad:** [`docs/specs/catalogo/spec.md`](../catalogo/spec.md) §2 ·
@@ -99,3 +99,20 @@ precisa en el mismo movimiento: no se busca «en la unión», se busca «cada pa
 - El caso de borde existía desde el primer buscador y el test lo tapaba por no probar el cruce.
 - Este spec y el del test del 404 del detalle salen de la auditoría del 27-10: eran desviaciones sin
   tarea en el tablero.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #41)
+
+`npm run typecheck` sin errores, `npm run lint` en 0 y la suite en verde con los tests nuevos.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| El término se parte en palabras; cada una en alguno de los cuatro campos | implementado | `src/lib/catalogo.ts:127-141` (`filtrar`): `palabras.every((palabra) => campos.some(...))` |
+| `gel alcohol` sigue encontrando `Alcohol en Gel` | implementado | test *«sigue encontrando el caso que antes pasaba por casualidad»* (`tests/front/catalogo-filtros.test.ts`) |
+| Se acaban las coincidencias que dependían de la concatenación | implementado | test *«encuentra un producto con las palabras en campos distintos y en cualquier orden»*: `glicerina alcohol` (descripción + nombre) devolvía `[]` antes y ahora encuentra el producto |
+| Una palabra de otro producto no crea coincidencia | implementado | test *«cada palabra tiene que aparecer en algún campo del mismo producto»*: `jabón zinc` y `crema shampoo` devuelven `[]` |
+| Sin mayúsculas ni acentos, en todas las palabras | implementado | test *«ignora acentos y mayúsculas en todas las palabras»* (`GLICERINA Alcohol`, `emulsión zinc`, espacios de más) |
+| Categoría exacta junto con la búsqueda | implementado | test *«la categoría se sigue respetando junto con las palabras»* |
+| El spec del catálogo §2 dice la regla real | implementado | [`catalogo/spec.md` §2](../catalogo/spec.md); la fila de desviación de su §7 pasó a ✅ |
+| Un solo módulo de búsqueda | implementado | el filtrado vive en `src/lib/catalogo.ts`; `src/app/catalog/page.tsx:50` sólo le pasa la consulta |

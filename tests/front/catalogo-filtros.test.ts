@@ -55,6 +55,47 @@ describe('T2 · búsqueda', () => {
   });
 });
 
+describe('#41 · la búsqueda son todas las palabras, cada una en algún campo', () => {
+  async function buscando(busqueda: string, categoria?: string) {
+    const { db, consultar } = await catalogoConSeed();
+    await crearProducto(db, { nombre: 'Zinc tópico', precio: 900, cantidad: 4 });
+
+    const resultado = await consultar({ busqueda, categoria });
+    if (resultado.estado !== 'ok') throw new Error(`se esperaba catálogo ok, llegó ${resultado.estado}`);
+    return resultado.productos.map((producto) => producto.nombre);
+  }
+
+  it('encuentra un producto con las palabras en campos distintos y en cualquier orden', async () => {
+    // `glicerina` está en la descripción y `alcohol` en el nombre: entre los dos no son un tramo
+    // contiguo de la concatenación, así que la unión de campos no los alcanzaba.
+    expect(await buscando('glicerina alcohol')).toEqual(['Alcohol en Gel']);
+    expect(await buscando('alcohol glicerina')).toEqual(['Alcohol en Gel']);
+  });
+
+  it('sigue encontrando el caso que antes pasaba por casualidad', async () => {
+    // `gel alcohol` cruzaba el borde tipo→descripción de `Alcohol en Gel`; con la conjunción
+    // encuentra por nombre y por tipo, que es la razón legítima.
+    expect(await buscando('gel alcohol')).toEqual(['Alcohol en Gel']);
+  });
+
+  it('cada palabra tiene que aparecer en algún campo del mismo producto', async () => {
+    // `jabón` está en un producto y `zinc` en otro: no puede haber coincidencia entre productos.
+    expect(await buscando('jabón zinc')).toEqual([]);
+    expect(await buscando('crema shampoo')).toEqual([]);
+  });
+
+  it('ignora acentos y mayúsculas en todas las palabras', async () => {
+    expect(await buscando('GLICERINA Alcohol')).toEqual(['Alcohol en Gel']);
+    expect(await buscando('emulsión zinc')).toEqual(['Zinc tópico']);
+    expect(await buscando('   gel    ALCOHOL   ')).toEqual(['Alcohol en Gel']);
+  });
+
+  it('la categoría se sigue respetando junto con las palabras', async () => {
+    expect(await buscando('glicerina alcohol', 'Cosmética')).toEqual([]);
+    expect(await buscando('glicerina alcohol', 'Higiene')).toEqual(['Alcohol en Gel']);
+  });
+});
+
 describe('T2 · filtro por categoría', () => {
   it('filtra por categoría exacta', async () => {
     expect(await nombres({ categoria: 'Higiene' })).toEqual([

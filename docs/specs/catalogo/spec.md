@@ -24,7 +24,13 @@ página, sin duplicar la lógica de filtrado en el cliente.
 
 - El filtrado y la búsqueda viven en el **módulo** (`src/lib/catalogo.ts`), que ya es la única fuente del
   catálogo. No hay una segunda implementación en el navegador.
-- La búsqueda es **insensible a mayúsculas y acentos** y busca en nombre, categoría, tipo y descripción.
+- La búsqueda es **insensible a mayúsculas y acentos** y es una **conjunción de palabras por campo**: el
+  término se parte en palabras y **cada palabra** tiene que aparecer en **alguno** de los cuatro campos de
+  producto (nombre, categoría, tipo y descripción) del **mismo** producto. No se busca el término dentro de
+  los campos concatenados: ahí la coincidencia dependía de que los campos quedaran pegados en cierto orden
+  (#41). Con esta regla, `gel alcohol` sigue encontrando `Alcohol en Gel` —una palabra en el nombre y otra
+  en el tipo— y `glicerina alcohol` también, porque la razón de la coincidencia es el producto, no la
+  concatenación.
 - La categoría es un **match exacto** contra `PRODUCTO.categoria`.
 - La consulta llega por **querystring** (`?q=…&categoria=…`) con un formulario GET: funciona sin
   JavaScript, se puede compartir por link y el botón "atrás" del navegador se comporta.
@@ -42,6 +48,9 @@ página, sin duplicar la lógica de filtrado en el cliente.
 - **When** busco `shampoo` y ningún producto lo menciona, **Then** veo el estado **sin resultados**, que
   **no** es el estado vacío de la tienda ni el estado de error.
 - **Then** la búsqueda también alcanza la descripción, la categoría y el tipo del producto.
+- **Then** cada palabra del término tiene que aparecer en algún campo del mismo producto: escribirlas en
+  cualquier orden encuentra el producto (`glicerina alcohol`), y una palabra de otro producto **no** crea
+  una coincidencia (`jabón zinc` no devuelve nada).
 
 ### HU-2 · Filtrar por categoría
 
@@ -101,13 +110,13 @@ la base viva sigue a medio migrar, así que nada de esto está verificado en pro
 
 | Criterio / HU | Estado | Evidencia |
 |---|---|---|
-| HU-1 · búsqueda insensible a mayúsculas y acentos | implementado, sin verificar en vivo | `src/lib/catalogo.ts:119-137` (`filtrar`, `sinAcentos`); test *«encuentra sin distinguir mayúsculas ni acentos»* en `tests/front/catalogo-filtros.test.ts:22` |
-| HU-1 · alcanza nombre, categoría, tipo y descripción | implementado, sin verificar en vivo | `src/lib/catalogo.ts:126`; test *«alcanza nombre, categoría, tipo y descripción»* en `tests/front/catalogo-filtros.test.ts:27` |
-| HU-1 · búsqueda sin coincidencias devuelve vacío, no error | implementado, sin verificar en vivo | test *«sin coincidencias devuelve un catálogo vacío, no un error»* en `tests/front/catalogo-filtros.test.ts:45`; `src/lib/catalogo.ts:108-115` |
+| HU-1 · búsqueda insensible a mayúsculas y acentos | implementado, sin verificar en vivo | `src/lib/catalogo.ts:127-145` (`filtrar`, `sinAcentos`); test *«encuentra sin distinguir mayúsculas ni acentos»* en `tests/front/catalogo-filtros.test.ts:22` |
+| HU-1 · alcanza nombre, categoría, tipo y descripción | implementado, sin verificar en vivo | `src/lib/catalogo.ts:138-140`; test *«alcanza nombre, categoría, tipo y descripción»* en `tests/front/catalogo-filtros.test.ts:27` |
+| HU-1 · búsqueda sin coincidencias devuelve vacío, no error | implementado, sin verificar en vivo | test *«sin coincidencias devuelve un catálogo vacío, no un error»* en `tests/front/catalogo-filtros.test.ts:45`; `src/lib/catalogo.ts:99-115` |
 | HU-2 · chips de categoría con "Todos" desde el catálogo | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:94-105`; test *«salen del catálogo completo y no de la lista filtrada»* en `tests/front/catalogo-filtros.test.ts:90` |
-| HU-2 · filtro por categoría exacta | implementado, sin verificar en vivo | `src/lib/catalogo.ts:123`; test *«filtra por categoría exacta»* en `tests/front/catalogo-filtros.test.ts:59` |
+| HU-2 · filtro por categoría exacta | implementado, sin verificar en vivo | `src/lib/catalogo.ts:134`; test *«filtra por categoría exacta»* en `tests/front/catalogo-filtros.test.ts:59` |
 | HU-2 · chip activo por color y `aria-current` | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:36`; test *«el filtro por categoría se conserva al buscar y se marca con aria-current»* en `tests/front/catalogo-pagina.test.ts:26` |
-| HU-3 · búsqueda y categoría se combinan | implementado, sin verificar en vivo | `src/lib/catalogo.ts:122-128`; test *«combina búsqueda y categoría»* en `tests/front/catalogo-filtros.test.ts:71` |
+| HU-3 · búsqueda y categoría se combinan | implementado, sin verificar en vivo | `src/lib/catalogo.ts:132-140`; test *«combina búsqueda y categoría»* en `tests/front/catalogo-filtros.test.ts:71` |
 | HU-3 · limpiar búsqueda conserva la categoría | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:64` y `src/app/catalog/page.tsx:86-91`; test `tests/front/catalogo-pagina.test.ts:26` |
 | HU-4 · estado sin resultados propio | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:115-128`; test *«el estado sin resultados es propio del catálogo y ofrece volver»* en `tests/front/catalogo-pagina.test.ts:31` |
 | HU-4 · sin resultados ≠ tienda vacía ≠ error de lectura | implementado, sin verificar en vivo | `src/components/GrillaProductos.tsx:22-52`; test *«distingue la tienda vacía del error»* en `tests/front/catalogo.test.ts:110` |
@@ -116,14 +125,12 @@ la base viva sigue a medio migrar, así que nada de esto está verificado en pro
 | HU-5 · foco visible y contraste AA | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (`:focus-visible`); el contraste no está medido |
 | HU-5 · la URL refleja la consulta | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:14-21` y `src/app/catalog/page.tsx:48-50`; test `tests/front/catalogo-pagina.test.ts:19` |
 | §2 · un solo filtrado, en el módulo, sin reimplementarlo en la página | implementado, sin verificar en vivo | `src/app/catalog/page.tsx:50`; test *«el filtrado no se reimplementa en la página»* en `tests/front/catalogo-pagina.test.ts:36` |
-| §5 · sin orden configurable, paginación ni filtro por precio | implementado, sin verificar en vivo | `src/lib/catalogo.ts:165` (orden por nombre) y ausencia de paginación en `src/app/catalog/page.tsx` |
-| §2 · búsqueda "en nombre, categoría, tipo y descripción" | desviación | `src/lib/catalogo.ts:126` une los cuatro campos con `join(" ")` **antes** de buscar: un término puede cruzar el borde entre dos campos (en `Alcohol en Gel` el término `"gel alcohol"` matchea porque el `tipo` termina donde empieza el `nombre`). El spec dice "busca en" cada campo; el test `tests/front/catalogo-filtros.test.ts:27` solo cubre coincidencias dentro de un campo |
+| §5 · sin orden configurable, paginación ni filtro por precio | implementado, sin verificar en vivo | `src/lib/catalogo.ts:174` (orden por nombre) y ausencia de paginación en `src/app/catalog/page.tsx` |
+| §2 · búsqueda "en nombre, categoría, tipo y descripción" | ✅ implementado (#41) | `src/lib/catalogo.ts:127-141`: conjunción de palabras, cada una en algún campo del mismo producto; tests *«encuentra un producto con las palabras en campos distintos y en cualquier orden»*, *«cada palabra tiene que aparecer en algún campo del mismo producto»* y *«sigue encontrando el caso que antes pasaba por casualidad»* en `tests/front/catalogo-filtros.test.ts` |
 
 ### Pendiente
 
 1. **Verificación en el navegador de `/catalog`** (form GET, chips, estados, responsive y contraste). Depende
    de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Búsqueda por campos: decidir si el cruce entre campos es aceptable.** Es la desviación de la tabla y hay
-   que resolverla moviendo `src/lib/catalogo.ts:126` a un `some()` por campo o corrigiendo el §2 del spec.
-3. **Cerrar el ticket `T2 · Catálogo`** (issue **#6**): sigue abierto aunque la implementación y sus tests
-   están hechos.
+2. **Cerrar el ticket `T2 · Catálogo`** (issue **#6**): sigue abierto aunque la implementación y sus tests
+   están hechos. De la desviación de búsqueda se encargó **#41**, ya implementada.
