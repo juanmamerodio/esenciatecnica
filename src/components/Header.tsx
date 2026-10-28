@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FlaskConical, ShoppingCart, ShieldCheck } from "lucide-react";
+import { ShoppingCart, ShieldCheck, Sparkles } from "lucide-react";
 import { totalUnidades } from "@/lib/carrito";
 import { useCartStore } from "@/lib/store";
 
@@ -39,7 +39,7 @@ export default function Header() {
           aria-label="Esencia Técnica · Inicio"
           className="flex shrink-0 items-center gap-2 rounded-2xl"
         >
-          <FlaskConical aria-hidden className="h-6 w-6 text-accent" strokeWidth={2.5} />
+          <Sparkles aria-hidden className="h-6 w-6 text-accent" strokeWidth={2.5} />
           <span className="hidden flex-col leading-tight sm:flex">
             <span className="text-base font-bold tracking-tight text-text">Esencia Técnica</span>
             <span className="font-mono text-[10px] uppercase tracking-wider text-muted">

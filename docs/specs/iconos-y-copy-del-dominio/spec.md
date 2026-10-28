@@ -1,6 +1,6 @@
 # Spec · Íconos y copy del dominio (retiro del laboratorio)
 
-> **Feature:** `iconos-y-copy-del-dominio` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#26](https://github.com/juanmamerodio/esenciatecnica/issues/26).
+> **Feature:** `iconos-y-copy-del-dominio` · **Estado:** implementada en repo (issue #43) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#26](https://github.com/juanmamerodio/esenciatecnica/issues/26) · **Tajada:** [#43](https://github.com/juanmamerodio/esenciatecnica/issues/43).
 > **Origen:** hallazgo 🟡 de `memory.md` (retirar `FlaskConical`), desviación de HU-1 en
 > [`sobre-el-proyecto/spec.md`](../sobre-el-proyecto/spec.md) y tarea `ALTA` del tablero:
 > *Retirar los íconos y el copy de laboratorio (FlaskConical)*.
@@ -108,3 +108,22 @@ Reemplazar el ícono por **íconos del dominio** y corregir el copy:
   producto es parte del relato; lo que se retira es el encuadre de insumo de laboratorio.
 - Si Celeste prefiere otro ícono de cosmética, el reemplazo es local: el test prohíbe el viejo, no exige
   uno en particular.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #43)
+
+`npm run typecheck` sin errores, `npm run lint` en 0 y la suite en verde con los tests nuevos. El test
+sigue prohibiendo el ícono retirado **por nombre**: cambiar `Droplets` por otro ícono de cosmética no
+rompe nada.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| Ningún archivo de `src/` importa `FlaskConical`, con test que recorre el árbol | implementado | test *«ningún archivo de `src/` importa el ícono retirado»* (`archivosFuente` sobre `src/` entero) |
+| `/about` no contiene «laboratorio» | implementado | `laboratorio` sumado a `VOCABULARIO_RETIRADO`; tests *«no quedó vocabulario de laboratorio ni de IA»* y *«/about no dice «laboratorio» ni siquiera en un comentario»* |
+| El copy nuevo aparece y «Ciencia Aplicada» sigue | implementado | `src/app/about/page.tsx` (valor «Ciencia Aplicada» con el texto aprobado); test *«el valor «Ciencia Aplicada» sigue presente con el copy nuevo»* |
+| Header y footer muestran la misma marca | implementado | `Sparkles` en `Header.tsx` y `Footer.tsx`; test *«el header y el footer muestran la misma marca»* |
+| El placeholder usa el ícono de cosmética y conserva su contrato | implementado | `Droplets` en `ImagenProducto.tsx`, con `role="img"`, el `aria-label` de siempre y `onError`; test *«el placeholder de producto sin imagen usa el ícono de cosmética y conserva su contrato»* |
+| Los íconos decorativos llevan `aria-hidden` | implementado | test *«los íconos decorativos del shell siguen con `aria-hidden`»* |
+| El spec `sobre-el-proyecto` deja de marcar la desviación de HU-1 | implementado | [`sobre-el-proyecto/spec.md`](../sobre-el-proyecto/spec.md): la fila pasó a implementado y el `### Pendiente` perdió el punto del ícono |
+| No se toca la paleta ni la tipografía | implementado | el diff es de íconos y copy: no se tocaron `globals.css`, `tailwind.config.ts` ni `layout.tsx` |

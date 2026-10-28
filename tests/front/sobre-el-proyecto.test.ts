@@ -1,5 +1,7 @@
+import { readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { leer } from './ayudantes';
+import { RAIZ, archivosFuente, leer } from './ayudantes';
 
 /**
  * T6 · Página institucional (issue #12) — decisiones G3 (nombre/ruta) y G1 (franja de valores).
@@ -14,7 +16,7 @@ const ABOUT = 'src/app/about/page.tsx';
 const HOME = 'src/app/page.tsx';
 
 /** Palabras que el glosario retira: el Producto no es un insumo de laboratorio. */
-const VOCABULARIO_RETIRADO = /reactivo|insumo|\bpH\b|compuestos clínicos|Gemini|\bIA\b|inteligencia artificial/i;
+const VOCABULARIO_RETIRADO = /reactivo|insumo|\bpH\b|compuestos clínicos|Gemini|\bIA\b|inteligencia artificial|laboratorio/i;
 
 const VALORES = ['Ciencia Aplicada', 'Sin Fines de Lucro', 'Formación Técnica'];
 
@@ -79,5 +81,57 @@ describe('T6 · contacto y estructura', () => {
     expect(about.match(/<h1\b/g)?.length).toBe(1);
     expect(about).not.toMatch(/from\s+["']@\/components\/(Header|Footer)["']/);
     expect(about).toMatch(/grid-cols-1/);
+  });
+});
+
+describe('#43 · la marca y el producto dejan de ser un vaso de laboratorio', () => {
+  const COPY_CIENCIA_APLICADA =
+    'Cada fórmula la elabora el Departamento de Química de la escuela y se convierte en un producto de cosmética o higiene listo para usar.';
+
+  it('ningún archivo de `src/` importa el ícono retirado', () => {
+    const ofensores = archivosFuente(join(RAIZ, 'src'))
+      .filter((archivo) => /FlaskConical/.test(readFileSync(archivo, 'utf8')))
+      .map((archivo) => relative(RAIZ, archivo).replace(/\\/g, '/'));
+
+    expect(ofensores).toEqual([]);
+  });
+
+  it('/about no dice «laboratorio» ni siquiera en un comentario', () => {
+    expect(leer(ABOUT)).not.toMatch(/laboratorio/i);
+  });
+
+  it('el header y el footer muestran la misma marca', () => {
+    const header = leer('src/components/Header.tsx');
+    const footer = leer('src/components/Footer.tsx');
+
+    expect(header).toMatch(/<Sparkles aria-hidden/);
+    expect(footer).toMatch(/<Sparkles aria-hidden/);
+  });
+
+  it('el placeholder de producto sin imagen usa el ícono de cosmética y conserva su contrato', () => {
+    const imagen = leer('src/components/ImagenProducto.tsx');
+
+    expect(imagen).toMatch(/<Droplets aria-hidden/);
+    // El texto alternativo y el manejo de error del estado «sin imagen» no cambian.
+    expect(imagen).toMatch(/role="img"/);
+    expect(imagen).toMatch(/aria-label=\{`\$\{nombre\} — sin foto, categoría \$\{categoria\}`\}/);
+    expect(imagen).toMatch(/onError/);
+  });
+
+  it('el valor «Ciencia Aplicada» sigue presente con el copy nuevo', () => {
+    const about = leer(ABOUT).replace(/\s+/g, ' ');
+
+    expect(about).toContain('Ciencia Aplicada');
+    expect(about).toContain(COPY_CIENCIA_APLICADA);
+    expect(about).toMatch(/Droplets/);
+  });
+
+  it('los íconos decorativos del shell siguen con `aria-hidden`', () => {
+    for (const archivo of ['src/components/Header.tsx', 'src/components/Footer.tsx', 'src/components/ImagenProducto.tsx']) {
+      const fuente = leer(archivo);
+      const iconos = [...fuente.matchAll(/<(Sparkles|Droplets)\b([^>]*)>/g)];
+      expect(iconos.length, archivo).toBeGreaterThan(0);
+      for (const icono of iconos) expect(icono[2], archivo).toMatch(/aria-hidden/);
+    }
   });
 });

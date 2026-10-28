@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarClock,
-  FlaskConical,
+  Droplets,
   GraduationCap,
   HandHeart,
   Leaf,
@@ -15,17 +15,18 @@ import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 /**
  * Página institucional — T6 · issue #12 (decisiones G3 y G1).
  *
- * Cosmética e higiene del Departamento de Química, sin vocabulario de laboratorio ni de
- * validación automática. Acá vive la franja de valores que G1 adjudicó a esta página: la Home
- * no la repite. No monta navegación propia: el shell ya marca la ruta activa.
+ * Cosmética e higiene del Departamento de Química, sin vocabulario técnico ni de validación
+ * automática. Acá vive la franja de valores que G1 adjudicó a esta página: la Home no la repite.
+ * No monta navegación propia: el shell ya marca la ruta activa. La marca y el ícono del producto
+ * son de cosmética e higiene (#43).
  */
 
 const VALORES = [
   {
     titulo: "Ciencia Aplicada",
-    icono: FlaskConical,
+    icono: Droplets,
     texto:
-      "Cada fórmula sale del trabajo de laboratorio del Departamento de Química y se convierte en un producto de cosmética o higiene listo para usar.",
+      "Cada fórmula la elabora el Departamento de Química de la escuela y se convierte en un producto de cosmética o higiene listo para usar.",
   },
   {
     titulo: "Sin Fines de Lucro",

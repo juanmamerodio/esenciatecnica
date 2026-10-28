@@ -110,7 +110,7 @@ claves del issue #20), igual que el resto del front.
 
 | Criterio / HU | Estado | Evidencia |
 |---|---|---|
-| HU-1 · Qué es el proyecto | desviación | El texto cumple: `src/app/about/page.tsx:80-90` (cosmética e higiene, Departamento de Química, 7mo año, E.E.S.T N°1); tests `habla de cosmética e higiene de la escuela` y `no quedó vocabulario de laboratorio ni de IA`. **Desviación de §1:** sigue el ícono de vaso de laboratorio `FlaskConical` en `src/app/about/page.tsx:5,26`, `src/components/Footer.tsx:2,18`, `src/components/Header.tsx:6,42` y `src/components/ImagenProducto.tsx:5,32`, que el problema daba por retirado. Ningún test lo cubre: la verificación es de texto, no de íconos. |
+| HU-1 · Qué es el proyecto | implementado, sin verificar en vivo | El texto cumple (cosmética e higiene, Departamento de Química, 7mo año, E.E.S.T N°1); tests `habla de cosmética e higiene de la escuela` y `no quedó vocabulario de laboratorio ni de IA`. El ícono del laboratorio se retiró en **#43**: la marca es `Sparkles` en `Header` y `Footer`, y el valor «Ciencia Aplicada» y el placeholder de producto usan `Droplets`; tests *«ningún archivo de `src/` importa el ícono retirado»* y *«el header y el footer muestran la misma marca»*. |
 | HU-2 · Cómo se compra | implementado | `src/app/about/page.tsx:44-63` (transferencia validada a mano, reserva que se libera el viernes, retiro o entrega acordados y sin envío ni seguimiento); tests `explica la validación manual del pago` y `comunica el plazo de la reserva sin prometer envío`. |
 | HU-3 · Franja de valores en un solo lugar | implementado | `src/app/about/page.tsx:23-42` y `:152-165`; `src/app/page.tsx:88-129` (el bloque de pago de la Home no repite los valores); tests `está en la página institucional`, `no se repite en la Home` y `el bloque de pago de la Home habla del pago y la reserva…`. |
 | HU-4 · Contacto, mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/about/page.tsx:168-191` (contacto e institución) y `src/components/Footer.tsx:36-39`; tests `usa el contacto institucional aprobado en G1` y `tiene un solo h1 y no vuelve a montar la navegación`; la jerarquía, el responsive y el foco se verifican en navegador (#23). |
@@ -118,5 +118,7 @@ claves del issue #20), igual que el resto del front.
 
 ### Pendiente
 
-- Retirar `FlaskConical` de `src/app/about/page.tsx`, `src/components/Header.tsx`, `src/components/Footer.tsx` y `src/components/ImagenProducto.tsx`, y reemplazarlo por un ícono del dominio (cosmética/higiene): es la desviación de HU-1 y va como tarea aparte. **No** está cubierta por ningún ticket de #1..#23.
 - Verificación en navegador de `/about` (jerarquía de encabezados, responsive, foco visible, ruta activa) dentro de la punta a punta (#23).
+
+> La desviación de HU-1 (el ícono de laboratorio) se cerró en **#43**: ver
+> [`iconos-y-copy-del-dominio/spec.md`](../iconos-y-copy-del-dominio/spec.md).

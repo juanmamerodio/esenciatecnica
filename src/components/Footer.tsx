@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FlaskConical } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 /** Footer institucional en columnas: institución, contacto y accesos (issue #3). */
 const ACCESOS = [
@@ -15,7 +15,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div>
           <p className="flex items-center gap-2 font-bold tracking-tight text-accent">
-            <FlaskConical aria-hidden className="h-5 w-5" />
+            <Sparkles aria-hidden className="h-5 w-5" />
             Esencia Técnica
           </p>
           <p className="mt-4 max-w-xs text-xs leading-relaxed text-muted">

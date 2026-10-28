@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FlaskConical } from "lucide-react";
+import { Droplets } from "lucide-react";
 
 /**
  * Imagen del producto con su plan B: si no hay `imagen_url` o la URL no resuelve, se
  * muestra el placeholder de la identidad (fondo tonal + categoría en mono) en lugar del
- * ícono de imagen rota (HU-5).
+ * ícono de imagen rota (HU-5). El ícono es de cosmética e higiene, no un vaso de laboratorio
+ * (#43): el Producto no es un insumo de laboratorio.
  */
 export default function ImagenProducto({
   url,
@@ -29,7 +30,7 @@ export default function ImagenProducto({
         aria-label={`${nombre} — sin foto, categoría ${categoria}`}
         className="flex aspect-square w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-lt to-surface"
       >
-        <FlaskConical aria-hidden className="h-10 w-10 text-accent/60" />
+        <Droplets aria-hidden className="h-10 w-10 text-accent/60" />
         <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted">{categoria}</span>
       </div>
     );
