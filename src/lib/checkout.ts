@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { claveDelArchivo, revisarArchivo, type ArchivoSubido } from "@/lib/archivo";
-import {
-  camposDeZod,
-  motivoDeBd,
-  type MotivoDelCheckout,
-} from "@/lib/errores-bd";
+import { camposDeZod, motivoDeBd, MOTIVOS_DEL_CHECKOUT, type MotivoDelCheckout } from "@/lib/errores-bd";
 import type { EstadoPedido, ItemPedido } from "@/lib/database.types";
 import { redondearACentavos } from "@/lib/format";
 
@@ -63,18 +59,48 @@ export type EntradaCheckout = {
 /** Lo que el checkout puede devolver: subconjunto de los motivos del dominio (#35). */
 export type MotivoDeError = MotivoDelCheckout;
 
-export type ResultadoCheckout =
-  | { estado: "ok"; idPedido: number; total: number; numeroDeComprobante: number }
-  | {
-      estado: "error";
-      motivo: MotivoDeError;
-      mensaje: string;
-      campos?: Record<string, string>;
-      /** Total que calculó la base, cuando el error fue por el monto declarado. */
-      total?: number;
-      /** Pedido ya creado: el reintento lo reutiliza para no duplicar la reserva. */
-      idPedido?: number;
-    };
+/**
+ * Contrato de la respuesta del borde — la **única** definición del resultado: el tipo sale de acá
+ * (`z.infer`) y el borde del cliente lo valida con este mismo esquema en vez de castear el cuerpo
+ * (hallazgo 10 de #25 · #46). Si el esquema y el tipo se escribieran por separado, podrían
+ * divergir sin que nada lo note.
+ */
+export const ESQUEMA_RESULTADO_CHECKOUT = z.discriminatedUnion("estado", [
+  z.object({
+    estado: z.literal("ok"),
+    idPedido: z.number().int().positive(),
+    total: z.number().finite().nonnegative(),
+    numeroDeComprobante: z.number().int().positive(),
+  }),
+  z.object({
+    estado: z.literal("error"),
+    motivo: z.enum(MOTIVOS_DEL_CHECKOUT),
+    mensaje: z.string().min(1),
+    campos: z.record(z.string()).optional(),
+    /** Total que calculó la base, cuando el error fue por el monto declarado. */
+    total: z.number().finite().nonnegative().optional(),
+    /** Pedido ya creado: el reintento lo reutiliza para no duplicar la reserva. */
+    idPedido: z.number().int().positive().optional(),
+  }),
+]);
+
+export type ResultadoCheckout = z.infer<typeof ESQUEMA_RESULTADO_CHECKOUT>;
+
+/**
+ * Lee el cuerpo del borde del checkout. Un texto vacío, un JSON roto o un cuerpo con otra forma
+ * devuelven nulo, y la pantalla muestra que no se entendió la respuesta: nunca se castea.
+ */
+export function leerRespuestaCheckout(texto: string): ResultadoCheckout | null {
+  let datos: unknown;
+  try {
+    datos = JSON.parse(texto);
+  } catch {
+    return null;
+  }
+
+  const revision = ESQUEMA_RESULTADO_CHECKOUT.safeParse(datos);
+  return revision.success ? revision.data : null;
+}
 
 /**
  * Puerto del checkout. En producción lo implementa Supabase (`crear_pedido`, `cliente`,

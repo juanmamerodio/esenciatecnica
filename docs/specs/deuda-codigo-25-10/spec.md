@@ -172,7 +172,7 @@ Decisiones por hallazgo:
 | 7 · límites del checkout sin escribir | [#37](https://github.com/juanmamerodio/esenciatecnica/issues/37) | pendiente |
 | 8 · duplicación de «archivo subido» y «errores de base» | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
 | 9 · `sinConfiguracion()` con diagnóstico falso | [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) | ✅ implementado |
-| 10 · el borde del cliente castea la respuesta | [#46](https://github.com/juanmamerodio/esenciatecnica/issues/46) | pendiente |
+| 10 · el borde del cliente castea la respuesta | [#46](https://github.com/juanmamerodio/esenciatecnica/issues/46) | ✅ implementado |
 | 11 · juicios del baseline | repartido (ver §2) | ✅ implementado en [#35](https://github.com/juanmamerodio/esenciatecnica/issues/35) (fecha) y [#44](https://github.com/juanmamerodio/esenciatecnica/issues/44) (dinero) |
 
 ### Hallazgo 1 · cerrado (#33)
@@ -231,3 +231,18 @@ Nacieron dos módulos compartidos y profundos, y el formato de la fecha se separ
 | Ningún archivo importa la función retirada | implementado | `npm run typecheck` sin errores tras retirarla del puerto y del módulo |
 | Test estructural que falla si el símbolo vuelve | implementado | test *«la superficie pública del panel no expone la firma suelta del comprobante (#34)»* en `tests/front/admin.test.ts` |
 | La lista de pedidos sigue mostrando la signed URL del comprobante | implementado | test *«firma el comprobante de cada pedido»*/`urlFirmada` en `tests/front/admin.test.ts`; `firmarSinRomper` sigue en `admin.ts` |
+
+### Hallazgo 10 · cerrado (#46)
+
+El contrato de la respuesta del checkout se escribe **una sola vez**, como esquema Zod
+(`ESQUEMA_RESULTADO_CHECKOUT` en `src/lib/checkout.ts`): de ahí sale el tipo `ResultadoCheckout`
+(`z.infer`) y de ahí lee el borde del cliente (`leerRespuestaCheckout`). La pantalla ya no castea el
+cuerpo con `as ResultadoCheckout`.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| El borde valida el cuerpo con el esquema que define el contrato | implementado | `leerRespuestaCheckout` en `src/lib/checkout.ts`; `src/app/checkout/page.tsx` lee `respuesta.text()` y lo valida |
+| El tipo no se duplica a mano | implementado | `z.infer<typeof ESQUEMA_RESULTADO_CHECKOUT>`; test estructural *«el esquema que valida el borde es el que define el contrato»* |
+| Un cuerpo inesperado no explota: muestra el mensaje de respuesta que no se entiende | implementado | test *«un cuerpo inesperado devuelve nulo en vez de explotar»* (JSON roto, vacío, lista, `null`, sin campos, motivo inventado, tipos cambiados) |
+| El camino feliz y el error con total siguen entendiéndose | implementado | tests *«el camino feliz sigue igual»* y *«el error del dominio con total también se entiende»* |
+| Los motivos son una sola fuente (tupla) para el tipo y el `z.enum` | implementado | `MOTIVOS_DEL_CHECKOUT` y `MOTIVOS_DEL_PANEL` en `src/lib/errores-bd.ts` |

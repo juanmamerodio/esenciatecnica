@@ -11,51 +11,40 @@ import type { z } from "zod";
  */
 
 /**
- * Los motivos del dominio. Cada superficie usa un subconjunto (`MotivoDelCheckout`,
- * `MotivoDelPanel`), pero la tabla de códigos y la de HTTP son una sola para todas.
+ * Lo que el checkout puede devolver al Cliente, como **tupla**: es la única fuente del tipo y la
+ * que alimenta el `z.enum` del esquema que valida la respuesta en el borde del cliente (#46).
  */
-export type MotivoDeError =
-  | "datos-invalidos"
-  | "items-invalidos"
-  | "archivo-invalido"
-  | "stock-insuficiente"
-  | "producto-no-disponible"
-  | "stock-bajo-reserva"
-  | "comprobante-no-pendiente"
-  | "monto-no-coincide"
-  | "pedido-no-pendiente"
-  | "nombre-duplicado"
-  | "datos-duplicados"
-  | "datos-inconsistentes"
-  | "error-del-servidor";
+export const MOTIVOS_DEL_CHECKOUT = [
+  "datos-invalidos",
+  "items-invalidos",
+  "archivo-invalido",
+  "stock-insuficiente",
+  "producto-no-disponible",
+  "monto-no-coincide",
+  "pedido-no-pendiente",
+  "error-del-servidor",
+] as const;
 
-/** Lo que puede devolver el checkout al Cliente. */
-export type MotivoDelCheckout = Extract<
-  MotivoDeError,
-  | "datos-invalidos"
-  | "items-invalidos"
-  | "archivo-invalido"
-  | "stock-insuficiente"
-  | "producto-no-disponible"
-  | "monto-no-coincide"
-  | "pedido-no-pendiente"
-  | "error-del-servidor"
->;
+export type MotivoDelCheckout = (typeof MOTIVOS_DEL_CHECKOUT)[number];
 
-/** Lo que puede devolver el panel al Administrador. */
-export type MotivoDelPanel = Extract<
-  MotivoDeError,
-  | "datos-invalidos"
-  | "datos-inconsistentes"
-  | "stock-insuficiente"
-  | "stock-bajo-reserva"
-  | "comprobante-no-pendiente"
-  | "monto-no-coincide"
-  | "pedido-no-pendiente"
-  | "nombre-duplicado"
-  | "datos-duplicados"
-  | "error-del-servidor"
->;
+/** Lo que el panel puede devolver al Administrador: misma regla, misma única fuente. */
+export const MOTIVOS_DEL_PANEL = [
+  "datos-invalidos",
+  "datos-inconsistentes",
+  "stock-insuficiente",
+  "stock-bajo-reserva",
+  "comprobante-no-pendiente",
+  "monto-no-coincide",
+  "pedido-no-pendiente",
+  "nombre-duplicado",
+  "datos-duplicados",
+  "error-del-servidor",
+] as const;
+
+export type MotivoDelPanel = (typeof MOTIVOS_DEL_PANEL)[number];
+
+/** Todos los motivos del sistema: la unión de las dos superficies. */
+export type MotivoDeError = MotivoDelCheckout | MotivoDelPanel;
 
 /**
  * Código crudo → motivo. Los `ET00x` son los `errcode` de las migraciones 02 y 06; `23505` y

@@ -3,6 +3,7 @@ import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   confirmarPedido,
+  leerRespuestaCheckout,
   totalAVisualizar,
   type EntradaCheckout,
   type PuertoCheckout,
@@ -394,6 +395,64 @@ describe('#34 · el total que se muestra en el resumen', () => {
     expect(pagina).toMatch(/setTotalDeLaBase\(cuerpo\.total\)/);
     // El bug era renderizar el total del carrito en el resumen de la transferencia.
     expect(pagina).not.toMatch(/\{formatPrice\(total\)\}/);
+  });
+});
+
+describe('#46 · el borde del cliente valida la respuesta, no la castea', () => {
+  it('el camino feliz sigue igual: el mismo cuerpo que responde la ruta se entiende', async () => {
+    const { puerto } = puertoFalso();
+    const resultado = await confirmarPedido(puerto, entrada({ monto: 2500 }));
+    const cuerpo = JSON.stringify(resultado);
+
+    expect(leerRespuestaCheckout(cuerpo)).toEqual(resultado);
+  });
+
+  it('el error del dominio con total también se entiende', () => {
+    const cuerpo = JSON.stringify({
+      estado: 'error',
+      motivo: 'monto-no-coincide',
+      mensaje: 'El importe tiene que coincidir con el total del pedido.',
+      total: 3000,
+      idPedido: 42,
+      campos: { monto: 'Revisá el monto.' },
+    });
+
+    const leido = leerRespuestaCheckout(cuerpo);
+    expect(leido?.estado).toBe('error');
+    if (leido?.estado !== 'error') return;
+    expect(leido.total).toBe(3000);
+    expect(leido.idPedido).toBe(42);
+  });
+
+  it('un cuerpo inesperado devuelve nulo en vez de explotar', () => {
+    expect(leerRespuestaCheckout('no es json')).toBeNull();
+    expect(leerRespuestaCheckout('')).toBeNull();
+    expect(leerRespuestaCheckout('[]')).toBeNull();
+    expect(leerRespuestaCheckout('null')).toBeNull();
+    expect(leerRespuestaCheckout('{"estado":"ok"}')).toBeNull();
+    expect(leerRespuestaCheckout('{"estado":"error"}')).toBeNull();
+    expect(
+      leerRespuestaCheckout('{"estado":"error","motivo":"inventado","mensaje":"hola"}'),
+    ).toBeNull();
+    expect(
+      leerRespuestaCheckout('{"estado":"ok","idPedido":"42","total":"2500","numeroDeComprobante":9}'),
+    ).toBeNull();
+  });
+
+  it('el esquema que valida el borde es el que define el contrato', () => {
+    const modulo = leer('src/lib/checkout.ts');
+    expect(modulo).toMatch(/ESQUEMA_RESULTADO_CHECKOUT/);
+    expect(modulo).toMatch(/z\.infer<typeof ESQUEMA_RESULTADO_CHECKOUT>/);
+    // El tipo no se escribe a mano: sale del esquema.
+    expect(modulo).not.toMatch(/export type ResultadoCheckout = \{/);
+  });
+
+  it('la pantalla valida el cuerpo y no lo castea', () => {
+    const pagina = leer('src/app/checkout/page.tsx');
+    expect(pagina).toMatch(/leerRespuestaCheckout\(/);
+    expect(pagina).toMatch(/respuesta\.text\(\)/);
+    expect(pagina).not.toMatch(/as ResultadoCheckout/);
+    expect(pagina).not.toMatch(/await respuesta\.json\(\)/);
   });
 });
 

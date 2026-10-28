@@ -15,7 +15,7 @@ import {
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 import SubirComprobante from "@/components/SubirComprobante";
 import { subtotalDeLinea, totalDelPedido } from "@/lib/carrito";
-import { totalAVisualizar, type ResultadoCheckout } from "@/lib/checkout";
+import { leerRespuestaCheckout, totalAVisualizar } from "@/lib/checkout";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
 import { datosDeTransferencia } from "@/lib/transferencia";
@@ -91,7 +91,13 @@ export default function CheckoutPage() {
       formulario.set("archivo", archivo);
 
       const respuesta = await fetch("/api/checkout", { method: "POST", body: formulario });
-      const cuerpo = (await respuesta.json()) as ResultadoCheckout;
+      // El cuerpo se valida contra el contrato; nunca se castea (hallazgo 10 de #25 · #46).
+      const cuerpo = leerRespuestaCheckout(await respuesta.text());
+
+      if (!cuerpo) {
+        setError("El checkout devolvió una respuesta que no se entiende. Volvé a intentar.");
+        return;
+      }
 
       if (cuerpo.estado === "ok") {
         vaciar();
