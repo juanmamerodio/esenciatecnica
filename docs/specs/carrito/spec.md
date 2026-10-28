@@ -27,8 +27,9 @@ persistencia en el cliente (zustand). El carrito:
 - tiene **una sola línea por producto** (el modelo rechaza el producto repetido en `DETALLE_PEDIDO`);
 - guarda `id`, `nombre`, `precio`, `cantidad` y la `disponible` que tenía el producto al agregarse, para
   no ofrecer más unidades de las que hay;
-- calcula el total como `SUM(precio × cantidad)` redondeado a dos decimales (el modelo usa
-  `NUMERIC(12,2)`).
+- calcula el total como la **suma de los subtotales ya redondeados** (`precio × cantidad` por línea,
+  redondeado a dos decimales). El dinero del modelo es `NUMERIC(12,2)` y la regla es una sola para toda
+  la app (issue **#44**).
 
 ## 3. Historias y criterios de aceptación
 
@@ -52,8 +53,10 @@ persistencia en el cliente (zustand). El carrito:
 ### HU-3 · Totales
 
 - **Then** el resumen muestra el subtotal por línea y el total del pedido.
-- **Then** el total es la suma de `precio × cantidad` y coincide con lo que se cobra, redondeado a dos
-  decimales.
+- **Then** el total es la suma de los subtotales redondeados de `precio × cantidad` y coincide con lo que
+  se cobra: es el mismo número que el checkout precarga para transferir, redondeado a dos decimales.
+- **Then** el monto con centavos se muestra con dos decimales exactos (`$ 4,50`) y el entero sin
+  decimales (`$ 3.000`).
 - **Then** el contador del header cuenta **unidades**, no líneas.
 
 ### HU-4 · Persistencia
@@ -93,7 +96,8 @@ No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8)
 1. **Módulo puro + adaptador:** la aritmética se testea sin DOM y el adaptador sólo persiste.
 2. **Clave de almacenamiento `esenciatecnica-carrito`:** se retira el nombre legacy del proyecto.
 3. **Tope por `disponible`:** el carrito no promete unidades que la vista no ofrece hoy.
-4. **Total redondeado a dos decimales:** el dinero del modelo es `NUMERIC(12,2)`.
+4. **Total redondeado a dos decimales:** el dinero del modelo es `NUMERIC(12,2)`, el redondeo ocurre en la
+   aritmética y el formato es adaptativo (entero sin decimales, con centavos con dos exactos).
 
 ---
 
@@ -112,9 +116,9 @@ persistencia y el contador quedan para la verificación manual.
 | HU-2 · subir y bajar la cantidad, con la cantidad visible | implementado, sin verificar en vivo | `src/components/Carrito.tsx:65-90` (`aria-live` en `:78`); tests en `tests/front/carrito.test.ts:59` y `:133` |
 | HU-2 · bajar de 1 quita la línea; hay botón explícito para quitar | implementado, sin verificar en vivo | `src/lib/carrito.ts:53-68` y `src/components/Carrito.tsx:96-103`; test *«bajar de 1 quita la línea»* en `tests/front/carrito.test.ts:70` |
 | HU-2 · la cantidad nunca supera lo disponible ni baja de 1 | implementado, sin verificar en vivo | `src/lib/carrito.ts:57-60`; tests *«no supera lo disponible al subir la cantidad»* en `tests/front/carrito.test.ts:66` y `:133` |
-| HU-3 · subtotal por línea y total del pedido | implementado, sin verificar en vivo | `src/components/Carrito.tsx:92-94` y `:116-119`; test *«el total es la suma de precio por cantidad»* en `tests/front/carrito.test.ts:89` |
-| HU-3 · total = `precio × cantidad`, redondeado a dos decimales | implementado, sin verificar en vivo | `src/lib/carrito.ts:71-74`; test *«redondea a dos decimales, como el dinero del modelo»* en `tests/front/carrito.test.ts:95` |
-| HU-3 · el contador del header cuenta unidades, no líneas | implementado, sin verificar en vivo | `src/lib/carrito.ts:77-79` y `src/components/Header.tsx:27`; test *«el contador cuenta unidades, no líneas»* en `tests/front/carrito.test.ts:101` |
+| HU-3 · subtotal por línea y total del pedido | implementado, sin verificar en vivo | `src/components/Carrito.tsx:93` y `:116-119`; `subtotalDeLinea` en `src/lib/carrito.ts:71-77`; test *«el total es la suma de precio por cantidad»* en `tests/front/carrito.test.ts:89` |
+| HU-3 · total = `precio × cantidad`, redondeado a dos decimales | implementado, sin verificar en vivo | `src/lib/carrito.ts:75-89`; tests *«redondea a dos decimales, como el dinero del modelo»* en `tests/front/carrito.test.ts:95` y *«el total suma los subtotales ya redondeados»* en `tests/front/formato-dinero.test.ts` |
+| HU-3 · el contador del header cuenta unidades, no líneas | implementado, sin verificar en vivo | `src/lib/carrito.ts:91-94` y `src/components/Header.tsx:27`; test *«el contador cuenta unidades, no líneas»* en `tests/front/carrito.test.ts:101` |
 | HU-4 · recargar o navegar no pierde el carrito | implementado, sin verificar en vivo | `src/lib/store.ts:28-44` (`persist`, clave `esenciatecnica-carrito`); test `tests/front/carrito.test.ts:115`. La persistencia real es de `localStorage`: no se testea |
 | HU-4 · vaciar deja el contador en 0 y el estado vacío visible | implementado, sin verificar en vivo | `src/lib/store.ts:41`; `src/components/Carrito.tsx:30-44`; test *«tiene estado vacío diseñado que lleva al catálogo»* en `tests/front/carrito.test.ts:141` |
 | HU-5 · carrito vacío que explica y lleva al catálogo | implementado, sin verificar en vivo | `src/components/Carrito.tsx:30-44`; test `tests/front/carrito.test.ts:141` |
@@ -123,14 +127,16 @@ persistencia y el contador quedan para la verificación manual.
 | HU-6 · agregar, editar o quitar no llaman a la base | implementado, sin verificar en vivo | test *«el módulo es puro: no habla con la base ni con la red»* en `tests/front/carrito.test.ts:109` y *«el adaptador de persistencia usa el módulo y guarda sólo en el navegador»* en `tests/front/carrito.test.ts:115` |
 | HU-6 · el botón del carrito lleva al checkout | implementado, sin verificar en vivo | `src/components/Carrito.tsx:126-129`; `src/app/checkout/page.tsx:48` recalcula con `totalDelPedido` |
 | §4 · un solo carrito, sin componentes legacy | implementado, sin verificar en vivo | test *«hay un solo carrito: los componentes legacy se retiraron»* en `tests/front/carrito.test.ts:126` y *«no quedan nombres legacy en el camino del carrito»* en `:146` |
-| HU-3 · el total "coincide con lo que se cobra" | desviación | `src/lib/carrito.ts:71-74` y `src/lib/format.ts:5-10` redondean y formatean distinto: el total se calcula a dos decimales, pero `formatPrice` usa `minimumFractionDigits: 0`, así que `3001.65` se muestra como `$ 3.002` mientras el monto que viaja al checkout (`src/app/checkout/page.tsx:56`) es `3001.65`. Con el seed actual (precios enteros) no se dispara |
+| HU-3 · el total "coincide con lo que se cobra" | implementado, sin verificar en vivo | Regla única: `subtotalDeLinea` suma subtotales ya redondeados (`src/lib/carrito.ts:71-89`) y `formatPrice` muestra entero sin decimales y con centavos con dos exactos (`src/lib/format.ts`). El carrito y el checkout comparten `subtotalDeLinea`; tests *«un monto con centavos se muestra con dos decimales exactos»*, *«el total del carrito es el número que el checkout precarga»* y *«el carrito y el checkout no multiplican a mano»* en `tests/front/formato-dinero.test.ts`. Cierra el issue **#44** |
 | §1 · `/cart` sin el vocabulario legacy | implementado, sin verificar en vivo | `src/app/cart/page.tsx:1-5` monta `src/components/Carrito.tsx`; test `tests/front/carrito.test.ts:146` |
 
 ### Pendiente
 
 1. **Verificación en el navegador de `/` y `/cart`** (agregar, contador, persistencia al recargar, estado
    vacío, mobile y foco). Depende de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Cerrar la desviación de formato de precio:** mostrar dos decimales en `src/lib/format.ts:9` o acotar el
-   criterio de "redondeado a dos decimales" a la aritmética. Afecta a carrito y a checkout.
-3. **Cerrar el ticket `T4 · Carrito`** (issue **#9**): sigue abierto aunque la implementación y sus tests
+2. **Cerrar el ticket `T4 · Carrito`** (issue **#9**): sigue abierto aunque la implementación y sus tests
    están hechos.
+
+> La desviación de formato de precio se cerró en el issue **#44** (spec
+> [`formato-del-dinero`](../formato-del-dinero/spec.md)): el redondeo vive en la aritmética y el formato es
+> adaptativo, así que el total que se muestra es el que viaja al pedido.

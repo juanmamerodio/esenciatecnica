@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { EstadoPedido, ItemPedido } from "@/lib/database.types";
+import { redondearACentavos } from "@/lib/format";
 
 /**
  * Módulo de checkout — T5 · issue #10.
@@ -306,7 +307,7 @@ function revisarEntrada(entrada: EntradaCheckout): Revision {
     cliente: cliente.data,
     items: items.data,
     // El monto se guarda como lo declaró el Cliente, en la precisión del modelo (NUMERIC(12,2)).
-    monto: redondear(monto.data),
+    monto: redondearACentavos(monto.data),
     idPedido,
   };
 }
@@ -348,12 +349,7 @@ function montoQueNoCoincide(idPedido: number, total: number): ResultadoCheckout 
 }
 
 function coincideElMonto(uno: number, otro: number): boolean {
-  return Math.round((uno + Number.EPSILON) * 100) === Math.round((otro + Number.EPSILON) * 100);
-}
-
-/** El dinero del modelo es `NUMERIC(12,2)`: mismo redondeo que el carrito. */
-function redondear(valor: number): number {
-  return Math.round((valor + Number.EPSILON) * 100) / 100;
+  return redondearACentavos(uno) === redondearACentavos(otro);
 }
 
 function camposDe(error: z.ZodError): Record<string, string> {

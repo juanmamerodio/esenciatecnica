@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 import SubirComprobante from "@/components/SubirComprobante";
-import { totalDelPedido } from "@/lib/carrito";
+import { subtotalDeLinea, totalDelPedido } from "@/lib/carrito";
 import type { ResultadoCheckout } from "@/lib/checkout";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
                     {item.cantidad}× {item.nombre}
                   </span>
                   <span className="shrink-0 font-mono text-text">
-                    {formatPrice(item.precio * item.cantidad)}
+                    {formatPrice(subtotalDeLinea(item.precio, item.cantidad))}
                   </span>
                 </li>
               ))}

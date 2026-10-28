@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { totalDelPedido, totalUnidades } from "@/lib/carrito";
+import { subtotalDeLinea, totalDelPedido, totalUnidades } from "@/lib/carrito";
 import { useCartStore } from "@/lib/store";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 
@@ -90,7 +90,7 @@ export default function Carrito() {
               </div>
 
               <p className="w-24 text-right font-mono font-bold text-text">
-                {formatPrice(item.precio * item.cantidad)}
+                {formatPrice(subtotalDeLinea(item.precio, item.cantidad))}
               </p>
 
               <button

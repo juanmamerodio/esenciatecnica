@@ -76,6 +76,9 @@ leer. No se maquilla con datos de muestra.
   cambió; el **carrito no se vacía** (el Cliente ajusta la cantidad y reintenta).
 - **Then** el total que se muestra sale de `totalDelPedido(items)` del carrito, pero **el que manda es el
   de la base**: si difieren (el precio cambió entre agregar y confirmar), se muestra el de la base.
+- **Then** el total que se muestra, el que se precarga en el monto y el que viaja al pedido son el **mismo
+  número**, en la precisión del dinero (`NUMERIC(12,2)`): el subtotal se redondea a centavos, el total suma
+  subtotales redondeados y el formato es adaptativo (issue **#44**).
 - **Then** los items que viajan a la RPC son `{ id_producto, cantidad }`, **una línea por producto**; no
   viaja ningún precio desde el cliente.
 - **Then** una línea de un producto inactivo o inexistente se rechaza con su mensaje y no reserva nada.
