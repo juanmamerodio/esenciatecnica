@@ -50,8 +50,8 @@ export default function PanelDePedidos({ pedidos }: { pedidos: PedidoDelPanel[] 
     setEnviandoRemito(null);
     setAvisoRemito(
       resultado.ok
-        ? "El remito se reenvió al Cliente por email."
-        : `No se pudo reenviar el remito: ${resultado.mensaje}`,
+        ? (resultado.aviso ?? "El remito se reenvió al Cliente por email.")
+        : `El remito existe, pero el email no salió: ${resultado.mensaje}`,
     );
   };
 
@@ -79,7 +79,9 @@ export default function PanelDePedidos({ pedidos }: { pedidos: PedidoDelPanel[] 
 
     setAviso(
       confirmacion.decision === "aprobar"
-        ? "El comprobante quedó aprobado y la base emitió el remito."
+        ? resultado.aviso
+          ? resultado.aviso
+          : "El comprobante quedó aprobado y la base emitió el remito. El email del remito salió hacia el Cliente."
         : "El comprobante quedó rechazado y la reserva se liberó.",
     );
     setConfirmacion(null);
