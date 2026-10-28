@@ -145,11 +145,15 @@ falló” está implementado en `src/components/admin/comun.ts` y `PanelDePedido
 
 ### Pendiente
 
-- Verificación en vivo del envío real por Resend (el email llega y se ve bien): issue #20 (`RESEND_API_KEY`)
-  y #14 (T8).
+- Verificación en vivo del envío real por Resend (el email llega y se ve bien): issue #20
+  (`RESEND_API_KEY`).
 - Verificación en vivo de `aprobar_comprobante` y `remitos_de_venta` contra `otjph…`: issue #15/#16. Los
   tests de PGlite ya cubren la regla; falta la base real.
-- Verificación manual de la página imprimible (mobile, foco, contraste AA): cierre de T8 (#14) con la base
-  migrada.
+- Verificación manual de la página imprimible (mobile, foco, contraste AA), con la base migrada. Vive en
+  la punta a punta **#23**.
 - El fallo de correo y el reenvío ya están implementados (issue #19); no queda código pendiente en esa
   parte.
+
+> El ticket `T8 · Remito y email al Cliente` (**#14**) se cerró el 2026-10-28 con su comentario de
+> evidencia: la implementación y sus tests están en `main` y lo único que falta es la verificación en vivo
+> de arriba.

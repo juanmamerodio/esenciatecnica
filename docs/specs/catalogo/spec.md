@@ -143,6 +143,9 @@ la base viva sigue a medio migrar, así que nada de esto está verificado en pro
 ### Pendiente
 
 1. **Verificación en el navegador de `/catalog`** (form GET, chips, estados, responsive y contraste). Depende
-   de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Cerrar el ticket `T2 · Catálogo`** (issue **#6**): sigue abierto aunque la implementación y sus tests
-   están hechos. De la desviación de búsqueda se encargó **#41**, ya implementada.
+   de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**). Vive en la punta a punta
+   **#23**.
+
+> El ticket `T2 · Catálogo` (**#6**) se cerró el 2026-10-28 con su comentario de evidencia: la
+> implementación y sus tests están en `main`, la desviación de búsqueda se cerró en **#41** y lo único que
+> falta es la verificación en vivo de arriba.

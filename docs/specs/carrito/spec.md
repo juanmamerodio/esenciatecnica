@@ -151,9 +151,10 @@ persistencia y el contador quedan para la verificación manual.
 
 1. **Verificación en el navegador de `/` y `/cart`** (agregar, contador, persistencia al recargar, estado
    vacío, mobile y foco). Depende de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Cerrar el ticket `T4 · Carrito`** (issue **#9**): sigue abierto aunque la implementación y sus tests
-   están hechos.
+   Vive en la punta a punta **#23**.
 
+> El ticket `T4 · Carrito` (**#9**) se cerró el 2026-10-28 con su comentario de evidencia: la
+> implementación y sus tests están en `main` y lo único que falta es la verificación en vivo de arriba.
 > La desviación de formato de precio se cerró en el issue **#44** (spec
 > [`formato-del-dinero`](../formato-del-dinero/spec.md)): el redondeo vive en la aritmética y el formato es
 > adaptativo, así que el total que se muestra es el que viaja al pedido.

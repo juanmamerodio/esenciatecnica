@@ -269,4 +269,8 @@ criterio como “verde en producción” sin esa verificación.
 - Poner `SUPABASE_SERVICE_ROLE_KEY` en `.env.local` y Vercel: issue #20. Sin la clave, el borde responde
   `503` y no se puede probar el camino completo.
 - Verificación manual en navegador de `/checkout` (formulario, monto precargado, estados de error y de
-  éxito, carrito que no se vacía): cierre de la tajada T5 (#10) con la base migrada y las claves puestas.
+  éxito, carrito que no se vacía), con la base migrada y las claves puestas. Vive en la punta a punta
+  **#23**.
+
+> El ticket `T5 · Checkout y comprobante` (**#10**) se cerró el 2026-10-28 con su comentario de evidencia:
+> la implementación y sus tests están en `main` y lo único que falta es la verificación en vivo de arriba.

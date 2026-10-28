@@ -152,6 +152,9 @@ invariante de la vista, no en una ejecución del navegador.
 ### Pendiente
 
 1. **Verificación en el navegador de `/producto/<id>`** (jerarquía, responsive, estados y contraste). Depende
-   de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Cerrar el ticket `T3 · Detalle de producto`** (issue **#8**): sigue abierto aunque la implementación y
-   sus tests están hechos. El 404 de ids inválidos y la precisión del §2.2 se cerraron en **#42**.
+   de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**). Vive en la punta a punta
+   **#23**.
+
+> El ticket `T3 · Detalle de producto` (**#8**) se cerró el 2026-10-28 con su comentario de evidencia: la
+> implementación y sus tests están en `main`, el 404 de ids inválidos y la precisión del §2.2 se cerraron
+> en **#42** y lo único que falta es la verificación en vivo de arriba.

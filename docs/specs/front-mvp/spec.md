@@ -139,8 +139,8 @@ Ninguna tajada se implementa sin su spec detallada ni sus criterios de aceptaci�
 
 > **Estado (auditoría del 2026-10-27):** hecho, sin verificar en vivo · las ocho HU tienen cobertura de
 > estructura o de datos (`tests/front/home.test.ts`, `tests/front/catalogo.test.ts`) y el vocabulario del
-> dominio está limpio; la verificación en navegador sigue pendiente (#23). La franja institucional del
-> footer y `/about` todavía usa el ícono `FlaskConical` (hallazgo 🟡 de `memory.md`).
+> dominio está limpio; la verificación en navegador sigue pendiente (#23). La desviación del ícono de
+> laboratorio se cerró en **#43**: la marca es `Sparkles` y el producto, `Droplets`.
 
 ### HU-1 · Propuesta de valor
 
@@ -356,7 +356,7 @@ tajadas que bloqueaban. Quedan acá y en la spec de cada tajada:
 | §3.3 Contrato de datos: `vista_catalogo` y vacío ≠ error | implementado | `src/lib/catalogo.ts:96-104`, `src/lib/catalogo-servidor.ts:35`; `tests/front/catalogo.test.ts:82-136`. |
 | §3.3 Orden por `nombre` sin `created_at` | implementado | `src/lib/catalogo.ts:165`; `tests/front/catalogo.test.ts:33`. |
 | §3.3 Tipo `Producto` legacy de `src/lib/supabase.ts` | retirado | `src/lib/supabase.ts` ya no existe; `tests/front/home.test.ts:67-73`. |
-| §3.4 Skills en `.agents/skills/` | pendiente | El directorio no existe (`Test-Path` da falso) y `AGENTS.md` §11 lo declara fundación. |
+| §3.4 Skills en `.agents/skills/` | implementado | `.agents/skills/tablero-teams/SKILL.md` y `.agents/skills/bd-viva/SKILL.md`, nombradas en `AGENTS.md` §11; `tests/front/skills-del-proyecto.test.ts`; commit `7fd1f72` (#45). |
 | §5 HU-1 · Propuesta de valor | implementado | `src/app/page.tsx:20-44`; `tests/front/home.test.ts:28-35`. |
 | §5 HU-2 · Productos publicados | implementado | `src/app/page.tsx:71-86`; `tests/front/catalogo.test.ts:22-45`. |
 | §5 HU-3 · Producto sin stock | implementado | `src/components/ProductCard.tsx:35-41`; `tests/front/catalogo.test.ts:47-62`. |
@@ -375,11 +375,15 @@ tajadas que bloqueaban. Quedan acá y en la spec de cada tajada:
 | §9 Gate de despliegue y secretos | pendiente | `.env.local` sin `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY` (O1 · #20). |
 | §10 Decisiones 1-5 (G1/G2/G3) | implementado | `src/app/producto/[id]/page.tsx`; `src/app/about/page.tsx:25-37`; `src/components/Footer.tsx:36-42`. |
 | §10 G4 · Datos bancarios reales | pendiente | Cooperadora; hasta entonces el checkout lo dice (`src/app/checkout/page.tsx:272`). |
-| Ícono institucional (`FlaskConical`) en header, footer y `/about` | pendiente | `src/components/Header.tsx:42`, `src/components/Footer.tsx:18`, `src/app/about/page.tsx:5,26`; hallazgo 🟡 de `memory.md`. |
+| Ícono institucional (`FlaskConical`) en header, footer y `/about` | retirado | La marca es `Sparkles` (`Header.tsx`, `Footer.tsx`) y el producto, `Droplets`; test *«ningún archivo de `src/` importa el ícono retirado»*; commit `a2f4686` (#43). |
 
-En verde en repo: `npm run typecheck` y `npm run lint` en 0, y `npm test` con **279 tests en 23
+En verde en repo: `npm run typecheck` y `npm run lint` en 0, y `npm test` con **388 tests en 29
 archivos**. Eso **no** dice nada de la base viva: la suite corre contra PGlite y deja `otjph` a medio
 migrar en verde. Para la base viva el único control es `npm run bd:viva`, y hoy está **rojo** (#15).
+
+> Los nueve tickets `T0`–`T8` (#2, #5, #6, #8, #9, #10, #12, #13 y #14) se cerraron el 2026-10-28 con su
+> comentario de evidencia (spec [`trazabilidad-issues`](../trazabilidad-issues/spec.md)); lo que quedaba
+> pendiente de cada uno es la verificación en vivo que vive en **#23**.
 
 ### Pendiente
 
@@ -393,9 +397,5 @@ migrar en verde. Para la base viva el único control es `npm run bd:viva`, y hoy
   de mostrar un CBU inventado.
 - **Fotos reales de la beta**: se suben desde `/admin` al bucket `productos`, no se commitean rutas
   locales (#22/B5).
-- **`.agents/skills/`**: el directorio no existe aunque `AGENTS.md` §11 y §3.4 lo declaran (hallazgo
-  abierto de `memory.md`).
-- **Ícono de laboratorio** (`FlaskConical`) en header, footer y `/about`, contra el vocabulario que
-  retira el glosario (hallazgo 🟡 de `memory.md`).
 - **Fotos y remito real**: la única evidencia de que el email de Resend sale y se ve bien es la
   verificación manual (#23).

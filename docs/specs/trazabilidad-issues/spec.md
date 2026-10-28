@@ -1,6 +1,6 @@
 # Spec · Trazabilidad de los issues del front y del esquema
 
-> **Feature:** `trazabilidad-issues` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#24](https://github.com/juanmamerodio/esenciatecnica/issues/24).
+> **Feature:** `trazabilidad-issues` · **Estado:** implementada en repo (issue #48) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#24](https://github.com/juanmamerodio/esenciatecnica/issues/24) · **Tajada:** [#48](https://github.com/juanmamerodio/esenciatecnica/issues/48).
 > **Origen:** hallazgo 🟡 de la auditoría del tablero del 27-10 (`memory.md`) y tarea `backlog` del tablero:
 > *Cerrar los issues del front y del esquema ya implementados*.
 > **Fuente de verdad:** [`AGENTS.md`](../../../AGENTS.md) §6.2 y §9 · [`docs/agentes/issue-tracker.md`](../../agentes/issue-tracker.md).
@@ -104,3 +104,41 @@ Esta tajada es documentación y gobernanza: no lleva test de código (excepción
   cierran los nueve.
 - Si al momento del cierre un issue ya tiene un commit que no aparece en este spec, manda el commit: se
   cita ese y se anota la diferencia.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #48)
+
+La verificación es el estado del tracker, no una suite: esta tajada es documentación y gobernanza
+(excepción de `AGENTS.md` §8). `npm run typecheck` y `npm run lint` en 0 y `npm test` con **388 tests en
+29 archivos**, aunque ninguno de los tres habla del cierre.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| #2, #5, #6, #8, #9, #10, #12, #13 y #14 cerrados con su comentario de evidencia | implementado | cerrados el 2026-10-28 con el comentario uniforme de cinco bloques (`gh issue view <n> --json state,comments`) |
+| Ningún cierre sin comentario y ninguno cita un commit o un test que no exista | implementado | los 22 commits citados existen en `main` (`git log -1 <sha>`); los 17 archivos de test existen y **sus conteos coinciden uno a uno** con la corrida de la suite |
+| Cada comentario dice qué queda pendiente de verificación en vivo y en qué issue vive | implementado | bloque «Qué queda pendiente de verificación en vivo» en los nueve: base migrada (#15, #16/B1), claves (#20/O1) y pantalla (#23/B6) |
+| #15 a #23 siguen abiertos y sin cambios | implementado | sin cambio de estado ni de cuerpo en los nueve |
+| Los specs de las tajadas ya no piden cerrar su ticket | implementado | el punto «cerrar el ticket TN» salió de `carrito`, `catalogo`, `checkout`, `detalle-producto` y `remito`, y en su lugar quedó la nota del cierre y el puntero a la verificación en vivo (#23) |
+| `gh issue list --state open` reducido al cierre beta y a los tickets nuevos | implementado | quedan #15–#23 (cierre beta), los paraguas (#24, #25, #28, #29), el paraguas del front (#1) y la tajada de esta sesión (#48); #45 y #47 se cierran por el mensaje de sus propios commits al subir |
+| `npm run docs:links` en verde | implementado | 0 links sin resolver sobre 52 archivos `.md` |
+| El tablero de Teams no cambia de estado por los nueve | implementado | las nueve tareas ya estaban en `done`/`review`; la sesión sólo deja bitácora |
+
+### Hallazgos de esta sesión (los tres se corrigieron acá)
+
+1. **Un cierre sin cerrar.** #14 tenía su comentario de evidencia publicado a las 23:14:56Z y seguía
+   **abierto**: la sesión anterior se cortó entre el comentario y el `close`. Se cerró, y la spec de
+   `remito` ya no afirma algo falso sobre su propio ticket.
+2. **Dos punteros de sección inexactos.** Los comentarios de #10 y #13 mandaban a «§8, estado de
+   implementación», pero en `checkout` y `admin` el §8 es **Blockers declarados** y el estado vive en el
+   §9. Se corrigieron los dos comentarios: un revisor tiene que llegar a la sección sin adivinar.
+3. **Un issue de la misma clase fuera de la lista.** #3 (F0 · tokens y shell) tenía código y test en
+   `main` (`275d61c`, `tests/front/identidad-shell.test.ts`) y quedaba abierto, así que el criterio de la
+   lista de abiertos no se cumplía. Se cerró con el mismo formato y su spec (§3.1 y §3.2 de `front-mvp`)
+   quedó linkeada.
+
+> **Fuera del alcance de la spec, decidido con el humano en la sesión:** la fila del tablero *«Cerrar los
+> issues del front y del esquema ya implementados»* decía `backlog`, no `done` como suponía el issue #48;
+> se movió a `done` con su bitácora. Y `main` estaba **27 commits adelante** de `origin/main`: los
+> `closes #NN` de los mensajes nunca llegaron a GitHub y CI (#39) no había corrido nunca. Se hizo push,
+> que es lo que cierra #45 y #47 por mensaje de commit.

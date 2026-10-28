@@ -1,7 +1,8 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (tanda del 27-10 casi
-> cerrada: #33–#47 en repo; queda #48 · trazabilidad).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (tanda del 27-10
+> **cerrada**: los dieciséis tickets #33–#48 en repo y `origin/main` al día; el único camino crítico que
+> queda es el cierre beta).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -9,22 +10,32 @@
 - Hecho en repo: B3 (#17), B4 (#18), A1 (#19), B2 (#21) y B5 (#22). Falta **aplicar** `00`–`06` y el
   seed en `otjph` (B1/#16, Juanma con revisión de Isabella), cargar secretos (O1/#20, Enzo) y la
   verificación de punta a punta (B6/#23, Celeste).
-- **Tanda nueva ordenada el 28-10:** los nueve specs del 27-10 se publican y sus dieciséis tajadas
-  (#33–#48) tienen un orden de ejecución en [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md).
-  **Implementadas en repo, una por commit:** #39 · CI, #33, #41, #42, #35, #34, #46, #36, #37, #38, #43,
-  #44 · dinero, #40 · plantilla de spec, con su retrofit **#47**, y #45 · skills del proyecto.
-  Queda **#48 · trazabilidad de issues**, el último del orden.
+- **Tanda del 28-10 cerrada:** los nueve specs del 27-10 se publicaron y sus dieciséis tajadas
+  (#33–#48) se implementaron en repo, una por commit, en el orden de
+  [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md): #39 · CI, #33, #41, #42, #35,
+  #34, #46, #36, #37, #38, #43, #44 · dinero, #40 · plantilla de spec, con su retrofit **#47**, #45 ·
+  skills y **#48 · trazabilidad** (los nueve issues viejos `T0`–`T8` cerrados con su comentario de
+  evidencia, y también F0 · #3).
+- **`origin/main` al día.** El repositorio acumulaba **27 commits sin subir**: GitHub nunca vio los
+  `closes #NN` de los mensajes y **CI (#39) no había corrido nunca**. Se empujó el 28-10; de ahí en
+  adelante el cierre de un issue por mensaje de commit sólo vale si el commit se sube.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
-- **Tablero de Teams auditado el 27-10** contra el repo: 41 tareas → 20 `done`, 7 `review`, 14 `backlog`.
-  Las de `review` son las que ya tienen código y test pero esperan la base viva o las claves. Se
-  publicaron dos notas en la bandeja: **AVANCE** (cierre beta) y **BLOQUEO** (los 26 desajustes de
-  `otjph`). Tareas nuevas: B6, semilla y fotos, trazabilidad de issues, deuda de código, íconos de
-  laboratorio, redondeo del dinero, `.agents/skills/` y plantilla de spec.
+- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): 44 tareas. La
+  auditoría del 27-10 dejó 41 → 20 `done`, 7 `review`, 14 `backlog`; el 28-10 se movió **trazabilidad
+  de issues a `done`** con su bitácora. Las de `review` son las que ya tienen código y test pero esperan
+  la base viva o las claves. Siguen publicadas las dos notas de la bandeja de la auditoría: **AVANCE**
+  (cierre beta) y **BLOQUEO** (los 26 desajustes de `otjph`).
+  **Ojo:** el issue #48 suponía que su fila ya decía `done` y en realidad estaba en `backlog` — la
+  premisa de un ticket sobre el tablero se verifica leyendo el tablero, no confiando en el texto.
 
 ## Semáforo
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **388 tests** en 29 archivos ·
-  `npm run build` compila sin `RESEND_API_KEY` y ya incluye `/api/cron/vencidos`.
+  `docs:links` 0 links sin resolver · `npm run build` compila sin `RESEND_API_KEY` y ya incluye
+  `/api/cron/vencidos`.
+- **GitHub**: `origin/main` al día desde el 28-10, así que **CI corre de verdad** por primera vez; la
+  puerta de §8 dejó de ser una promesa local. Los cierres por mensaje de commit (#45, #47) recién ahí
+  se aplican.
 - BD prod `otjph…`: **ROJA**, **26 desajustes** medidos con el `bd:viva` nuevo. Además de los 13
   originales, ahora ve:
   - lectura anónima abierta (`200 []`) en **las diez** tablas cerradas, incluidas `admin` y `roll`;
@@ -53,6 +64,15 @@
 | #22 · B5 | semilla de la beta | ✅ seed de tres productos; ⏳ fotos desde `/admin` |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste, bloqueada por B1/O1 |
 
+## Hecho (2026-10-28, #48 · trazabilidad de issues)
+| Cambio | Qué dejó |
+|---|---|
+| GitHub · #48 (spec `trazabilidad-issues`) | **Los nueve issues `T0`–`T8` (#2, #5, #6, #8, #9, #10, #12, #13, #14) cerrados** con el comentario uniforme de cinco bloques: qué se construyó, commits que lo contienen, tests que lo cubren, qué queda pendiente de verificación en vivo y el spec de la tajada linkeado. Se sumó **#3 (F0)** con el mismo formato. `gh issue list --state open` queda en el cierre beta (#15–#23), los paraguas (#24, #25, #28, #29) y las tajadas de la tanda. |
+| Verificación de los cierres | No se cerró por confianza: los **22 commits** citados existen en `main` y los **17 archivos de test** también, con **sus conteos idénticos** a la corrida de la suite (388/29). #15–#23 sin tocar. |
+| Tres correcciones de evidencia | **#14** tenía el comentario publicado a las 23:14:56Z y seguía **abierto** (la sesión anterior se cortó antes del `close`). Los comentarios de **#10** y **#13** mandaban al §8, que en `checkout` y `admin` es *Blockers declarados*: el estado vive en el §9, y se editaron los dos. **#3** estaba fuera de la lista de #48 aunque era la misma clase (código + test, sólo falta la pantalla). |
+| `docs/specs/*/spec.md` | Los cinco specs que pedían «cerrar el ticket TN» pierden ese `### Pendiente` y quedan con la nota del cierre y el puntero a la verificación en vivo (**#23**). `front-mvp` §11 anota el cierre de los nueve. La spec de `trazabilidad-issues` pasa a *implementada* con su §8 de estado. |
+| Push a `origin/main` | El repo venía **27 commits atrás**: se subió, que es lo que hace correr CI y lo que cierra **#45** y **#47** por mensaje de commit. |
+
 ## Hecho (2026-10-28, tanda del 27-10)
 | Cambio | Qué dejó |
 |---|---|
@@ -65,7 +85,7 @@
 | `tests/front/formato-dinero.test.ts` | Doce tests: formato con y sin centavos, redondeo sin error de punto flotante, total que suma subtotales redondeados, coherencia carrito→checkout, remito con el mismo total y una sola función de formato en carrito, checkout y panel. |
 | `carrito/spec.md` y `checkout/spec.md` | La desviación de formato deja de estar abierta: los dos specs enuncian la regla y el ejemplo falso (`3001.65 → $ 3.002`) se retira. |
 
-
+## Hecho (2026-10-27/28, cierre beta en repo)
 | Cambio | Qué dejó |
 |---|---|
 | `00_respaldo_legacy.sql` | Marcador por `detalle_carrito`/`stock.porcentaje`; `respaldo_legacy.conteos`; aborta si origen y copia no coinciden. |
@@ -95,36 +115,31 @@
 | `npm run docs:links` | El verificador de links de `docs/` deja de estar suelto: entra en `package.json` y en la definición de terminado de §8. |
 
 ## Hallazgos abiertos
-> El redondeo del dinero (hallazgo 1 de la auditoría del 27-10) quedó cerrado el 2026-10-28 con el issue
-> **#44**: el formato es adaptativo, el subtotal se redondea en la aritmética y el total suma subtotales
-> redondeados. Los demás hallazgos ya tienen su tajada en el orden de ejecución.
-1. 🟡 **Búsqueda del catálogo:** `catalogo.ts` une nombre + categoría + tipo + descripción con `join(" ")`
-   antes de buscar, así que un término cruza el borde entre campos (`"gel alcohol"` matchea
-   `Alcohol en Gel`). El test sólo cubre coincidencias intra-campo. → **#41**.
-2. 🟡 **Detalle de producto:** el 404 por id inválido tiene código (`producto/[id]/page.tsx:25-34`) pero
-   ningún test lo cubre. → **#42**.
-3. 🟡 `FlaskConical` (ícono de laboratorio) sigue en `about`, `Header`, `Footer` e `ImagenProducto`, y
-   `sobre-el-proyecto/spec.md` §1 lo daba por retirado. → **#43**.
-4. ✅ **Hueco de plantilla transversal:** cerrado el 2026-10-28 con **#40** (nace `PLANTILLA.md` y su test
-   estructural) y **#47** (retrofit de los siete specs de la tanda). `bd-mvp`, `front-mvp` y
-   `migracion-otjph` siguen fuera de la plantilla y están nombrados en el test, para que una tarea futura
-   los alcance sin que nadie tenga que acordarse.
-5. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
-   por hechas; los del cierre beta también. → **#48**.
-6. ✅ `.agents/skills/` **ya existe** con las dos skills del repo y `AGENTS.md` §11 dice la verdad; el test
-   estructural las cubre. Cerrado el 2026-10-28 con **#45**.
-7. 🔴 **Seguridad:** la anon key ejecuta tres RPC en `otjph`; se cierra al aplicar `03`.
-8. 🟡 **Revisión del 28-10 sobre las skills (#45):** ninguno toca comportamiento; se dejaron sin parchear por
-   la regla de §6.5 (no parchear en la sesión de review). La skill de `bd-viva` no nombra
+> **Los hallazgos de código están cerrados.** Toda la deuda detectada por la auditoría del 27-10 y por la
+> revisión del 25-10 tiene su tajada implementada, con test y con el issue cerrado: el redondeo del dinero
+> (**#44**), la búsqueda del catálogo (**#41**), el 404 del detalle (**#42**), el ícono de laboratorio
+> (**#43**), el hueco de la plantilla (**#40** y **#47**), las skills (**#45**) y la trazabilidad
+> (**#48**). Las cuatro de la revisión del 25-10 también: `buscarCliente` con `ilike` (**#33**), el
+> diagnóstico falso de `sinConfiguracion()` (**#34**), la duplicación del archivo subido (**#35**) y los
+> casteos sin Zod del borde (**#46**). Y las tres de contrato: la alerta de stock (**#36**), los límites
+> del checkout (**#37**) y el tiempo de producción en la card (**#38**), más el CI (**#39**).
+>
+> Lo que queda **no es código**: es la base viva, las claves y la verificación en el navegador.
+1. 🔴 **Base viva a medio migrar:** **26 desajustes** en `otjph`. Es el camino crítico de la beta: aplicar
+   `00`–`06` y el seed, con revisión de Isabella, y firmar con `npm run bd:viva` en verde (#15, #16/B1).
+2. 🔴 **Seguridad:** la anon key ejecuta `aprobar_comprobante`, `rechazar_comprobante` y
+   `cancelar_pedidos_vencidos`, y lee en `200 []` las diez tablas cerradas. Se cierra al aplicar `03`.
+3. 🟡 **Secretos:** faltan `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY`,
+   `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*` (#20, Enzo).
+4. 🟡 **Revisión del 28-10 sobre las skills (#45):** ninguno toca comportamiento; se dejaron sin parchear
+   por la regla de §6.5 (no parchear en la sesión de review). La skill de `bd-viva` no nombra
    `scripts/verificar-bd-viva.mjs` y `tablero-teams` copia el bloque de comandos de `teams.md` §5 en vez
    de apuntarlo; falta `PARÁMETROS DE ENTRADA` y el orden de `brain.md` §4.1, y §11 perdió el puntero
    «anatomía en `brain.md` §4.1»; el test fija exactamente dos skills (la spec §5 dice «al menos una») y
-   sus guardias de `task_notes`/`§11` son más débiles que lo que §8 afirma. → tarea en el tablero y
-   **#48** para la trazabilidad.
-
-Siguen abiertos los hallazgos de la revisión de código del 25-10 (`buscarCliente` con `ilike`,
-duplicación de "archivo subido", `sinConfiguracion()` con diagnóstico falso, casteos sin Zod): son las
-tajadas #33 a #38 y #46.
+   sus guardias de `task_notes`/`§11` son más débiles que lo que §8 afirma. → tarea **`backlog`** del
+   tablero *«Deuda de las skills del proyecto: revisión del 28-10»*; el issue #48 ya no es el destino.
+5. 🟡 **Verificación en pantalla:** ninguna de las nueve tajadas del front se vio en un navegador con la
+   base migrada. Vive en **#23** (B6, Celeste), bloqueada por #16 y #20.
 
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit. TDD. Español único. Sin IA. Sin envío.
@@ -142,6 +157,12 @@ tajadas #33 a #38 y #46.
   `select cancelar_pedidos_vencidos();` en el SQL Editor.
 - **El tablero de Teams se sincroniza con `npm run teams`** (puente temporal por PostgREST con la anon key
   pública de `quimicashop/config.js`). Contrato, estados y ritual: [`docs/agentes/teams.md`](docs/agentes/teams.md).
+- **Un issue se cierra con evidencia, no por confianza**: el comentario de cinco bloques (qué se
+  construyó, commits, tests, qué queda pendiente en vivo y el spec linkeado) y **commits y tests que
+  existan de verdad**. El commit tiene que estar **subido**: uno local no cierra nada en GitHub y deja a
+  CI sin correr. Un puntero a un archivo o a una sección se verifica antes de publicarlo.
+- **La premisa de un ticket se verifica contra el artefacto**: #48 afirmaba que su fila del tablero ya
+  decía `done` y estaba en `backlog`. Leer el tracker antes de creerle al texto.
 
 ## Decisiones que no hay que redescubrir
 - **G2:** el detalle es **página propia** (`/producto/[id]`), no card ampliada.
