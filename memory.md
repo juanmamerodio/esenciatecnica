@@ -1,7 +1,7 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (orden de ejecución de la
-> tanda del 27-10 y primer ticket implementado: dinero, #44).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (tanda del 27-10 casi
+> cerrada: #33–#44 y #46 en repo, y el retrofit de la plantilla, #47).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -11,8 +11,9 @@
   verificación de punta a punta (B6/#23, Celeste).
 - **Tanda nueva ordenada el 28-10:** los nueve specs del 27-10 se publican y sus dieciséis tajadas
   (#33–#48) tienen un orden de ejecución en [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md).
-  El primero, **#44 · dinero** (redondeo en la aritmética y formato en un solo lugar), está implementado.
-  Sigue **#39 · CI**.
+  **Implementadas en repo, una por commit:** #39 · CI, #33, #41, #42, #35, #34, #46, #36, #37, #38, #43,
+  #44 · dinero y #40 · plantilla de spec, con su retrofit **#47**. Quedan **#45 · skills del proyecto** y
+  **#48 · trazabilidad de issues**, los dos últimos del orden.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
 - **Tablero de Teams auditado el 27-10** contra el repo: 41 tareas → 20 `done`, 7 `review`, 14 `backlog`.
@@ -22,7 +23,7 @@
   laboratorio, redondeo del dinero, `.agents/skills/` y plantilla de spec.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **291 tests** en 24 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **381 tests** en 28 archivos ·
   `npm run build` compila sin `RESEND_API_KEY` y ya incluye `/api/cron/vencidos`.
 - BD prod `otjph…`: **ROJA**, **26 desajustes** medidos con el `bd:viva` nuevo. Además de los 13
   originales, ahora ve:
@@ -56,6 +57,7 @@
 | Cambio | Qué dejó |
 |---|---|
 | `docs/estado/ORDEN_DE_EJECUCION.md` | Los dieciséis tickets de la tanda ordenados por cuatro criterios (dinero/seguridad, puerta automática, lo fundacional antes de quien lo usa, gobernanza al final), con las dependencias nativas de GitHub (#47 ← #40/#41/#42/#44; #46 ← #35; #48 ← los otros quince). |
+| **#47 · Retrofit de la plantilla** | Los siete specs de la tanda siguen `docs/specs/PLANTILLA.md`: secciones canónicas en orden, notas finales y 21 HU con `Como … quiero … para`. No cambió ninguna decisión de comportamiento; sí se corrigieron las referencias cruzadas a los números viejos (MODELO, ADR 0005, handoff, guías y specs vecinos). El test estructural deja de nombrar a los siete como pendientes; `bd-mvp`, `front-mvp` y `migracion-otjph` siguen fuera, con su motivo y nombrados en el test. Commit `1a66dc5`. |
 | Nueve specs de `docs/specs/` | Publicados: busqueda-por-campos, detalle-404, deuda-codigo-25-10, formato-del-dinero, iconos-y-copy-del-dominio, integracion-continua, plantilla-de-spec, skills-del-proyecto y trazabilidad-issues. |
 | `src/lib/format.ts` | `redondearACentavos` (aritmética) y `formatPrice` adaptativo: entero sin decimales (`$ 3.000`), con centavos con dos exactos (`$ 4,50`). Una sola regla de dinero para tienda, panel, remito y checkout. |
 | `src/lib/carrito.ts` + `checkout.ts` + `Carrito.tsx` + `checkout/page.tsx` | `subtotalDeLinea` (precio × cantidad redondeado) y `totalDelPedido` como suma de subtotales redondeados; el checkout usa la misma función de redondeo y dejó la suya. |
@@ -81,7 +83,7 @@
 | Bandeja de Teams (`team_discussions`) | Nota de **AVANCE** del cierre beta y nota de **BLOQUEO** por los 26 desajustes de `otjph`. |
 | `docs/specs/*/spec.md` | Los nueve specs por tajada y el paraguas `front-mvp` suman su sección **Estado de implementación (auditoría del 2026-10-27)**: criterio por criterio, con evidencia y `### Pendiente`. |
 | `migracion-otjph/spec.md` | §7.4 con la medición del 27-10 (13 → 26 desajustes) y la tabla de las ocho piezas versionadas (`00`–`06` + seed). |
-| `checkout/spec.md` | Se resolvió la contradicción HU-3 vs §6.3: **manda el código** (el monto se precarga, editable). |
+| `checkout/spec.md` | Se resolvió la contradicción HU-3 vs §4.3: **manda el código** (el monto se precarga, editable). |
 
 ## Hecho (2026-10-27, retro)
 | Cambio | Qué dejó |
@@ -102,8 +104,10 @@
    ningún test lo cubre. → **#42**.
 3. 🟡 `FlaskConical` (ícono de laboratorio) sigue en `about`, `Header`, `Footer` e `ImagenProducto`, y
    `sobre-el-proyecto/spec.md` §1 lo daba por retirado. → **#43**.
-4. 🟡 Hueco de plantilla transversal: ningún spec tiene sección de notas finales y 25 HU no enuncian actor
-   ni beneficio. → **#40** y **#47**.
+4. ✅ **Hueco de plantilla transversal:** cerrado el 2026-10-28 con **#40** (nace `PLANTILLA.md` y su test
+   estructural) y **#47** (retrofit de los siete specs de la tanda). `bd-mvp`, `front-mvp` y
+   `migracion-otjph` siguen fuera de la plantilla y están nombrados en el test, para que una tarea futura
+   los alcance sin que nadie tenga que acordarse.
 5. 🟡 Trazabilidad: #2, #5, #6, #8, #9, #10, #12, #13 y #14 siguen **OPEN** aunque `AGENTS.md` §9 las da
    por hechas; los del cierre beta también. → **#48**.
 6. 🟡 `.agents/skills/` **no existe**, y `AGENTS.md` §11 lo declara como fundación. → **#45**.
