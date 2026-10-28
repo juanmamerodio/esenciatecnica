@@ -24,7 +24,10 @@ describe('T1 · catálogo público', () => {
     const { db, consultar } = await catalogoConSeed();
     await db.query(`update public.producto set activo = false where nombre = 'Jabón Líquido Neutro'`);
 
-    expect(await nombresDe(consultar)).toEqual(['Crema Hidratante Facial']);
+    expect(await nombresDe(consultar)).toEqual([
+      'Alcohol en Gel',
+      'Crema Hidratante Facial',
+    ]);
   });
 
   it('ordena por nombre ascendente', async () => {
@@ -33,6 +36,7 @@ describe('T1 · catálogo público', () => {
     await crearProducto(db, { nombre: 'Aloe en gel', precio: 900, cantidad: 4 });
 
     expect(await nombresDe(consultar)).toEqual([
+      'Alcohol en Gel',
       'Aloe en gel',
       'Crema Hidratante Facial',
       'Jabón Líquido Neutro',
@@ -50,7 +54,7 @@ describe('T1 · catálogo público', () => {
     if (resultado.estado !== 'ok') throw new Error('se esperaba catálogo ok');
 
     const porNombre = new Map(resultado.productos.map((producto) => [producto.nombre, producto]));
-    expect(porNombre.get('Crema Hidratante Facial')).toMatchObject({ disponible: 43, sinStock: false });
+    expect(porNombre.get('Crema Hidratante Facial')).toMatchObject({ disponible: 48, sinStock: false });
     expect(porNombre.get('Jabón Líquido Neutro')).toMatchObject({ disponible: 6, sinStock: false });
     expect(porNombre.get('Acondicionador sólido')).toMatchObject({ disponible: 0, sinStock: true });
     expect(porNombre.get('Bálsamo labial')).toMatchObject({ disponible: 0, sinStock: true });
@@ -62,7 +66,10 @@ describe('T1 · catálogo público', () => {
     const resultado = await consultar();
     if (resultado.estado !== 'ok') throw new Error('se esperaba catálogo ok');
 
-    expect(resultado.productos[0]).toMatchObject({
+    const crema = resultado.productos.find(
+      (producto) => producto.nombre === 'Crema Hidratante Facial',
+    );
+    expect(crema).toMatchObject({
       nombre: 'Crema Hidratante Facial',
       categoria: 'Cosmética',
       tipo: 'Emulsión',

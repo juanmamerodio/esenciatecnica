@@ -20,6 +20,7 @@ describe('seed del catálogo', () => {
     );
 
     expect(rows.map((fila) => fila.nombre)).toEqual([
+      'Alcohol en Gel',
       'Crema Hidratante Facial',
       'Jabón Líquido Neutro',
     ]);
@@ -31,7 +32,10 @@ describe('seed del catálogo', () => {
     await db.exec(seed);
 
     const { rows } = await db.query<{ total: string }>('select count(*)::text as total from producto');
-    expect(rows[0].total).toBe('2');
+    expect(rows[0].total).toBe('3');
+
+    const stock = await db.query<{ total: string }>('select count(*)::text as total from stock');
+    expect(stock.rows[0].total).toBe('3');
   });
 
   it('deja stock disponible coherente para vender', async () => {
@@ -40,9 +44,34 @@ describe('seed del catálogo', () => {
     );
 
     expect(rows).toEqual([
-      { nombre: 'Crema Hidratante Facial', disponible: 43 },
+      { nombre: 'Alcohol en Gel', disponible: 24 },
+      { nombre: 'Crema Hidratante Facial', disponible: 48 },
       { nombre: 'Jabón Líquido Neutro', disponible: 6 },
     ]);
+  });
+
+  it('no deja rutas locales muertas en imagen_url', async () => {
+    const { rows } = await db.query<{ nombre: string; imagen_url: string | null }>(
+      'select nombre, imagen_url from producto order by nombre',
+    );
+
+    for (const fila of rows) {
+      expect(fila.imagen_url, fila.nombre).toBeNull();
+    }
+  });
+
+  it('limpia una ruta local heredada del seed viejo al volver a correrlo', async () => {
+    await db.query(
+      `update producto set imagen_url = '/productos/crema-hidratante.jpg'
+        where nombre = 'Crema Hidratante Facial'`,
+    );
+
+    await db.exec(readFileSync(path.join(process.cwd(), 'supabase', 'seed.sql'), 'utf8'));
+
+    const { rows } = await db.query<{ imagen_url: string | null }>(
+      `select imagen_url from producto where nombre = 'Crema Hidratante Facial'`,
+    );
+    expect(rows[0].imagen_url).toBeNull();
   });
 
   it('genera la alerta de stock del producto por debajo del umbral', async () => {

@@ -36,7 +36,7 @@ describe('T2 · búsqueda', () => {
     };
 
     expect(await buscando('zinc')).toEqual(['Zinc tópico']);
-    expect(await buscando('higiene')).toEqual(['Jabón Líquido Neutro']);
+    expect(await buscando('higiene')).toEqual(['Alcohol en Gel', 'Jabón Líquido Neutro']);
     expect(await buscando('emulsión')).toEqual(['Crema Hidratante Facial', 'Zinc tópico']);
     expect(await buscando('manzanilla')).toEqual(['Crema Hidratante Facial']);
     expect(consultar).toBeTypeOf('function');
@@ -57,7 +57,10 @@ describe('T2 · búsqueda', () => {
 
 describe('T2 · filtro por categoría', () => {
   it('filtra por categoría exacta', async () => {
-    expect(await nombres({ categoria: 'Higiene' })).toEqual(['Jabón Líquido Neutro']);
+    expect(await nombres({ categoria: 'Higiene' })).toEqual([
+      'Alcohol en Gel',
+      'Jabón Líquido Neutro',
+    ]);
     expect(await nombres({ categoria: 'Cosmética' })).toEqual(['Crema Hidratante Facial']);
   });
 
@@ -89,7 +92,10 @@ describe('T2 · categorías disponibles', () => {
 
     const soloHigiene = await consultar({ categoria: 'Higiene' });
     if (soloHigiene.estado !== 'ok') throw new Error('se esperaba catálogo ok');
-    expect(soloHigiene.productos.map((producto) => producto.nombre)).toEqual(['Jabón Líquido Neutro']);
+    expect(soloHigiene.productos.map((producto) => producto.nombre)).toEqual([
+      'Alcohol en Gel',
+      'Jabón Líquido Neutro',
+    ]);
     expect(soloHigiene.categorias).toEqual(['Cosmética', 'Higiene']);
   });
 
