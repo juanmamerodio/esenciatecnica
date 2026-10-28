@@ -17,8 +17,10 @@
   skills y **#48 · trazabilidad** (los nueve issues viejos `T0`–`T8` cerrados con su comentario de
   evidencia, y también F0 · #3).
 - **`origin/main` al día.** El repositorio acumulaba **27 commits sin subir**: GitHub nunca vio los
-  `closes #NN` de los mensajes y **CI (#39) no había corrido nunca**. Se empujó el 28-10; de ahí en
-  adelante el cierre de un issue por mensaje de commit sólo vale si el commit se sube.
+  `closes #NN` de sus mensajes ni **las cuatro puertas nuevas de CI** (#39) —typecheck, lint, test y
+  `docs:links`—, que no habían corrido nunca en GitHub. El `build` **sí** venía corriendo y **venía rojo
+  desde el 26-10**. Se empujó el 28-10: #45, #47 y #48 se cerraron por mensaje de commit y las cuatro
+  puertas quedaron verdes; de ahí en adelante un cierre por mensaje sólo vale si el commit se sube.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella y el cierre se firma con `npm run bd:viva` verde.
 - **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): 44 tareas. La
@@ -33,9 +35,11 @@
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **388 tests** en 29 archivos ·
   `docs:links` 0 links sin resolver · `npm run build` compila sin `RESEND_API_KEY` y ya incluye
   `/api/cron/vencidos`.
-- **GitHub**: `origin/main` al día desde el 28-10, así que **CI corre de verdad** por primera vez; la
-  puerta de §8 dejó de ser una promesa local. Los cierres por mensaje de commit (#45, #47) recién ahí
-  se aplican.
+- **GitHub**: `origin/main` al día desde el 28-10. La corrida `40787366670` deja **Typecheck, Lint, Test
+  y Docs links en verde** —las cuatro puertas de #39 corrieron por primera vez— y **`Build Next.js` en
+  rojo** con `supabaseKey is required` en `/api/notifications`: es el **rojo esperado** por los secretos
+  de Actions que faltan (**#20**, Enzo), no un defecto del repo. Hasta que se carguen,
+  `npm run build` local (que sí compila, porque no lee esa clave) y CI no dicen lo mismo.
 - BD prod `otjph…`: **ROJA**, **26 desajustes** medidos con el `bd:viva` nuevo. Además de los 13
   originales, ahora ve:
   - lectura anónima abierta (`200 []`) en **las diez** tablas cerradas, incluidas `admin` y `roll`;

@@ -120,7 +120,7 @@ La verificación es el estado del tracker, no una suite: esta tajada es document
 | Cada comentario dice qué queda pendiente de verificación en vivo y en qué issue vive | implementado | bloque «Qué queda pendiente de verificación en vivo» en los nueve: base migrada (#15, #16/B1), claves (#20/O1) y pantalla (#23/B6) |
 | #15 a #23 siguen abiertos y sin cambios | implementado | sin cambio de estado ni de cuerpo en los nueve |
 | Los specs de las tajadas ya no piden cerrar su ticket | implementado | el punto «cerrar el ticket TN» salió de `carrito`, `catalogo`, `checkout`, `detalle-producto` y `remito`, y en su lugar quedó la nota del cierre y el puntero a la verificación en vivo (#23) |
-| `gh issue list --state open` reducido al cierre beta y a los tickets nuevos | implementado | quedan #15–#23 (cierre beta), los paraguas (#24, #25, #28, #29), el paraguas del front (#1) y la tajada de esta sesión (#48); #45 y #47 se cierran por el mensaje de sus propios commits al subir |
+| `gh issue list --state open` reducido al cierre beta y a los tickets nuevos | implementado | quedan **#15–#23** (cierre beta), los paraguas **#24, #25, #28, #29** y el paraguas del front **#1**; las tres tajadas de la tanda que seguían abiertas —**#45, #47 y #48**— se cerraron por el mensaje de su commit al subir |
 | `npm run docs:links` en verde | implementado | 0 links sin resolver sobre 52 archivos `.md` |
 | El tablero de Teams no cambia de estado por los nueve | implementado | las nueve tareas ya estaban en `done`/`review`; la sesión sólo deja bitácora |
 
@@ -139,6 +139,12 @@ La verificación es el estado del tracker, no una suite: esta tajada es document
 
 > **Fuera del alcance de la spec, decidido con el humano en la sesión:** la fila del tablero *«Cerrar los
 > issues del front y del esquema ya implementados»* decía `backlog`, no `done` como suponía el issue #48;
-> se movió a `done` con su bitácora. Y `main` estaba **27 commits adelante** de `origin/main`: los
-> `closes #NN` de los mensajes nunca llegaron a GitHub y CI (#39) no había corrido nunca. Se hizo push,
-> que es lo que cierra #45 y #47 por mensaje de commit.
+> se movió a `done` con su bitácora.
+>
+> Y `main` estaba **27 commits adelante** de `origin/main`: los `closes #NN` de los mensajes y las cuatro
+> puertas nuevas de CI (#39) nunca llegaron a GitHub. **El `build` de CI sí venía corriendo, y rojo desde
+> el 26-10** por falta de `SUPABASE_SERVICE_ROLE_KEY` en Actions (#20) —`supabaseKey is required` en
+> `/api/notifications`—. Se hizo push: **#45, #47 y #48 se cerraron** por mensaje de commit y la corrida
+> `40787366670` dejó **Typecheck, Lint, Test y Docs links en verde** con el `build` todavía rojo por esa
+> misma falta de secretos. El rojo de `build` es de **#20**, no de esta tajada; los comandos locales
+> —`typecheck`, `lint`, `test`, `docs:links` y `build`— están todos en verde.
