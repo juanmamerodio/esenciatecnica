@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:types": "node scripts/generar-tipos-bd.mjs",
-    "bd:viva": "node scripts/verificar-bd-viva.mjs"
+    "bd:viva": "node scripts/verificar-bd-viva.mjs",
+    "docs:links": "node scripts/verificar-links-docs.mjs",
+    "teams": "node scripts/teams-tablero.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",

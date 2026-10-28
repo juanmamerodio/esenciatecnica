@@ -1,7 +1,7 @@
 # memory.md · estado de build
 
 > Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-27 (auditoría del tablero de
-> Teams y specs al día).
+> Teams, specs al día y puente `npm run teams`).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. El front y el código del cierre beta están
@@ -69,6 +69,14 @@
 | `migracion-otjph/spec.md` | §7.4 con la medición del 27-10 (13 → 26 desajustes) y la tabla de las ocho piezas versionadas (`00`–`06` + seed). |
 | `checkout/spec.md` | Se resolvió la contradicción HU-3 vs §6.3: **manda el código** (el monto se precarga, editable). |
 
+## Hecho (2026-10-27, retro)
+| Cambio | Qué dejó |
+|---|---|
+| `AGENTS.md` §1, §3, §10, §11, §12 | El tablero deja de estar prohibido y pasa a ser parte del contrato: se sincroniza al cerrar cada sesión, con `done` = código + test y `review` = hecho en repo sin verificar en vivo. Todo por puntero, sin cachear el contrato. |
+| `docs/agentes/teams.md` | Referencia revelada: dónde vive el tablero, los cuatro `key` de autoría, el contrato de `team_tasks`, el ritual de cierre y los gotchas que ya costaron tiempo. |
+| `scripts/teams-tablero.mjs` + `npm run teams` | Único camino de escritura al tablero (leer, estado, nueva, publicar): valida autor, estado y categoría, y siempre deja bitácora y log de auditoría. |
+| `npm run docs:links` | El verificador de links de `docs/` deja de estar suelto: entra en `package.json` y en la definición de terminado de §8. |
+
 ## Hallazgos abiertos
 1. 🟠 **Redondeo del dinero:** `carrito.ts` redondea el total a dos decimales, pero `format.ts` lo muestra
    sin decimales (`3001.65` → `$ 3.002`) mientras el checkout manda `3001.65`. Con el seed actual
@@ -104,10 +112,8 @@ en el tablero.
 - **Rechazo terminal:** no se reabre un pedido; el Cliente vuelve a comprar.
 - **Cron:** viernes 23:59 ART = `59 2 * * 6` UTC en `vercel.json`, con `CRON_SECRET`. Fallback manual:
   `select cancelar_pedidos_vencidos();` en el SQL Editor.
-- **El tablero de Teams se escribe por PostgREST** con la anon key pública de
-  `quimicashop/config.js` (RLS `USING (true)`): `team_tasks`, `task_notes`, `task_audit_logs` y
-  `team_discussions`. Estados válidos: `backlog`, `in_progress`, `review`, `done`; prioridades `ALTA`,
-  `MEDIA`, `BAJA`. Un `review` = hecho en repo, sin verificar en vivo.
+- **El tablero de Teams se sincroniza con `npm run teams`** (puente temporal por PostgREST con la anon key
+  pública de `quimicashop/config.js`). Contrato, estados y ritual: [`docs/agentes/teams.md`](docs/agentes/teams.md).
 
 ## Decisiones que no hay que redescubrir
 - **G2:** el detalle es **página propia** (`/producto/[id]`), no card ampliada.

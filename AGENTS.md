@@ -32,7 +32,7 @@ Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** de `es
 - APIs, servicios, modelos y migraciones del e-commerce.
 - Tests y documentación técnica del e-commerce.
 
-**No** tocás el Hub ni el entorno Teams. Viven en el repo [`quimicashop`](https://github.com/juanmamerodio/quimicashop): `index.html`, `tasks.html`, `tasks.js`, `style.css`, `diagrams/`, minutas y tablas `team_*`.
+El Hub y el entorno Teams viven en [`quimicashop`](https://github.com/juanmamerodio/quimicashop): `index.html`, `tasks.html`, `tasks.js`, `style.css`, `diagrams/`, minutas y tablas `team_*`. **El tablero sí es parte de tu trabajo**: al cerrar la sesión se audita y se sincroniza con `npm run teams` (protocolo en [`docs/agentes/teams.md`](docs/agentes/teams.md)).
 
 ---
 
@@ -63,7 +63,7 @@ Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** de `es
 | `quimicashop` | Hub, Teams, minutas, diagramas | GitHub Pages | Proyecto Teams (`uchy...`, `team_*`) |
 
 - No agregues HTML del Hub, `tasks.js`, `style.css`, minutas ni tablas `team_*` a este repo.
-- `/api/notifications` es un puente temporal hacia Teams; si se migra, se borran `TEAMS_*` de este repo.
+- `/api/notifications` y `npm run teams` son los puentes temporales hacia Teams (el segundo, para el tablero y la bandeja); si Teams se migra, se borran `TEAMS_*` y `scripts/teams-tablero.mjs`.
 - `.env.local` y las claves de servicio **nunca** se commitean.
 - La base vieja `uchy...` es de Teams y conserva el catálogo legacy; **no** se usa para el e-commerce.
 
@@ -187,6 +187,7 @@ npm run build
 npm test          # suite de base de datos (Vitest + PGlite)
 npm run db:types  # regenera src/lib/database.types.ts desde el SQL
 npm run bd:viva   # compara las migraciones con el proyecto Supabase vivo (en red)
+npm run docs:links # verifica los enlaces relativos de la documentación
 ```
 
 Estado actual (2026-10-27, tras el cierre beta en repo: `00` corregida, `06`, cron, A1, `bd:viva` y seed):
@@ -203,7 +204,7 @@ Un ticket está terminado solo si:
 - `npm run typecheck` no agrega errores nuevos; idealmente queda verde.
 - `npm run lint` no agrega errores nuevos.
 - El modelo/glosario se actualiza si cambió un término o una regla.
-- La documentación afectada queda linkeada y sin referencias al esquema legacy.
+- La documentación afectada queda linkeada, sin referencias al esquema legacy y con `npm run docs:links` sin links rotos.
 
 **Nunca digas que algo está verde si el comando está rojo.** Reportá el comando, la salida y el error exacto.
 
@@ -243,7 +244,7 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 | Celeste Cáceres | Diseño UX/UI & Testing QA |
 | Enzo Queipo | Backend, Admin Panel & Relaciones |
 
-- El tablero de tareas vive en `quimicashop` (`team_tasks`). Es la fuente de prioridades; no se cachea acá.
+- El tablero vive en `quimicashop` (`team_tasks`): es la fuente de prioridades y se **sincroniza** al cerrar cada sesión con `npm run teams`. `done` sólo con código y test; `review` = hecho en repo, sin verificar en vivo. Protocolo y contrato: [`docs/agentes/teams.md`](docs/agentes/teams.md).
 - Las minutas son historia y evidencia; no son spec.
 - Las decisiones de dominio se consultan con el equipo; no se inventan.
 
@@ -263,6 +264,7 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 - [`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md) — issues y specs en GitHub con `gh`.
 - [`docs/agentes/triage-labels.md`](docs/agentes/triage-labels.md) — roles de triage.
 - [`docs/agentes/domain.md`](docs/agentes/domain.md) — cómo consumir glosario y ADRs.
+- [`docs/agentes/teams.md`](docs/agentes/teams.md) — tablero y bandeja de Teams: estados, contrato y ritual de cierre.
 - [`GLOSSARY.md`](GLOSSARY.md) — vocabulario.
 - `.agents/skills/` — skills propias del proyecto (anatomía en [`docs/metodo/brain.md`](docs/metodo/brain.md) §4.1).
 - `docs/adr/` — decisiones de arquitectura.
@@ -282,7 +284,7 @@ código muerto.
 
 ---
 
-## 12. Checklist de inicio de tarea
+## 12. Checklist de tarea (inicio y cierre)
 
 1. Leer `GLOSSARY.md`, `docs/MODELO.md` y el ticket.
 2. Confirmar que el área que vas a tocar está cubierta por el modelo aprobado.
@@ -292,3 +294,4 @@ código muerto.
 6. Verificar typecheck, lint y test.
 7. Actualizar glosario, modelo o ADR si cambió una decisión.
 8. Commit quirúrgico con mensaje claro; sin archivos sueltos.
+9. Al cerrar: auditar el tablero contra lo hecho, mover estados con `npm run teams`, crear lo que falte, publicar el avance y reescribir `memory.md` ([`docs/agentes/teams.md`](docs/agentes/teams.md) §6).
