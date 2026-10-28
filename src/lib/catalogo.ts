@@ -35,6 +35,20 @@ export type ProductoCatalogo = {
   sinImagen: boolean;
 };
 
+/**
+ * El id de un producto tal como llega por un borde (la URL de `/producto/[id]`): sólo dígitos,
+ * entero positivo y dentro del rango seguro de `Number`. Cualquier otra cosa —`abc`, `0`, `-1`,
+ * `1.5`, `1 `, un número gigante— no es un producto y devuelve nulo.
+ *
+ * Vive acá, en el módulo del catálogo, para probarlo sin montar la página y para que el detalle no
+ * tenga una segunda regla (#42). La validez de `activo` no se decide acá: la filtra la vista.
+ */
+export function idDeProducto(valor: string): number | null {
+  if (!/^[0-9]+$/.test(valor)) return null;
+  const id = Number(valor);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
 export type ResultadoCatalogo =
   | { estado: "ok"; productos: ProductoCatalogo[]; categorias: string[] }
   | { estado: "error"; mensaje: string };

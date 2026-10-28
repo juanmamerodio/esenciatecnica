@@ -5,6 +5,7 @@ import AgregarAlCarrito from "@/components/AgregarAlCarrito";
 import GrillaProductos from "@/components/GrillaProductos";
 import ImagenProducto from "@/components/ImagenProducto";
 import { formatPrice } from "@/lib/format";
+import { idDeProducto } from "@/lib/catalogo";
 import { leerCatalogo } from "@/lib/catalogo-servidor";
 
 /**
@@ -21,16 +22,11 @@ export const dynamic = "force-dynamic";
 
 type Ruta = { id: string };
 
-/** El id de la URL es un entero positivo: cualquier otra cosa no es un producto. */
-function idDeRuta(valor: string): number | null {
-  if (!/^[0-9]+$/.test(valor)) return null;
-  const id = Number(valor);
-  return Number.isSafeInteger(id) && id > 0 ? id : null;
-}
-
 export default async function DetalleProductoPage({ params }: { params: Promise<Ruta> }) {
   const { id } = await params;
-  const identificador = idDeRuta(id);
+  // El formato del id lo valida el módulo del catálogo (`idDeProducto`); la validez de `activo` la
+  // filtra la vista, así que acá no hay una segunda regla.
+  const identificador = idDeProducto(id);
   if (identificador === null) notFound();
 
   const resultado = await leerCatalogo();

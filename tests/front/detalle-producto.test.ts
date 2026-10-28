@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { consultarCatalogo } from '../../src/lib/catalogo';
+import { consultarCatalogo, idDeProducto } from '../../src/lib/catalogo';
 import { crearBase, crearCliente, crearProducto, type Base } from '../db/ayudantes';
 import { lectorDe, leer } from './ayudantes';
 
@@ -82,6 +82,55 @@ describe('T3 · el filtro de activos vive en la vista, no en el cliente', () => 
     } finally {
       await cerrar(db);
     }
+  });
+});
+
+describe('#42 · el id de la URL es válido o no es un producto', () => {
+  it('rechaza lo que no son dígitos', () => {
+    expect(idDeProducto('abc')).toBeNull();
+    expect(idDeProducto('12a')).toBeNull();
+    expect(idDeProducto('')).toBeNull();
+    expect(idDeProducto(' 1')).toBeNull();
+    expect(idDeProducto('1 ')).toBeNull();
+  });
+
+  it('rechaza el cero y los negativos', () => {
+    expect(idDeProducto('0')).toBeNull();
+    expect(idDeProducto('-1')).toBeNull();
+  });
+
+  it('rechaza los decimales', () => {
+    expect(idDeProducto('1.5')).toBeNull();
+    expect(idDeProducto('1,5')).toBeNull();
+  });
+
+  it('rechaza un número fuera del rango seguro, que no se vuelve un producto por accidente', () => {
+    expect(idDeProducto('99999999999999999999')).toBeNull();
+    expect(idDeProducto('9007199254740993')).toBeNull();
+  });
+
+  it('acepta un entero positivo y lo devuelve como número', () => {
+    expect(idDeProducto('1')).toBe(1);
+    expect(idDeProducto('42')).toBe(42);
+  });
+});
+
+describe('#42 · la página delega el 404 y no valida `activo`', () => {
+  it('llama al 404 cuando el formato del id es inválido y cuando el producto no está', () => {
+    const pagina = leer(PAGINA);
+    expect(pagina).toMatch(/idDeProducto\(/);
+    // Dos `notFound()`: uno por formato y otro por producto ausente.
+    expect(pagina.match(/notFound\(\)/g)).toHaveLength(2);
+    expect(pagina).toMatch(/find\(\(fila\) => fila\.id === identificador\)/);
+  });
+
+  it('no reimplementa la validación del id ni la regla de `activo`', () => {
+    const pagina = leer(PAGINA);
+    expect(pagina).not.toMatch(/Number\.isSafeInteger|\/\^\[0-9\]\+\$\//);
+
+    // Sin comentarios: la página puede explicar que la vista filtra `activo`, pero no puede usarlo.
+    const codigo = pagina.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+    expect(codigo).not.toMatch(/activo/);
   });
 });
 

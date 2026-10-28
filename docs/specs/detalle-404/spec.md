@@ -1,6 +1,6 @@
 # Spec · El 404 del detalle de producto
 
-> **Feature:** `detalle-404` · **Estado:** especificada, sin implementar · **Fecha:** 2026-10-27 · **Issue:** [#32](https://github.com/juanmamerodio/esenciatecnica/issues/32).
+> **Feature:** `detalle-404` · **Estado:** implementada en repo (issue #42) · **Fecha:** 2026-10-27, implementada el 2026-10-28 · **Issue:** [#32](https://github.com/juanmamerodio/esenciatecnica/issues/32) · **Tajada:** [#42](https://github.com/juanmamerodio/esenciatecnica/issues/42).
 > **Origen:** `### Pendiente` de [`detalle-producto/spec.md`](../detalle-producto/spec.md) (el 404 por id
 > inválido sólo lo sostiene el código) y hallazgo 🟡 n.º 3 de `memory.md`. No tiene tarea en el tablero.
 > **Fuente de verdad:** [`docs/specs/detalle-producto/spec.md`](../detalle-producto/spec.md) §2.2 y HU-5 ·
@@ -101,3 +101,19 @@ Cubrir las tres situaciones con test y precisar el spec:
 - La corrección del §2.2 es de redacción, no de comportamiento: el código ya hacía lo correcto.
 - El test del borde numérico (`99999999999999999999`) es el que más fácil se olvida y el que más caro sale
   si el id entra a una consulta sin validar.
+
+---
+
+## 8. Estado de implementación (2026-10-28 · issue #42)
+
+`npm run typecheck` sin errores, `npm run lint` en 0 y la suite en verde con los tests nuevos.
+
+| Criterio | Estado | Evidencia |
+|---|---|---|
+| La validación del formato del id es una función pura y exportada del módulo del catálogo | implementado | `idDeProducto` en `src/lib/catalogo.ts`; la página la importa y ya no tiene su propia `idDeRuta` |
+| Test puro con los casos de borde | implementado | `tests/front/detalle-producto.test.ts`: `abc`, `12a`, `''`, `' 1'`, `'1 '`, `0`, `-1`, `1.5`, `1,5`, `99999999999999999999`, `9007199254740993` → nulo; `1` y `42` → número |
+| La página llama al 404 con formato inválido y con producto ausente | implementado | test *«llama al 404 cuando el formato del id es inválido y cuando el producto no está»*: `idDeProducto(`, dos `notFound()` y el `find` por identificador |
+| La página no valida `activo` ni reimplementa el formato | implementado | test *«no reimplementa la validación del id ni la regla de `activo`»* (sobre el código sin comentarios) |
+| El producto dado de baja no se alcanza por URL | implementado (ya existía) | test *«un producto dado de baja deja de aparecer: su URL directa no puede mostrarlo»*, con PGlite |
+| El spec §2.2 dice lo que la página hace | implementado | [`detalle-producto/spec.md` §2.2 y su tabla](../detalle-producto/spec.md); la fila de desviación pasó a ✅ |
+| No se agregan campos al modelo ni a la vista | implementado | no se tocaron migraciones ni `database.types.ts` |

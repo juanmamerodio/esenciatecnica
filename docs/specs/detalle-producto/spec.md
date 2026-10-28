@@ -29,9 +29,11 @@ Una **página propia** en `/producto/[id]` (decisión **G2**), server-side, que:
 1. Reutiliza la **misma** función pública del catálogo (`leerCatalogo` → `consultarCatalogo`). No hay un
    segundo lector ni una consulta “por id”: se busca el producto dentro del resultado que ya viene
    ordenado y filtrado por `vista_catalogo`. Una sola fuente por concepto (`AGENTS.md` §7.4).
-2. Responde **404** cuando el id no es un entero positivo o el producto no está en la vista. Como
-   `vista_catalogo` filtra `activo`, un producto dado de baja **no** se puede abrir por URL directa, y esa
-   regla no depende del cliente.
+2. Responde **404** cuando el id no es un entero positivo o el producto no está en la vista. La página
+   **sí** valida a propósito el **formato** del id —delega en `idDeProducto` (`src/lib/catalogo.ts`), que
+   sólo acepta dígitos, entero positivo y dentro del rango seguro de `Number`— y **no** valida `activo`:
+   esa regla vive en `vista_catalogo`, que filtra los productos dados de baja. El 404 es el mismo para las
+   tres situaciones (formato inválido, id inexistente y producto dado de baja): no se distinguen.
 3. Muestra solo datos del modelo: imagen (o placeholder), categoría, tipo, nombre, descripción completa,
    precio y `tiempo_produccion` como **dato de producción** (§6.2 de la spec del front).
 4. Reutiliza los estados ya diseñados: `ImagenProducto` para “sin imagen”, el botón de agregar para
@@ -122,7 +124,7 @@ invariante de la vista, no en una ejecución del navegador.
 | HU-1 · la card lleva a `/producto/<id>` y el detalle muestra sus datos | implementado, sin verificar en vivo | `src/components/ProductCard.tsx:14` (URL del detalle) y `:17-26` (enlaces de imagen y título); `src/app/producto/[id]/page.tsx:62-87`; tests *«la card lleva al detalle sin cambiar su contrato»* y *«resuelve los estados sin stock y sin imagen como la card»* en `tests/front/detalle-producto.test.ts:114` y `:105` |
 | HU-1 · se puede agregar al carrito desde el detalle | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:119`; test `tests/front/detalle-producto.test.ts:105` |
 | HU-2 · un producto con `activo = false` no se abre por URL | implementado, sin verificar en vivo | test *«un producto dado de baja deja de aparecer: su URL directa no puede mostrarlo»* en `tests/front/detalle-producto.test.ts:22` |
-| HU-2 · la página no filtra ni valida `activo`; lo hace `vista_catalogo` | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:25-29,36-48`; test *«reutiliza el catálogo y delega el 404 en la vista»* en `tests/front/detalle-producto.test.ts:89` |
+| HU-2 · la página no filtra ni valida `activo`; lo hace `vista_catalogo` | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:25-30,44-45`; tests *«reutiliza el catálogo y delega el 404 en la vista»* y *«no reimplementa la validación del id ni la regla de `activo`»* en `tests/front/detalle-producto.test.ts` |
 | HU-3 · `tiempo_produccion` como **Producción estimada**, tiempo de elaboración | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:89-104`; test *«muestra la producción como dato de producción y no promete envío»* en `tests/front/detalle-producto.test.ts:98` |
 | HU-3 · sin promesa de envío ni estados posteriores a `Pago Validado` | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:106-112`; test `tests/front/detalle-producto.test.ts:98` |
 | HU-4 · `disponible = 0` muestra “Sin stock” y no ofrece agregar | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:114-120`; test *«resuelve los estados sin stock y sin imagen como la card»* en `tests/front/detalle-producto.test.ts:105` |
@@ -130,17 +132,13 @@ invariante de la vista, no en una ejecución del navegador.
 | HU-4 · no se agrega ningún campo al modelo | implementado, sin verificar en vivo | test *«el detalle publica la misma disponibilidad que la grilla, sin campos nuevos»* en `tests/front/detalle-producto.test.ts:47` |
 | HU-5 · una sola columna en mobile, sin desbordes, un solo `h1` | pendiente | `src/app/producto/[id]/page.tsx:60,80` dan un solo `h1` y grilla de una columna, pero no hay test ni medición: es verificación manual, bloqueada por #16/#20 |
 | HU-5 · foco visible, contraste AA y nombre accesible en controles con ícono | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (`:focus-visible`); `src/components/AgregarAlCarrito.tsx:32` (`aria-label`); contraste sin medir |
-| HU-5 · id inválido (`abc`, `0`, `-1`) responde 404 | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx:25-34`; **no hay test que cubra los ids inválidos**: la evidencia es el código, no una ejecución |
+| HU-5 · id inválido (`abc`, `0`, `-1`) responde 404 | ✅ implementado (#42) | `idDeProducto` en `src/lib/catalogo.ts` (exportada) y `src/app/producto/[id]/page.tsx:29-30`; los cinco tests de *«el id de la URL es válido o no es un producto»* cubren `abc`, `12a`, vacío, ` 1`, `1 `, `0`, `-1`, `1.5`, `1,5`, `99999999999999999999`, `9007199254740993`, `1` y `42` |
 | §2 · la página no reserva stock ni cobra: solo agrega al carrito | implementado, sin verificar en vivo | `src/app/producto/[id]/page.tsx` no importa nada de base ni de checkout; test `tests/front/carrito.test.ts:109` cubre la pureza del módulo |
-| §2.2 · el 404 se apoya en que `vista_catalogo` filtra `activo` | desviación | `src/app/producto/[id]/page.tsx:25-29` valida el **formato** del id con una regex antes de delegar el 404; el spec dice que "la página no filtra ni valida `activo`", y efectivamente no toca `activo`, pero la lectura literal del §2.2 da a entender que la página no valida nada. Conviene precisar el texto del spec |
+| §2.2 · el 404 se apoya en que `vista_catalogo` filtra `activo` | ✅ implementado (#42) | el §2.2 precisa la decisión: formato del id en `idDeProducto` (`src/lib/catalogo.ts`), `activo` en la vista; test *«no reimplementa la validación del id ni la regla de `activo`»* y *«llama al 404 cuando el formato del id es inválido y cuando el producto no está»* en `tests/front/detalle-producto.test.ts` |
 
 ### Pendiente
 
 1. **Verificación en el navegador de `/producto/<id>`** (jerarquía, responsive, estados y contraste). Depende
    de la base migrada (**#16**, **#15**) y de las claves de entorno (**#20**).
-2. **Cubrir el 404 de ids inválidos** (`/producto/abc`, `/producto/0`, `/producto/-1`) o mover ese criterio de
-   HU-5 a la verificación manual declarada en §4. Hoy solo lo sostiene el código.
-3. **Cerrar el ticket `T3 · Detalle de producto`** (issue **#8**): sigue abierto aunque la implementación y
-   sus tests están hechos.
-4. **Precisar el §2.2 del spec** o ajustar `src/app/producto/[id]/page.tsx:25-29`, según la desviación de la
-   tabla.
+2. **Cerrar el ticket `T3 · Detalle de producto`** (issue **#8**): sigue abierto aunque la implementación y
+   sus tests están hechos. El 404 de ids inválidos y la precisión del §2.2 se cerraron en **#42**.
