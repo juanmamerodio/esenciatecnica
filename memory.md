@@ -31,10 +31,10 @@
 ## Semáforo
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **397 tests** en 29 archivos ·
   `docs:links` 0 links sin resolver · `npm run build` compila sin `RESEND_API_KEY`.
-- **GitHub**: `main` y `origin/main` al día (`65657d5`, `95604d8`). La corrida `40792252142` deja
-  **Typecheck, Lint, Test y Docs links en verde** y **`Build Next.js` en rojo** con `supabaseKey is
-  required` en `/api/notifications`: es el **rojo esperado** por los secretos de Actions que faltan
-  (#20), no un defecto del repo.
+- **GitHub**: `main` y `origin/main` al día (`65657d5`, `95604d8`, `3cda005`). Las corridas `40792252142`
+  y `40793704253` dejan **Typecheck, Lint, Test y Docs links en verde** y **`Build Next.js` en rojo** con
+  `supabaseKey is required` en `/api/notifications`: es el **rojo esperado** por los secretos de Actions
+  que faltan (#20), no un defecto del repo.
 - BD prod `otjph…`: **VERDE** con el `bd:viva` del 28-10 (`01`–`06` aplicadas). Fuera del control, por
   ser invisible a la anon key: `respaldo_legacy`, el límite de 5 MB y los MIME de cada bucket.
 

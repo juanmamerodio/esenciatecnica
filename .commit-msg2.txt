@@ -1,0 +1,6 @@
+docs(cierre): la skill de bd:viva y el semaforo dicen lo que el control aprendio (#21)
+
+La skill suma la regla que dejo la revision: una respuesta sin code conocido no se interpreta (el
+statusCode no distingue NoSuchKey de NoSuchBucket) y un `nota` es un control que la anon key no pudo
+hacer, con su cuenta en el cierre. memory.md queda con los tres commits de la sesion y la corrida de
+CI que dejo las cuatro puertas en verde.

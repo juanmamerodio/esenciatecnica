@@ -38,6 +38,10 @@ distinto de cero y resume cada desajuste nombrando tabla y columnas.
   objeto que no está** (`/storage/v1/object/authenticated/{bucket}/…`: `NoSuchKey` = existe) y después la
   pública, que distingue público de privado (`NoSuchBucket` = privado). Si una `FALLA` nombra un bucket,
   probá el objeto antes de creerle a la ficha. Medido el 28-10 con `productos`, que existía.
+- **Una respuesta sin `code` conocido no se interpreta.** `NoSuchKey` y `NoSuchBucket` llegan los dos con
+  `404` y HTTP 400: el `statusCode` no distingue nada. «No se pudo medir» no es «no existe» ni «privado»;
+  el control lo reporta como `FALLA`, y un `nota` es un control que la anon key no pudo hacer (el cierre
+  dice cuántos quedaron).
 
 ## 4. PASOS DE EJECUCIÓN
 
