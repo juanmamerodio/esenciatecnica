@@ -37,6 +37,12 @@ testear con Vitest en `environment: node` sin red.
 4. La comparación de la contraseña es en tiempo constante y el nombre de usuario se ignora: el MVP no tiene
    Administradores en base, así que no hay usuario con el que comparar (decisión registrada en
    `specs/admin/spec.md` §4.3).
+5. **La tienda no prefetchea el panel.** Las entradas a `/admin` del header y del footer se hacen con
+   navegación de documento (un `<a>`), no con `<Link>`. Un `<Link>` prefetchea `/admin` en cuanto entra al
+   viewport, y esa petición de fondo recibe el `401` con `WWW-Authenticate`: el navegador abría el diálogo
+   de usuario y contraseña **en la tienda**, sin que nadie hubiera pedido el panel (bug del 28-10, medido con
+   Chrome contra el deploy y contra un build local). El reto queda para quien pide el panel. Lo fija
+   `tests/front/entrada-al-panel.test.ts`.
 
 El archivo vive en `src/`, al lado de `src/app/`: con el directorio `src` en uso, Next resuelve el middleware
 en la raíz de las páginas (`rootDir = join(pagesDir || appDir, '..')` → `src/`), así que un `middleware.ts` en
@@ -51,6 +57,9 @@ la raíz del repo **no** se compilaría y el panel quedaría abierto en producci
   `TextEncoder` y comparación manual). El navegador aplica Basic Auth por origen y realm: tras entrar al
   panel, las llamadas `fetch` del mismo origen llevan el encabezado, de modo que la protección es a nivel de
   origen y no por sesión con expiración.
+- **El `WWW-Authenticate` es del navegador, no de la app:** cualquier petición a `/admin` sin credenciales
+  —incluida una de prefetch, que nadie pidió— recibe el reto, y el navegador decide si lo muestra. Por eso la
+  regla 5 es del lado del cliente: no se prefetchea una ruta que reta.
 - **Riesgo:** en desarrollo, un `.env.local` sin `ADMIN_PASSWORD` deja el panel en `503`. Es el
   comportamiento buscado y está documentado en la spec (`specs/admin/spec.md` §3, HU-1).
 
@@ -63,3 +72,10 @@ la raíz del repo **no** se compilaría y el panel quedaría abierto en producci
   Administradores.
 - **Sesión con cookie firmada emitida por una ruta de login:** más piezas (página de login, cookie, cierre de
   sesión) para un MVP con un solo Administrador y una contraseña compartida.
+- **`prefetch={false}` en el `<Link>` del panel:** en Next 15 apaga el prefetch de viewport, pero **no** el de
+  hover (`next/dist/client/link.js`: `prefetchEnabled` gatea el efecto de intersección; `onMouseEnter`
+  prefetchea siempre), así que el diálogo volvería al pasar el mouse por «Gestión». Y deja la entrada al panel
+  dependiendo de un detalle del router. La navegación de documento es explícita y no depende de Next.
+- **Responder el prefetch sin `WWW-Authenticate` (o con `403`):** calla el síntoma en el borde y desvía la
+  regla del `401` documentado, medido por los tests y por `bd:viva`. La tienda no debe pedir el panel en
+  segundo plano: eso se arregla en la tienda.

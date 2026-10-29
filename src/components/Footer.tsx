@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
-/** Footer institucional en columnas: institución, contacto y accesos (issue #3). */
+/**
+ * Footer institucional en columnas: institución, contacto y accesos (issue #3).
+ *
+ * El panel **no** está en esta lista: se mapea a `<Link>`, y el prefetch del Link pediría
+ * `/admin` en segundo plano, con el `401` de Basic Auth abriendo el diálogo en la tienda
+ * (ADR 0005 · consecuencias). Su entrada lleva navegación de documento, más abajo.
+ */
 const ACCESOS = [
   { nombre: "Catálogo", href: "/catalog" },
   { nombre: "Sobre el proyecto", href: "/about" },
   { nombre: "Carrito", href: "/cart" },
-  { nombre: "Gestión (admin)", href: "/admin" },
 ];
 
 export default function Footer() {
@@ -56,6 +61,15 @@ export default function Footer() {
                 </Link>
               </li>
             ))}
+            <li>
+              {/* El panel, con navegación de documento: su `401` es un reto de Basic Auth. */}
+              <a
+                href="/admin"
+                className="text-sm text-muted underline-offset-4 hover:text-accent hover:underline"
+              >
+                Gestión (admin)
+              </a>
+            </li>
           </ul>
         </div>
       </div>

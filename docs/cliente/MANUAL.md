@@ -111,6 +111,9 @@ El panel está protegido con **una sola contraseña**, que la maneja el equipo d
 | **Usuario** | Cualquier cosa (el sistema lo ignora). |
 | **Contraseña** | La contraseña del Administrador. |
 
+La tienda **no** pide nada: las credenciales se piden solo al entrar al panel, nunca al abrir el
+catálogo, un producto o el carrito.
+
 Se ingresa **una vez por navegador**: después queda recordada. Si no la sabés o no funciona,
 pedísela al equipo del proyecto: no se resetea desde la web.
 

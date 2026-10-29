@@ -82,14 +82,19 @@ export default function Header() {
           </Link>
         </nav>
 
-        <Link
+        {/*
+          El panel se entra con navegación de documento, no con `<Link>`: el prefetch del Link
+          pide `/admin` en segundo plano y el `401` con `WWW-Authenticate` del middleware abría
+          el diálogo de Basic Auth en la tienda (ADR 0005 · consecuencias).
+        */}
+        <a
           href="/admin"
           className="nav-pill shrink-0 gap-2 border border-border"
           aria-current={esRutaActiva(pathname, "/admin") ? "page" : undefined}
         >
           <ShieldCheck aria-hidden className="h-4 w-4" />
           Gestión
-        </Link>
+        </a>
       </div>
     </header>
   );
