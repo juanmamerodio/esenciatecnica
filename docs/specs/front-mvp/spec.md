@@ -379,7 +379,8 @@ tajadas que bloqueaban. Quedan acá y en la spec de cada tajada:
 
 En verde en repo: `npm run typecheck` y `npm run lint` en 0, y `npm test` con **388 tests en 29
 archivos**. Eso **no** dice nada de la base viva: la suite corre contra PGlite y deja `otjph` a medio
-migrar en verde. Para la base viva el único control es `npm run bd:viva`, y hoy está **rojo** (#15).
+migrar en verde. Para la base viva el único control es `npm run bd:viva`, y desde el 2026-10-28 está
+**verde** contra `otjph` con `01`–`06` aplicadas (#15, #21).
 
 > Los nueve tickets `T0`–`T8` (#2, #5, #6, #8, #9, #10, #12, #13 y #14) se cerraron el 2026-10-28 con su
 > comentario de evidencia (spec [`trazabilidad-issues`](../trazabilidad-issues/spec.md)); lo que quedaba

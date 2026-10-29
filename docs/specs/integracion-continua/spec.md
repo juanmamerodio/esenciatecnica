@@ -30,8 +30,8 @@ Ampliar el workflow para que cada push y cada pull request contra `main` corra, 
 **`typecheck` → `lint` → `test` → `docs:links` → build**. El primer paso que falla corta el job y GitHub
 marca el commit en rojo.
 
-- `bd:viva` **no** entra: necesita la base viva y los secretos, y hoy está rojo por diseño hasta que se
-  apliquen las migraciones. Su lugar es el cierre de la migración, no cada push.
+- `bd:viva` **no** entra: necesita la base viva, la anon key y la red, así que no es una puerta de cada
+  push. Su lugar es el cierre y la auditoría de la migración.
 - Los controles que no necesitan secretos corren siempre, incluso en un fork o en un PR sin variables.
 
 ## 3. Historias

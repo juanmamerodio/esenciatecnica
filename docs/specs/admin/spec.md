@@ -1,7 +1,7 @@
 # Spec · Panel `/admin` (`T7`)
 
 > **Feature:** `front-mvp/admin` · **Estado:** implementada en repo · **Fecha:** 2026-10-27 (revisado el 2026-10-27).
-> **Verificación en vivo:** pendiente (depende del issue #16 y de las claves del issue #20).
+> **Verificación en vivo:** pendiente (el esquema ya está aplicado desde el 2026-10-28; depende de las claves del issue #20).
 > **Origen:** gate de arranque del issue [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13);
 > `docs/specs/front-mvp/spec.md` §4 (tajada T7) no fijaba criterios propios y este documento los fija.
 > **Cierre beta:** esta versión agrega los criterios que faltaban para que el panel explique los
@@ -355,14 +355,14 @@ y `ADMIN_PASSWORD`. Por eso casi todo queda “implementado, sin verificar en vi
 | HU-11 · Mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (foco visible), `src/components/admin/PanelDeStock.tsx:86` y `PanelDePedidos.tsx:160` (`overflow-x-auto`), `aria-label` y `role="alert"` en los componentes; el uso en celular y el contraste AA se verifican en navegador (#23). |
 | HU-12 · El panel explica los rechazos de la base | implementado | `describirError` en `src/lib/admin.ts` (sobre `motivoDeBd`: `ET007`, `23505` y `23514`, #35); test `traduce ET007, 23505 y 23514 a mensajes del dominio (issue #17)`. |
 | HU-13 · El remito que no salió se ve | implementado, sin verificar en vivo | `src/app/api/admin/comprobantes/route.ts`, `pedirAlPanel` en `src/components/admin/comun.ts`, `src/components/admin/PanelDePedidos.tsx`; `tests/front/aviso-remito.test.ts`. El envío real depende de `RESEND_API_KEY` (#20). |
-| Verificación de punta a punta del panel | pendiente | Ninguna corrida contra la base viva: falta el esquema migrado y las claves (#16, #20, #23). |
+| Verificación de punta a punta del panel | pendiente | Ninguna corrida contra el panel vivo: el esquema está aplicado y `bd:viva` en verde (28-10); faltan las claves (#20) y la corrida en navegador (#23). |
 
 > Las referencias `archivo:línea` de las filas sin símbolo son la foto de la auditoría del 2026-10-27;
 > la tanda de #33–#46 movió código, así que las filas que esa tanda tocó citan el **símbolo**.
 
 ### Pendiente
 
-- Aplicar las migraciones `00`–`05` (#16) y `06` (#17) en `otjph…`: sin eso no hay bucket `productos`, ni `ET007`, ni RPC en vivo; `npm run bd:viva` sigue rojo (#21).
+- **Migraciones aplicadas** el 2026-10-28: `01`–`06` están en `otjph…` y `npm run bd:viva` cierra en **verde**, así que el bucket `productos`, `ET007` y las RPC existen en vivo (#16, #17, #21). Queda la firma de `respaldo_legacy` en el SQL Editor.
 - `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD` y `RESEND_API_KEY` en `.env.local` y Vercel (#20): sin la primera el panel responde `503`; sin la segunda, el middleware responde `503`.
 - Semilla y fotos de la beta (#22) y verificación en navegador del panel —Basic Auth, popup de alerta, confirmación del monto, edición de stock, subida de foto y reenvío del remito— antes de la punta a punta (#23).
 - Nada de esto bloquea los seams: `src/lib/admin.ts`, `src/lib/admin-auth.ts` y `src/components/admin/comun.ts` corren con puerto falso, sin red.
