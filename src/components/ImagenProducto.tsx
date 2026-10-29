@@ -3,12 +3,17 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Droplets } from "lucide-react";
+import { esUrlDeImagenPermitida } from "@/lib/imagen";
 
 /**
- * Imagen del producto con su plan B: si no hay `imagen_url` o la URL no resuelve, se
- * muestra el placeholder de la identidad (fondo tonal + categoría en mono) en lugar del
- * ícono de imagen rota (HU-5). El ícono es de cosmética e higiene, no un vaso de laboratorio
- * (#43): el Producto no es un insumo de laboratorio.
+ * Imagen del producto con su plan B: si no hay `imagen_url`, la URL no resuelve o el host
+ * queda fuera del contrato de `next/image`, se muestra el placeholder de la identidad
+ * (fondo tonal + categoría en mono) en lugar del ícono de imagen rota (HU-5).
+ *
+ * El chequeo del host corre **antes** del `Image`: `next/image` tira durante el render si el
+ * host no está en `images.remotePatterns` y el `onError` no llega a correr, así que un dato
+ * de demo en `ejemplo.com` dejaba la Home en 500 (#49). El ícono es de cosmética e higiene,
+ * no un vaso de laboratorio (#43): el Producto no es un insumo de laboratorio.
  */
 export default function ImagenProducto({
   url,
@@ -22,8 +27,9 @@ export default function ImagenProducto({
   sizes?: string;
 }) {
   const [fallo, setFallo] = useState(false);
+  const permitida = esUrlDeImagenPermitida(url);
 
-  if (!url || fallo) {
+  if (!url || !permitida || fallo) {
     return (
       <div
         role="img"
