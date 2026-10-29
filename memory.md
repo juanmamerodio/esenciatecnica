@@ -37,8 +37,9 @@
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **407 tests** en 31 archivos ·
   `docs:links` 0 links sin resolver · `npm run build` compila con el **entorno vacío** (probado con las
   ocho variables que la workflow pasa, todas en blanco).
-- **GitHub**: `main` hasta `a6d6af9`. La corrida `40804948996` cerró **success** con los cinco pasos. Los
-  secretos de Actions siguen faltando, pero el build ya no los necesita.
+- **GitHub**: `main` en verde. La corrida `40804948996` —el fix del catálogo— cerró **success** con los
+  cinco pasos, y las de documentación de este cierre también. Los secretos de Actions siguen faltando, pero
+  el build ya no los necesita.
 - BD prod `otjph…`: **VERDE** con el `bd:viva` del 28-10 (`01`–`06` aplicadas). Fuera del control, por ser
   invisible a la anon key: `respaldo_legacy`, el límite de 5 MB y los MIME de cada bucket.
 - **Tablero**: auditado y sincronizado con `npm run teams` —cuatro tareas nuevas y dos notas, AVANCE y
