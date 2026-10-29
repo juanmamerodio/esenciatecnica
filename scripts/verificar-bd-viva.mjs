@@ -45,8 +45,14 @@ const MIGRACIONES = path.join(RAIZ, 'supabase', 'migrations');
 const ENV_LOCAL = path.join(RAIZ, '.env.local');
 
 const fallos = [];
+const notas = [];
 const ok = (mensaje) => console.log(`  ok    ${mensaje}`);
-const nota = (mensaje) => console.log(`  nota  ${mensaje}`);
+// `nota` es un control que la anon key no puede hacer (una tabla cerrada no deja ver su esquema).
+// Se cuentan aparte y el cierre los reporta: un VERDE que no los nombre se lee como cobertura total.
+const nota = (mensaje) => {
+  notas.push(mensaje);
+  console.log(`  nota  ${mensaje}`);
+};
 const mal = (mensaje) => {
   fallos.push(mensaje);
   console.log(`  FALLA ${mensaje}`);
@@ -237,7 +243,11 @@ for (const bucket of BUCKETS) {
 // ── Cierre ─────────────────────────────────────────────────────────────────────
 console.log('');
 if (fallos.length === 0) {
-  console.log('VERDE · el proyecto vivo coincide con el esquema versionado.');
+  const alcance =
+    notas.length === 0
+      ? ''
+      : ` (${notas.length} control(es) no verificables con la anon key: ver el detalle arriba)`;
+  console.log(`VERDE · el proyecto vivo coincide con el esquema versionado${alcance}.`);
   process.exit(0);
 }
 console.log(`ROJO · ${fallos.length} desajuste(s) entre el repo y el proyecto vivo:`);

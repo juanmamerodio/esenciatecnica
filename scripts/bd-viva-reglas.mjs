@@ -161,39 +161,55 @@ export function evaluarRpc(estado, cuerpo) {
 }
 
 /**
- * El cuerpo de Storage que delata un bucket que la sonda no resolvió. El `statusCode` del cuerpo
- * **no sirve** para decidir: `NoSuchKey` y `NoSuchBucket` llegan los dos con `statusCode: 404` y
- * HTTP 400. La única marca que distingue es `code`.
+ * Las dos únicas marcas de Storage que se interpretan. El `statusCode` del cuerpo **no** distingue
+ * ausencia de objeto de ausencia de bucket: `NoSuchKey` y `NoSuchBucket` llegan los dos con
+ * `statusCode: 404` y HTTP 400. Una respuesta sin `code` conocido no se adivina: se reporta.
  */
-function esBucketAusente(estado, cuerpo) {
-  if (cuerpo?.code === 'NoSuchKey') return false;
-  if (cuerpo?.code === 'NoSuchBucket') return true;
-  return estado === 404;
+const OBJETO_AUSENTE = 'NoSuchKey';
+const BUCKET_AUSENTE = 'NoSuchBucket';
+
+function esBucketAusente(cuerpo) {
+  return cuerpo?.code === BUCKET_AUSENTE;
+}
+
+/** Un `401`/`403` puede venir en el HTTP o dentro del cuerpo (Storage lo hace de las dos formas). */
+function esPermisoDenegadoEnRespuesta(estado, cuerpo) {
+  if (esPermisoDenegado(estado)) return true;
+  const estadoInterno = String(cuerpo?.statusCode ?? '');
+  return estadoInterno === '401' || estadoInterno === '403';
 }
 
 /**
  * Existencia del bucket, medida con la sonda autenticada (`rutaDeExistencia`). Un `NoSuchKey` es la
  * prueba de que el bucket existe y el objeto no; un `401`/`403` también (existe, la anon key no lo
- * ve). Sólo `NoSuchBucket` significa que no está.
+ * ve). Sólo `NoSuchBucket` significa que no está; cualquier otra respuesta es un control que **no**
+ * se pudo hacer y se reporta como tal.
  */
 export function evaluarBucketExistente(estado, cuerpo) {
-  if (esPermisoDenegado(estado)) return resultado(true, 'existe (no visible para anon)');
-  if (cuerpo?.code === 'NoSuchKey') return resultado(true, 'existe');
-  if (estado === 200) return resultado(true, 'existe');
-  if (String(cuerpo?.statusCode ?? '') === '403' || String(cuerpo?.statusCode ?? '') === '401') {
+  if (esPermisoDenegadoEnRespuesta(estado, cuerpo)) {
     return resultado(true, 'existe (no visible para anon)');
   }
-  if (esBucketAusente(estado, cuerpo)) return resultado(false, 'no existe (NoSuchBucket)');
-  return resultado(false, `respuesta inesperada (HTTP ${estado})`);
+  if (cuerpo?.code === OBJETO_AUSENTE || estado === 200) return resultado(true, 'existe');
+  if (esBucketAusente(cuerpo)) return resultado(false, 'no existe (NoSuchBucket)');
+  return resultado(false, `respuesta inesperada (HTTP ${estado}): el bucket no se pudo verificar`);
 }
 
 /**
  * Visibilidad del bucket, medida con la sonda pública (`rutaPublica`) **sobre un bucket que ya se
  * probó existente**. Ahí `NoSuchBucket` no habla de existencia: habla de que la ruta pública no lo
  * sirve, o sea que es privado. El contrato manda cuál tiene que ser cada uno.
+ *
+ * «No se pudo medir» **no** es «privado»: leerlo así dejaría pasar un `comprobantes` público, que es
+ * la dirección sensible.
  */
 export function evaluarBucketPublico(esperado, estado, cuerpo) {
-  const publico = !esPermisoDenegado(estado) && !esBucketAusente(estado, cuerpo);
+  let publico;
+  if (cuerpo?.code === OBJETO_AUSENTE || estado === 200) publico = true;
+  else if (esBucketAusente(cuerpo) || esPermisoDenegadoEnRespuesta(estado, cuerpo)) publico = false;
+  else {
+    return resultado(false, `no se pudo medir su visibilidad (HTTP ${estado}): revisar a mano`);
+  }
+
   if (publico === esperado) {
     return resultado(true, esperado ? 'existe y es público' : 'existe y es privado');
   }

@@ -160,6 +160,15 @@ describe('B2 · las decisiones no confunden cerrar con estar vacío', () => {
     expect(evaluarBucketExistente(400, { message: 'otra cosa' }).ok).toBe(false);
   });
 
+  it('un 404 sin `code` no se lee como «no existe»: se reporta', () => {
+    // El `statusCode` del cuerpo no distingue nada (NoSuchKey y NoSuchBucket llegan los dos con
+    // 404). Una respuesta sin `code` conocido es un control que no se pudo hacer, no un veredicto.
+    expect(evaluarBucketExistente(404, null).ok).toBe(false);
+    expect(evaluarBucketExistente(404, null).motivo).toMatch(/inesperada/);
+    expect(evaluarBucketExistente(400, { statusCode: '404' }).ok).toBe(false);
+    expect(evaluarBucketExistente(400, { statusCode: '404' }).motivo).toMatch(/inesperada/);
+  });
+
   it('la visibilidad se mide con la ruta pública: el privado no resuelve, el público sí', () => {
     const ausente = { code: 'NoSuchBucket', statusCode: '404', message: 'Bucket not found' };
     const existe = { code: 'NoSuchKey', statusCode: '404', message: 'Object not found' };
@@ -167,6 +176,15 @@ describe('B2 · las decisiones no confunden cerrar con estar vacío', () => {
     expect(evaluarBucketPublico(false, 400, ausente).motivo).toMatch(/privado/);
     expect(evaluarBucketPublico(true, 400, existe).motivo).toMatch(/público/);
     expect(evaluarBucketPublico(false, 401, null).ok).toBe(true);
+  });
+
+  it('la visibilidad que no se pudo medir no se da por buena', () => {
+    // «No pude medirlo» no es «es privado»: si se leyera así, un `comprobantes` público pasaría el
+    // control por la puerta de atrás, que es justo la dirección sensible.
+    const raro = evaluarBucketPublico(false, 400, { message: 'otra cosa' });
+    expect(raro.ok).toBe(false);
+    expect(raro.motivo).toMatch(/no se pudo medir/);
+    expect(evaluarBucketPublico(true, 502, null).ok).toBe(false);
   });
 
   it('un bucket de comprobantes público es una fuga: el contrato lo quiere privado', () => {
@@ -233,5 +251,11 @@ describe('B2 · el script usa las reglas y no la service role', () => {
     expect(rutaPublica('comprobantes')).toBe(
       `/storage/v1/object/public/comprobantes/${CLAVE_INEXISTENTE}`,
     );
+  });
+
+  it('el cierre dice cuántos controles quedaron fuera del alcance de la anon key', () => {
+    // Un «VERDE» que no distingue un control cubierto de uno degradado a `nota` se lee como
+    // cobertura total. El resumen tiene que decir cuántos quedaron afuera.
+    expect(script).toMatch(/no verificables con la anon key/);
   });
 });

@@ -210,9 +210,9 @@ el mismo módulo puro (tipo MIME, tamaño y clave), y el bucket se verifica a ma
 
 ## 8. Blockers declarados
 
-1. **Migraciones aplicadas en `otjph…`** (Isabella). Hoy en producción: `vista_catalogo` no existe, las RPC
-   de `02` no existen (`crear_pedido` responde `PGRST202`) y el bucket `comprobantes` no existe. Sin eso no
-   hay nada que subir ni a quién pedirle el pedido.
+1. **Migraciones aplicadas en `otjph…`** ✅ **Cerrado el 2026-10-28:** `01`–`06` están aplicadas y
+   `npm run bd:viva` cierra en verde (`vista_catalogo` con sus 12 columnas, las cuatro RPC y los dos
+   buckets, con `comprobantes` privado). El cierre lo mide `bd:viva`, no este spec (#15, #21).
 2. **`SUPABASE_SERVICE_ROLE_KEY`** en `.env.local` y Vercel (Enzo, tarea *Secretos y entorno*): sin la
    clave, el borde no puede escribir ni firmar URLs.
 3. **Esta spec** aprobada y linkeada en [#10](https://github.com/juanmamerodio/esenciatecnica/issues/10).
@@ -223,9 +223,10 @@ falso y PGlite mientras se cierran los blockers.
 ## 9. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada HU contra el código de `src/` y los tests de `tests/front/` y `tests/db/`. El estado
-`implementado, sin verificar en vivo` significa que el código y los tests lo cubren, pero la base viva
-`otjph…` sigue a medio migrar y las claves del issue #20 todavía no están puestas. No se marca ningún
-criterio como “verde en producción” sin esa verificación.
+`implementado, sin verificar en vivo` significa que el código y los tests lo cubren, pero las claves del
+issue #20 todavía no están puestas: **el esquema ya está aplicado y en verde** (`bd:viva`, 2026-10-28), el
+que falta es el borde que escribe y firma. No se marca ningún criterio como “verde en producción” sin esa
+verificación.
 
 | Criterio / HU | Estado | Evidencia |
 |---|---|---|

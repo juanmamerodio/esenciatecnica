@@ -375,12 +375,15 @@ otra mitad del contrato:
 | `/storage/v1/object/public/{bucket}/…` | `NoSuchKey` = **público** | `NoSuchBucket` = privado o ausente |
 
 El `statusCode` del cuerpo **no** se usa para decidir: `NoSuchKey` y `NoSuchBucket` llegan los dos con
-`404` y HTTP 400. La única marca que distingue es `code`. La visibilidad se evalúa **después** de probar
-la existencia, así que un `NoSuchBucket` en la ruta pública significa «privado», no «ausente»; si el
-bucket de `comprobantes` fuera público, el control falla con el motivo a la vista (la imagen que sube el
-Cliente quedaría expuesta).
+`404` y HTTP 400. La única marca que distingue es `code`, y **una respuesta sin `code` conocido no se
+interpreta**: se reporta como control que no se pudo hacer. Leerla como «no existe» sería el mismo falso
+negativo por otra puerta, y leerla como «privado» en la sonda pública dejaría pasar un `comprobantes`
+público. La visibilidad se evalúa **después** de probar la existencia, así que un `NoSuchBucket` en la
+ruta pública significa «privado», no «ausente»; si el bucket de `comprobantes` fuera público, el control
+falla con el motivo a la vista (la imagen que sube el Cliente quedaría expuesta).
 
 Con la corrección, la medición del 28-10 sobre `otjph` cierra en **verde**: esquema, vista, RLS de las
 diez tablas, RPC cerradas a `anon`, `detalle_carrito` ausente y los dos buckets (privado y público).
 Sigue afuera lo que la anon key no puede ver: `respaldo_legacy`, el límite de 5 MB y los tipos MIME de
-cada bucket.
+cada bucket. Un control que la anon key no pueda hacer (una tabla cerrada no deja mirar su esquema) queda
+como `nota` y el cierre dice **cuántos** fueron: un `VERDE` que no los nombre se lee como cobertura total.

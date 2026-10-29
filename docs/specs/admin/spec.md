@@ -316,12 +316,12 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 
 ## 8. Blockers declarados
 
-1. **Migraciones `05` y `06` aplicadas en `otjph…`** (Juanma aplica, Isabella revisa). Sin el bucket
-   `productos`, subir una foto falla; sin `06`, el panel no puede recibir `ET007` ni la restricción de
-   precio. El DDL está en [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a
-   producción desde acá.
-2. **`SUPABASE_SERVICE_ROLE_KEY` y `ADMIN_PASSWORD`** en `.env.local` y en Vercel (Enzo, tarea *Secretos y
-   entorno*): sin la primera el panel no puede leer ni escribir; sin la segunda responde `503`.
+1. **Migraciones `05` y `06` aplicadas en `otjph…`** ✅ **Cerrado el 2026-10-28** (Juanma aplicó, Isabella
+   revisa): el bucket `productos` existe —público, medido con la anon key— y `06` está aplicada, así que
+   `ET007` y la restricción de precio corren en vivo. El DDL está en
+   [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a producción desde acá.
+2. **`SUPABASE_SERVICE_ROLE_KEY`** en `.env.local` y en Vercel (Enzo, tarea *Secretos y entorno*): sin ella
+   el panel no puede leer ni escribir y responde `503`. `ADMIN_PASSWORD` ya está cargada (28-10).
 3. **Esta spec** aprobada y linkeada en [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13).
 
 **Gate de despliegue, no de desarrollo:** sin las migraciones aplicadas en el proyecto de producción y sin
@@ -336,20 +336,20 @@ falso mientras se cierran los blockers.
 ## 9. Estado de implementación (auditoría del 2026-10-27)
 
 Auditoría de cada historia contra el código del repo y sus tests. El panel está codificado, pero la
-verificación en vivo no está hecha: la base `otjph…` está a medio migrar y faltan `SUPABASE_SERVICE_ROLE_KEY`
-y `ADMIN_PASSWORD`. Por eso casi todo queda “implementado, sin verificar en vivo”, que no es lo mismo que
-“verificado”.
+verificación en vivo no está hecha: **el esquema ya está aplicado y `bd:viva` en verde** (2026-10-28) y
+falta `SUPABASE_SERVICE_ROLE_KEY` —sin ella el panel no lee ni escribe—; `ADMIN_PASSWORD` ya está cargada.
+Por eso casi todo queda “implementado, sin verificar en vivo”, que no es lo mismo que “verificado”.
 
 | Criterio / HU | Estado | Evidencia |
 |---|---|---|
 | HU-1 · Entrada con Basic Auth | implementado, sin verificar en vivo | `src/middleware.ts:19-21` (matcher sólo `/admin` y `/api/admin`), `src/middleware.ts:36-52` (`503` sin `ADMIN_PASSWORD`, `401` con `WWW-Authenticate`), `src/lib/admin-auth.ts:26-45`; tests `sin encabezado no hay credenciales`, `sin ADMIN_PASSWORD el panel no está configurado…`, `los secretos y el adaptador no aparecen en ningún archivo "use client"`. La entrada real en el navegador depende de `ADMIN_PASSWORD` (#20). |
 | HU-2 · Los pedidos con su estado actual | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:42-131` (lee `estado_actual` y firma con `createSignedUrl`), `src/lib/admin.ts:389-410`; `src/components/admin/PanelDePedidos.tsx:138-242`; tests `pedidos() devuelve el estado actual…`, `un comprobante que no se puede firmar no oculta el pedido`, `una fila que no cumple el contrato…`. |
-| HU-3 · Aprobar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:208-214` (RPC `aprobar_comprobante`), `src/lib/admin.ts:418-427`; `src/components/admin/PanelDePedidos.tsx:244-249` y `:283-304` (confirmación con el monto); tests `aprobar va al RPC…` y `…confirman mostrando el monto`. La transacción de stock y remito vive en la base (`tests/db/aprobacion.test.ts`) y no está aplicada en `otjph` (#16). |
+| HU-3 · Aprobar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:208-214` (RPC `aprobar_comprobante`), `src/lib/admin.ts:418-427`; `src/components/admin/PanelDePedidos.tsx:244-249` y `:283-304` (confirmación con el monto); tests `aprobar va al RPC…` y `…confirman mostrando el monto`. La transacción de stock y remito vive en la base (`tests/db/aprobacion.test.ts`) y **aplicada** en `otjph` desde el 2026-10-28, medida por `bd:viva` (#16, #21). |
 | HU-4 · Rechazar el comprobante | implementado, sin verificar en vivo | `src/lib/admin-servidor.ts:216-222` (RPC `rechazar_comprobante`), `src/lib/admin.ts:430-440`; tests `rechazar va al RPC…` y `traduce ET001, ET004 y ET006…`. |
 | HU-5 · Monto que no coincide | implementado, sin verificar en vivo | `describirError` en `src/lib/admin.ts` traduce el motivo `monto-no-coincide` (viene de `src/lib/errores-bd.ts`, #35) y `ESTADO_HTTP` responde `422`; test `un monto que no coincide llega como mensaje del dominio…`. |
 | HU-6 · Stock editable | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (`editarStock`, `stock()`); `src/components/admin/PanelDeStock.tsx`; tests `rechaza una cantidad de stock o un umbral negativos`, `editarStock devuelve el stock actualizado…`, `stock() calcula el disponible y la alerta la toma de la base…`. |
 | HU-7 · La alerta de stock vive en el panel | implementado, sin verificar en vivo | `src/lib/admin.ts` (`alertas()` ordena las pendientes primero y la fila de stock toma `alerta_pendiente` de la base, #36); `src/lib/admin-servidor.ts` (una sola consulta a `alerta_de_estado` con `atendida = false`); `src/components/admin/AvisoDeAlertas.tsx` (`role="alert"`); `src/app/admin/page.tsx`; tests `stock() calcula el disponible y la alerta la toma de la base…`, `el panel no recalcula la alerta…`, `alertas() muestra primero las pendientes…` y `…la alerta de stock es un aviso del panel, nunca un email al Administrador`. |
-| HU-8 · Productos: alta, edición, baja y foto | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (productos y `subirFotoProducto`, que usa `revisarArchivo` y `claveDelArchivo` de `src/lib/archivo.ts`, #35); `src/lib/admin-servidor.ts`; `src/components/admin/PanelDeProductos.tsx`; tests `rechaza un producto sin nombre…`, `la baja es lógica…`, `sanea el nombre…`, `rechaza una foto de otro tipo…`. Sin el bucket `productos` (migración `05`, #16) la subida no corre en vivo. |
+| HU-8 · Productos: alta, edición, baja y foto | implementado, sin verificar en vivo | `crearPanel` en `src/lib/admin.ts` (productos y `subirFotoProducto`, que usa `revisarArchivo` y `claveDelArchivo` de `src/lib/archivo.ts`, #35); `src/lib/admin-servidor.ts`; `src/components/admin/PanelDeProductos.tsx`; tests `rechaza un producto sin nombre…`, `la baja es lógica…`, `sanea el nombre…`, `rechaza una foto de otro tipo…`. El bucket `productos` ya existe y es público (migración `05`, 28-10); la subida espera la service role (#20). |
 | HU-9 · Borde HTTP | implementado, sin verificar en vivo | `src/app/api/admin/{comprobantes,stock,productos,productos/foto,alertas}/route.ts`; `ESTADO_HTTP` (compartido con el checkout, en `src/lib/errores-bd.ts`) y `respuestaDeFalla` (503 sólo por configuración, 500 por falla real) en `src/lib/admin-http.ts`; test `existe una ruta server-side por operación…`. Nota: §2 habla de “cinco” rutas y hoy hay una sexta, `src/app/api/admin/remito/route.ts`, del reenvío de T8. |
 | HU-10 · Se retira la deuda legacy | implementado | Tests `la deuda legacy del esquema viejo se retiró del repo` (no existen `src/lib/supabase.ts` ni `src/app/api/sync-sheets/`; `/api/products` se conserva) y `/admin deja de ser el aviso de migración…`. |
 | HU-11 · Mobile y accesibilidad | implementado, sin verificar en vivo | `src/app/globals.css:53-55` (foco visible), `src/components/admin/PanelDeStock.tsx:86` y `PanelDePedidos.tsx:160` (`overflow-x-auto`), `aria-label` y `role="alert"` en los componentes; el uso en celular y el contraste AA se verifican en navegador (#23). |

@@ -267,7 +267,7 @@ no esta migración.
 | `04`/`05` Storage (`comprobantes` privado, `productos` público) | implementado | `04_storage_comprobantes.sql`, `05_storage_productos.sql`; PGlite no tiene el esquema `storage`, así que quedan sin cobertura automática (`AUDITORIA_BD.md` §8.3). |
 | `06` `precio > 0` + trigger `ET007` con reserva de stock | implementado | `06_cierre_beta.sql`; `tests/db/cierre-beta.test.ts`; `src/lib/admin.ts` traduce `ET007` a `stock-bajo-reserva`; commit `c1c904a`. |
 | `supabase/seed.sql` | implementado | Tres productos idempotentes, stock no destructivo y uno bajo el umbral; `tests/db/seed.test.ts`; commit `943e380`. |
-| `bd:viva` con las diez tablas cerradas, las RPC cerradas a `anon`, los buckets y `detalle_carrito` | implementado | `scripts/bd-viva-reglas.mjs:11-73`, `scripts/verificar-bd-viva.mjs:186-222`; `tests/front/bd-viva.test.ts`; commit `fed815a`. |
+| `bd:viva` con las diez tablas cerradas, las RPC cerradas a `anon`, los dos buckets **con su visibilidad** y `detalle_carrito` | implementado | `scripts/bd-viva-reglas.mjs` (`TABLAS_CERRADAS`, `evaluarRpc`, `rutaDeExistencia`/`rutaPublica`), `scripts/verificar-bd-viva.mjs:224-246` (Storage, dos sondas por bucket) y `tests/front/bd-viva.test.ts` (25 tests); commits `fed815a` y `65657d5` (#21). |
 | Cron de vencidos los viernes | implementado | `vercel.json` (`59 2 * * 6`), `src/app/api/cron/vencidos/route.ts`; `tests/front/cron.test.ts`; commit `8d0bf44`. |
 | Aplicar `00`–`06` en `otjph` | implementado | `bd:viva` del 28-10 en **verde**: `01`–`06` aplicadas (esquema, vista, RLS, RPC y buckets). De `00` queda la firma de `respaldo_legacy` (B1 · #16, B3 · #17). |
 | Correr `supabase/seed.sql` en `otjph` | sin verificar | Los datos vivos no son los del seed: stock 50/30/100 (ninguno bajo el umbral) e `imagen_url` en `ejemplo.com`. Es B5 · #22. |
@@ -276,7 +276,7 @@ no esta migración.
 | Buckets `comprobantes` y `productos` | implementado | Sondas anónimas del 28-10: `comprobantes` existe y es privado; `productos` existe y es público (B2 · #21). |
 | `respaldo_legacy` | sin verificar | La anon key no ve otros esquemas: lo firma quien corrió `00` en el SQL Editor. |
 | Secretos y entorno de producción | pendiente | O1 · #20 (Enzo): `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*`. |
-| Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por #16 y #20. |
+| Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por **#20** (secretos) y **#22** (seed y fotos); el esquema ya no bloquea. |
 | Scheduler del cron (antes fuera de alcance) | implementado | B4 · #18: `vercel.json` + `CRON_SECRET`; fallback manual en `bd-mvp` §9.3. |
 | `.agents/skills/` | implementado | `.agents/skills/tablero-teams/SKILL.md` y `.agents/skills/bd-viva/SKILL.md`, nombradas en `AGENTS.md` §11; `tests/front/skills-del-proyecto.test.ts`; commit `7fd1f72` (#45). |
 | Inconsistencias de specs de §6 | implementado | El `aviso` de correo se cerró en A1 · #19; la contradicción entre la HU-3 de `checkout` y sus decisiones de implementación (§4: el monto se precarga y es editable) se resolvió el 27-10; `FlaskConical` en `/about` y el footer se retiró en **#43**; `productos` en la spec de admin queda documentado como el bucket, con excepción explícita. |

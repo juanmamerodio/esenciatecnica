@@ -3,7 +3,7 @@
 > **Proyecto:** tienda, checkout, panel `/admin` y APIs del e-commerce **Esencia Técnica**.
 > **Institución:** E.E.S.T N°1 Luciano Reyes · Campana, Buenos Aires · 7mo Año Programación 2026.
 > **Equipo:** Isabella Infante, Juan Manuel Merodio, Celeste Cáceres, Enzo Queipo.
-> **Última actualización:** 2026-10-27.
+> **Última actualización:** 2026-10-28.
 
 Este documento es el contrato operativo para cualquier agente que trabaje en este repositorio. No es una copia de [`docs/metodo/brain.md`](docs/metodo/brain.md): adapta su filosofía (SDD, TDD, módulos profundos, disciplina de contexto) al e-commerce real.
 
@@ -203,7 +203,7 @@ Estado actual (2026-10-28, con `01`–`06` aplicadas en `otjph` y `bd:viva` en v
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
 - `npm run lint` → 0 errores y 0 warnings. El warning de `<img>` se fue con `ReceiptUploader.tsx` en `T5`.
-- `npm test` → 279 tests en 23 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corren contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar los deja en verde. Para el proyecto real está `npm run bd:viva` (issue #15).
+- `npm test` → 397 tests en 29 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corren contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar los deja en verde. Para el proyecto real está `npm run bd:viva` (issue #15).
 - `npm run bd:viva` → cubre la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets **con su visibilidad** (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado, visibilidad por la pública); sale distinto de cero y resume los desajustes. Contra `otjph`, con `01`–`06` aplicadas, **está verde desde el 28-10**; lo que la anon key no puede ver (`respaldo_legacy`) lo firma el SQL Editor.
 - `npm run build` → compila **sin** `RESEND_API_KEY`: desde `T8` Resend se instancia por llamada y no al importar. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
