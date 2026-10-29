@@ -1,34 +1,42 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (segunda sesión: el rojo
-> de CI entra en la raíz —#50—, el seed deja de publicar copy de laboratorio —#51— y `AGENTS.md` deja de
-> guardar estado. El equipo queda con el camino crítico publicado para el 29-10).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (tercera sesión: el 503
+> del panel era el **entorno de Vercel**, no el código —producción no tenía `ADMIN_PASSWORD` y además leía
+> la base legacy `uchy…`—; `/` deja de dar 500 con `imagen_url` de host ajeno —#49—).
 
 ## Ahora
 - Objetivo: **beta presentable el viernes 30-10**. No la traba el código: quedan **cuatro acciones humanas**,
   ya publicadas como BLOQUEO en la bandeja de Teams.
 - Orden del camino crítico: **#20 secretos (Enzo)** → **#22 seed + fotos (Enzo)** → **#23 verificación en
   navegador (Celeste)**. En paralelo, **firmar `respaldo_legacy`** en el SQL Editor cierra #16 y #15.
-- **`main` está en verde**: el build de CI dejó de necesitar secretos (#50, `8b0617b`) y la corrida
-  `40796836397` cerró `success` con los cinco pasos, `Build Next.js` incluido. Ya no hay un «rojo esperado»
-  que enseñe a ignorar el CI.
+  De #20 ya están hechas por CLI (28-10): `ADMIN_PASSWORD` en **Production + Preview**, y la
+  `NEXT_PUBLIC_SUPABASE_URL` / `ANON_KEY` de producción, que apuntaban a la base legacy `uchy…`.
+- **Producción (Vercel, proyecto `esenciatecnica`) ya no lee la base vieja**: `otjph…` en Production,
+  Preview y Development; `/`, `/catalog`, `/producto/1` y `/checkout` en `200`, y `/admin` en `401` sin
+  credenciales / `200` con la clave. Los dos alias (`esenciatecnica.vercel.app` y `quimicashop.vercel.app`)
+  sirven el mismo deploy.
+- **El catálogo se ve con placeholders**: los tres productos vivos todavía traen `imagen_url` en
+  `ejemplo.com`, así que el placeholder de la identidad hace el trabajo hasta que se suban fotos reales
+  desde `/admin`.
+- **Panel probado a medias** (28-10, `next dev` + la clave de Química, y en producción): `/admin` sin
+  credenciales da `401` con su `WWW-Authenticate`; con la clave da `200` y el cartel «Panel sin configurar ·
+  falta `SUPABASE_SERVICE_ROLE_KEY`». El Basic Auth está conectado; falta la clave de servicio para verlo con datos.
+- `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `VERCEL_OIDC_TOKEN` y
+  `ADMIN_PASSWORD`. **No tiene `SUPABASE_SERVICE_ROLE_KEY`** (verificado el 28-10 a las 23:10, dos veces):
+  faltan `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET` y
+  `NEXT_PUBLIC_TRANSFERENCIA_*` (#20, Enzo).
+- **`main` está en verde**: el build de CI dejó de necesitar secretos (#50, `8b0617b`). Ya no hay un «rojo
+  esperado» que enseñe a ignorar el CI.
 - `AGENTS.md` **ya no guarda estado**. Los conteos y las fechas vivían ahí y se vencían solos —por eso cada
   cierre re-fechaba §8, y por eso tres specs arrastran el «279 tests» de octubre—. El estado es **este
   archivo**, y `AGENTS.md` §0 ahora manda leerlo primero. Regla nueva: **§7.13, sin clientes al importar**.
-- **Panel probado a medias** (28-10, `next dev` + la clave de Química): `/admin` sin credenciales da `401`
-  con su `WWW-Authenticate`; con la clave da `200` y el cartel «Panel sin configurar · falta
-  `SUPABASE_SERVICE_ROLE_KEY`». El Basic Auth está conectado; falta la clave de servicio para verlo con datos.
-- `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `VERCEL_OIDC_TOKEN` y
-  `ADMIN_PASSWORD` (la puso Juanma el 28-10). Faltan `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
-  `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*` (#20, Enzo).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **402 tests** en 30 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **407 tests** en 31 archivos ·
   `docs:links` 0 links sin resolver · `npm run build` compila con el **entorno vacío** (probado con las
   ocho variables que la workflow pasa, todas en blanco).
-- **GitHub**: `main` hasta `d53fffe`. La corrida `40796836397` (`28e59ff`) cerró **success**: Typecheck,
-  Lint, Test, Docs links y **Build Next.js** en verde. Los secretos de Actions siguen faltando, pero el
-  build ya no los necesita.
+- **GitHub**: `main` hasta `bee66e8`. La corrida `40804948996` cerró **success** con los cinco pasos. Los
+  secretos de Actions siguen faltando, pero el build ya no los necesita.
 - BD prod `otjph…`: **VERDE** con el `bd:viva` del 28-10 (`01`–`06` aplicadas). Fuera del control, por ser
   invisible a la anon key: `respaldo_legacy`, el límite de 5 MB y los MIME de cada bucket.
 - **Tablero**: auditado y sincronizado con `npm run teams` —cuatro tareas nuevas y dos notas, AVANCE y
@@ -42,13 +50,23 @@
 | #17 · B3 | `06`: `precio > 0`, `ET007`, mensajes del panel | ✅ código, test y `06` aplicada |
 | #18 · B4 | cron de vencidos los viernes | ✅ código y test; falta `CRON_SECRET` para correrlo en vivo |
 | #19 · A1 | el panel avisa si el remito no salió | ✅ helper + panel + tests |
-| #20 · O1 | secretos y entorno de producción | ⏳ Enzo; **es el camino crítico** |
+| #20 · O1 | secretos y entorno de producción | ⏳ Enzo; **es el camino crítico**. Hecho por CLI el 28-10: `ADMIN_PASSWORD` en Production + Preview, y la `URL`/`ANON_KEY` de producción (apuntaban a `uchy…`). Falta `SUPABASE_SERVICE_ROLE_KEY` |
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
-| #22 · B5 | semilla y fotos de la beta | ⏳ el seed del repo no está aplicado en `otjph` y no hay fotos |
+| #22 · B5 | semilla y fotos de la beta | ⏳ el seed del repo no está aplicado en `otjph` y no hay fotos; el seed **no limpia** un `imagen_url` de host ajeno |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste, bloqueada sólo por #20 y #22 |
-| #49 | la Home en 500 por una `imagen_url` de host ajeno | ⏳ defensa en `backlog`; el seed de #22 apaga el síntoma |
+| #49 | la Home en 500 por una `imagen_url` de host ajeno | ✅ cerrado (`bee66e8`): módulo puro + placeholder; `/` responde 200 con la base viva |
 | #50 | el build de CI deja de necesitar secretos | ✅ cerrado (`8b0617b`); **CI en verde** |
 | #51 | el seed publicaba «laboratorio» | ✅ cerrado (`d53fffe`); el test ahora mira los datos |
+
+## Hecho (2026-10-28, tercera sesión · el 503 del panel, producción en `otjph` y #49)
+| Cambio | Qué dejó |
+|---|---|
+| Vercel · `ADMIN_PASSWORD` | El 503 del panel no era del código: **producción no tenía la variable**. Cargada en **Production + Preview** por CLI y con un deploy nuevo; `/admin` pasó de `503` a `401` sin credenciales y `200` con la clave. |
+| Vercel · Supabase de producción | `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` apuntaban a la **base legacy `uchy…`** (proyecto de Teams), así que la tienda publicada mostraba «No pudimos cargar el catálogo». Ahora apuntan a `otjph…` en los tres entornos, y la Home sirve los tres productos. |
+| `src/lib/imagen.ts` (nuevo) + `src/components/ImagenProducto.tsx` | La decisión de qué URL de imagen se puede renderizar sale del componente a un módulo puro que se consulta **antes** del `Image`; el placeholder tapa al host ajeno (#49). |
+| `tests/front/imagen-producto.test.ts` (nuevo, 5 tests) | Fija el contrato: bucket `**.supabase.co` sí, `ejemplo.com` no, `http` y `//host/x` no, rutas locales sí; y que el componente decida antes del `Image`. |
+| GitHub | `bee66e8` en `main`; corrida **40804948996** en `success`; **#49 cerrado** con su comentario de evidencia. |
+| Verificado en vivo | `otjph…`: `/`, `/catalog`, `/producto/1` y `/checkout` en `200` —local y en producción—, `/admin` `401`/`200`. El catálogo se ve con placeholder hasta que haya fotos. |
 
 ## Hecho (2026-10-28, segunda sesión · #50, #51 y el contrato)
 | Cambio | Qué dejó |
@@ -65,21 +83,25 @@
 > Los hallazgos de código del cierre anterior están cerrados y la base viva ya no es uno. Lo que queda son
 > claves, datos de demo y verificación en pantalla, más la deuda que dejó el review de esta sesión —que ya
 > tiene tarea—.
-1. 🔴 **Secretos (#20, Enzo):** sin `SUPABASE_SERVICE_ROLE_KEY` no hay panel con datos, ni checkout, ni cron
-   en vivo, y **es lo único que separa a la beta de la demo**. `ADMIN_PASSWORD` ya está.
+1. 🔴 **Secretos (#20, Enzo):** `ADMIN_PASSWORD` **ya está en Vercel** (Production + Preview) y el panel
+   entra; lo que falta es `SUPABASE_SERVICE_ROLE_KEY` —sin ella el panel no lee ni escribe, el checkout no
+   reserva stock y el cron no corre—, y es **lo único que separa a la beta de la demo**. `.env.local`
+   tampoco la tiene (verificado dos veces el 28-10 a las 23:10). Faltan además `RESEND_FROM_EMAIL`,
+   `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*`.
 2. 🟡 **Seed y fotos (#22):** el catálogo vivo no es el del repo (stock 50/30/100 sin nadie bajo el umbral,
    `imagen_url` en `ejemplo.com`), así que el popup de alerta no tiene qué mostrar y la tienda no tiene
    fotos. Se arregla corriendo `supabase/seed.sql` y subiendo fotos desde `/admin`. El seed ya no trae copy
-   de laboratorio (#51).
-3. 🔴 **La Home devuelve 500 con esos datos ([#49](https://github.com/juanmamerodio/esenciatecnica/issues/49)):**
-   `next/image` tira al validar un `src` fuera de `images.remotePatterns` y el `onError` no corre porque la
-   excepción es del render. El seed lo apaga (deja `imagen_url` en `NULL`); la **defensa** —placeholder para
-   hosts ajenos, con test— sigue en `backlog` y la encontró de nuevo el review de spec.
+   de laboratorio (#51), pero **tampoco limpia un `imagen_url` de host ajeno**: sólo las rutas
+   `/productos/%`, y el `insert` no toca las filas que ya existen por nombre. Hay que decidir si limpia
+   todo lo que no sea `https://<ref>.supabase.co/…`.
+3. ✅ **La Home ya no devuelve 500 con esos datos ([#49](https://github.com/juanmamerodio/esenciatecnica/issues/49)):**
+   cerrado en `bee66e8`. La defensa es un módulo puro que decide si la URL se puede renderizar y muestra el
+   placeholder cuando no; `/` responde `200` con la base viva y con `imagen_url` en `ejemplo.com`.
 4. 🟡 **`respaldo_legacy` sin firmar:** `bd:viva` no puede verlo (la anon key no lee otros esquemas); lo
    firma quien corrió `00` en el SQL Editor. Tarea nueva del tablero.
 5. 🟡 **Verificación en pantalla (#23, Celeste):** ninguna tajada del front se vio en un navegador con la
-   base migrada; bloqueada por #20 y #22. El panel se probó a medias el 28-10 (Basic Auth y el cartel de
-   falta de clave), no el flujo.
+   base migrada; bloqueada por #20 y #22. El panel se probó a medias (Basic Auth y el cartel de falta de
+   clave) en local y **en producción** el 28-10, no el flujo.
 6. 🟡 **Deuda del review del 28-10:** dos bugs con tarea propia (el cron y el total del checkout), `bd:viva`
    tolerando que `admin`/`roll` no existan, y el resto —`estadoHttp()` sin consumidor, el guard de env
    duplicado en los tres servicios de servidor, `describirError` repetido, los `alter table` de más en `00`,
