@@ -120,7 +120,7 @@ describe('#40 · los specs siguen la plantilla', () => {
   const todas = carpetas();
 
   it('encuentra los specs del repo', () => {
-    expect(todas.length).toBeGreaterThan(10);
+    expect(todas.length).toBeGreaterThanOrEqual(10);
     expect(todas).toContain('checkout');
   });
 

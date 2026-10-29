@@ -110,6 +110,6 @@ describe('#39 · la definición de terminado es una sola', () => {
   });
 
   it('el workflow está versionado y la documentación lo linkea', () => {
-    expect(leer('docs/specs/integracion-continua/spec.md')).toMatch(/\.github\/workflows\/ci\.yml/);
+    expect(leer('AGENTS.md')).toMatch(/\.github\/workflows\/ci\.yml/);
   });
 });

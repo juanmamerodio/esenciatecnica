@@ -41,7 +41,7 @@ escritura anónima sobre las seis tablas sensibles **pasan**. De tu tarea *"RLS 
 **Storage**: los dos buckets.
 
 **La causa de fondo** no es el DDL: es que `npm test` corre contra PGlite con las migraciones del
-repo, así que un proyecto a medio migrar deja los 230 tests en verde. Por eso las dos tareas se
+repo, así que un proyecto a medio migrar deja toda la suite en verde. Por eso las dos tareas se
 marcaron como hechas sin estarlo. Ese agujero ya lo cierra `npm run bd:viva`.
 
 > **Tus dos tareas del tablero están en `review` y no corresponde**: el proyecto vivo no coincide con

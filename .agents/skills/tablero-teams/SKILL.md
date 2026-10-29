@@ -1,69 +1,39 @@
 ---
 name: tablero-teams
-description: "Mueve tareas del tablero de Teams, crea tareas nuevas y publica avances en la bandeja con el puente `npm run teams`."
-whenToUse: "Al cerrar una sesión de implementación en esenciatecnica, al auditar el tablero contra lo hecho, o cuando alguien pide marcar, crear o publicar una tarea del equipo."
+description: "Mueve tareas del tablero de Teams, crea tareas nuevas, limpia la papelera (>24h) y publica avances en la bandeja con el puente `npm run teams`."
+whenToUse: "Al cerrar una sesión de implementación en esenciatecnica, al auditar el tablero contra lo hecho, o cuando alguien pide marcar, crear, archivar en papelera o publicar una tarea del equipo."
 ---
 
 # SKILL: tablero-teams
 
 ## 1. PROPÓSITO
 
-Operar el tablero de Teams (`team_tasks`) desde este repo con el único camino de escritura permitido:
-`npm run teams`. El contrato completo, los estados y el ritual viven en
-[`docs/agentes/teams.md`](../../../docs/agentes/teams.md); esta skill es el procedimiento, no la copia.
+Operar el tablero (`team_tasks`) y la bandeja (`team_discussions`) de Teams desde este repo a través del
+único camino de escritura permitido: [`scripts/teams-tablero.mjs`](../../../scripts/teams-tablero.mjs)
+(`npm run teams`). El contrato de columnas, los estados, la sintaxis exacta de los cinco subcomandos
+(`leer`, `estado`, `nueva`, `publicar`, `papelera`) y el ritual de cierre viven en
+[`docs/agentes/teams.md`](../../../docs/agentes/teams.md) §3–§6; esta skill fija las guardias operativas
+y el orden de ejecución sin duplicar esa referencia.
 
-## 2. ANTES DE ESCRIBIR
+## 2. PARÁMETROS DE ENTRADA
 
-- **`--autor` es obligatorio y no se inventa.** Los cuatro `key` canónicos son `Juanma`, `Isabella`,
-  `Celeste` y `Enzo`; el script rechaza cualquier otro. No se hereda del último que escribió.
-- **Un estado, un significado.** `backlog` = no empezada · `in_progress` = se está trabajando ahora ·
-  `review` = **hecha en repo, sin verificar en vivo** (hay código y test, falta la base migrada, las
-  claves o la firma del responsable) · `done` = **con evidencia**: el commit y el test existen.
-- **Nunca digas verde con el comando rojo.** Si el criterio depende de la base viva y `npm run bd:viva`
-  sigue rojo, el estado es `review`; para eso está la skill `bd-viva`.
-- **Escribí sólo lo que la sesión justifica.** La RLS del proyecto Teams está abierta a la anon key: es
-  deuda de seguridad de Teams, no una invitación.
+- `subcomando`: `leer` · `estado` · `nueva` · `publicar` · `papelera` (ver sintaxis completa en [`docs/agentes/teams.md`](../../../docs/agentes/teams.md) §5).
+- `--autor`: obligatorio en toda escritura; debe ser uno de los cuatro `key` canónicos (`Juanma` · `Isabella` · `Celeste` · `Enzo`).
+- `--nota` / `--descripcion` / `--texto`: evidencia concreta (commit, test, comando corrido y qué queda pendiente en vivo).
 
-## 3. COMANDOS
+## 3. GUARDRAILS
 
-```bash
-# Leer el tablero completo, o filtrar
-npm run teams -- leer
-npm run teams -- leer --estado review --asignado Isabella
+- NO escribas a mano contra PostgREST desde PowerShell 5.1 (desarma los `byte[]` JSON y provoca `PGRST102`): usá siempre `npm run teams`.
+- NO inventes ni heredes `--autor` ni `task_id` (en `task_notes` no hay FK aplicada y un UUID falso entra igual; el script resuelve y valida unicidad antes de escribir).
+- NO marques `done` sin evidencia: `backlog` = no empezada · `in_progress` = en curso · `review` = hecha en repo con código y test pero sin verificar en vivo · `done` = terminada con commit y test verificados (o excepción de documentación/configuración de `AGENTS.md` §8).
+- NO omitas `task_notes` ni `task_audit_logs`: el puente los registra automáticamente en cada `estado`, `nueva` y `papelera --confirmar`. Si una tarea vuelve de `done`, limpiá `completed_at` y dejá la nota explicando el motivo.
+- NO prometas envío de correo al publicar en la bandeja (`team_discussions` no dispara Resend; los correos salen sólo por `/api/notifications`) ni caches el listado del tablero en `AGENTS.md` o `memory.md`.
 
-# Mover una tarea (id o texto del título) con su bitácora
-npm run teams -- estado "Cron de los viernes" review --autor Juanma \
-  --nota "Implementado en repo: ruta, cron-auth y vercel.json. Falta CRON_SECRET."
+## 4. PASOS DE EJECUCIÓN
 
-# Crear una tarea
-npm run teams -- nueva --titulo "…" --asignado Enzo --prioridad ALTA \
-  --tag BACKEND --der Pedido --horas 4 --descripcion "…" --autor Juanma
+Seguir los pasos del ritual de [`docs/agentes/teams.md`](../../../docs/agentes/teams.md) §6:
 
-# Publicar en la bandeja
-npm run teams -- publicar --categoria AVANCE --titulo "…" --texto "…" --autor Juanma
-```
-
-Cada `estado` y cada `nueva` escriben además una nota en `task_notes` y un registro en
-`task_audit_logs`: **la bitácora y la auditoría no son opcionales**. Si una tarea vuelve de `done`,
-`completed_at` no se limpia solo: corregilo a mano y dejá la nota explicando por qué.
-
-## 4. PASOS DE EJECUCIÓN (cierre de sesión)
-
-1. **Auditar:** `npm run teams -- leer` contra `git log` y la suite. Qué quedó hecho y qué espera la
-   base viva.
-2. **Mover:** `done` sólo con evidencia; `review` lo que está en repo sin verificar en vivo; el resto
-   queda anotado con lo que falta.
-3. **Crear** las tareas que la sesión dejó descubiertas (deuda, hallazgos, verificaciones pendientes).
-4. **Publicar** una nota `AVANCE` con lo hecho y una `BLOQUEO` si algo frena al equipo.
-5. **Cerrar `memory.md`** con el estado real y el tablero ya sincronizado.
-
-## 5. GUARDRAILS
-
-- NO escribas a mano contra PostgREST: el shell del agente desarma el JSON (gotcha `PGRST102`); el
-  camino es siempre `npm run teams`.
-- NO emparejes tareas por título sin verificar que la coincidencia sea única: si hay varias, el script
-  lista los candidatos con su `id` y hay que elegir por `id`.
-- NO inventes `task_id` en `task_notes`: la columna no tiene FK aplicada y un id falso entra igual.
-- NO prometas el email del equipo: publicar en la bandeja no manda correo; eso sale sólo por
-  `/api/notifications`.
-- NO caches el tablero en `AGENTS.md` ni en `memory.md`: se lee con `npm run teams -- leer`.
+1. **Auditar:** correr `npm run teams -- leer` y contrastar con `git log`, la suite y `npm run bd:viva` (skill `bd-viva`).
+2. **Actualizar y crear:** mover a `done` o `review` según la evidencia con `npm run teams -- estado` y abrir las tareas descubiertas con `npm run teams -- nueva`.
+3. **Limpiar papelera:** listar con `npm run teams -- papelera --autor <key>` las tareas `done` con más de 24 h y archivarlas con `--confirmar`.
+4. **Publicar y cerrar:** publicar las notas `AVANCE` y `BLOQUEO` en la bandeja con `npm run teams -- publicar` y reescribir `memory.md`.

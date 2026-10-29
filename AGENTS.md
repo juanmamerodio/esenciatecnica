@@ -217,7 +217,7 @@ tres specs.
 - `npm test` — Vitest sobre `tests/db/` (PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corre contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar lo deja en verde. Para el proyecto real está `npm run bd:viva`.
 - `npm run docs:links` — cada enlace relativo de la documentación resuelve.
 - `npm run bd:viva` — mide la superficie pública de la base viva: la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets **con su visibilidad** (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado, visibilidad por la pública). Sale distinto de cero y resume los desajustes; lo que la anon key no puede ver (`respaldo_legacy`) lo firma el SQL Editor.
-- `npm run build` — **no lee secretos**: los clientes de Supabase y Resend se arman por llamada (§7.13), así que compila con el entorno vacío y también en un fork. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
+- `npm run build` — **no lee secretos**: los clientes de Supabase y Resend se arman por llamada (§7.13), así que compila con el entorno vacío y también en un fork. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Valida tipos y lint durante la compilación (`ignoreBuildErrors` fue retirado al llegar a 0 errores).
 
 Un ticket está terminado solo si:
 
@@ -292,7 +292,7 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 - `docs/adr/` — decisiones de arquitectura.
 
 **Skills del proyecto.** Las skills propias de Esencia Técnica viven en el repo, en
-`.agents/skills/<nombre-kebab>/SKILL.md`, para que todo el equipo las tenga; las globales de la máquina
+`.agents/skills/<nombre-kebab>/SKILL.md` (anatomía en [`docs/metodo/brain.md`](docs/metodo/brain.md) §4.1), para que todo el equipo las tenga; las globales de la máquina
 quedan para las genéricas de la agencia. Las del repo son **`tablero-teams`** y **`bd-viva`**; cada una
 resume su procedimiento y apunta a su fuente en vez de copiarla. Reglas que impone el entorno real
 (DeepSeek Harness), no el gusto:
@@ -322,4 +322,4 @@ código muerto.
 6. Verificar `typecheck`, `lint`, `test` y `docs:links`; el `build`, si tocaste rutas, configuración o el borde.
 7. Actualizar glosario, modelo o ADR si cambió una decisión.
 8. Commit quirúrgico con mensaje claro; sin archivos sueltos.
-9. Al cerrar: auditar el tablero contra lo hecho, mover estados con `npm run teams`, crear lo que falte, publicar el avance y reescribir `memory.md` ([`docs/agentes/teams.md`](docs/agentes/teams.md) §6).
+9. Al cerrar: auditar el tablero contra lo hecho, mover estados con `npm run teams`, crear lo que falte, archivar en la papelera las tareas `done` de más de 24 h (`npm run teams -- papelera`), publicar el avance y reescribir `memory.md` ([`docs/agentes/teams.md`](docs/agentes/teams.md) §6).

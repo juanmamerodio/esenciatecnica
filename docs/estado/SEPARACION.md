@@ -51,11 +51,9 @@ window.QUIMICASHOP_CONFIG = {
 
 ## Estado de la migración
 
-1. La base nueva del e-commerce ya tiene el DER normalizado y datos de prueba.
-2. El código Next.js todavía consulta el esquema legacy (`productos`, `pedidos`, `verificaciones`).
-   i18n y Gemini ya se retiraron (`T0 · Español único` y `a984727`).
-3. El modelo objetivo está en [`MODELO.md`](../MODELO.md); la brecha y el plan, en
-   [`AUDITORIA.md`](AUDITORIA.md).
+1. La base del e-commerce (`otjphjnrwihqzzhbfnmh`) tiene aplicadas las migraciones `00`–`06`, datos de demo sembrados (#22) y `npm run bd:viva` en **VERDE**.
+2. El código Next.js usa exclusivamente el modelo aprobado en [`MODELO.md`](../MODELO.md) (sin esquema legacy, sin i18n y sin IA).
+3. Producción en Vercel (`esenciatecnica.vercel.app`) apunta a `otjphjnrwihqzzhbfnmh`.
 4. El DER académico se adapta al modelo operativo; no al revés.
 
 ---
@@ -73,9 +71,9 @@ No se copian a este repo.
 
 ## Checklist de verificación
 
-- [ ] `.env.local` apunta al proyecto e-commerce.
-- [ ] `config.js` apunta al proyecto Teams.
-- [ ] La service role no está en el cliente ni en Git.
-- [ ] `/api/notifications` responde con las claves de Teams.
-- [ ] La tienda no consulta tablas `team_*`.
-- [ ] El panel `/admin` no consulta el catálogo legacy.
+- [x] `.env.local` y Vercel apuntan al proyecto e-commerce (`otjph…`).
+- [x] `config.js` apunta al proyecto Teams (`uchy…`).
+- [x] La service role no está en el cliente ni en Git.
+- [x] `/api/notifications` responde con las claves de Teams.
+- [x] La tienda no consulta tablas `team_*`.
+- [x] El panel `/admin` no consulta el catálogo legacy.

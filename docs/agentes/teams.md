@@ -1,7 +1,7 @@
 # Teams · tablero, bandeja y el puente `npm run teams`
 
 > **Cuándo leer esto:** al cerrar una sesión de implementación en `esenciatecnica`, o cada vez que haya
-> que marcar tareas, auditar las que quedan o publicar un avance del equipo.
+> que marcar tareas, auditar las que quedan, limpiar la papelera o publicar un avance del equipo.
 > **Puente:** [`scripts/teams-tablero.mjs`](../../scripts/teams-tablero.mjs) (`npm run teams`).
 > **Repos:** el Hub y el Teams viven en `quimicashop`; este repo **consume** su tablero, no lo reimplementa.
 
@@ -36,7 +36,7 @@ hereda de lo último que se escribió.
 | `backlog` | no empezada |
 | `in_progress` | alguien la está trabajando ahora |
 | `review` | **hecha en repo, sin verificar en vivo**: hay código y test, pero falta la base migrada, las claves o la firma de su responsable |
-| `done` | terminada **con evidencia**: el commit y el test que la cubren existen |
+| `done` | terminada **con evidencia**: el commit y el test que la cubren existen (o la razón explícita por la que el cambio es sólo de documentación o configuración, según [`AGENTS.md`](../../AGENTS.md) §8 y §10) |
 
 `done` no es cortesía: si el criterio de aceptación depende de la base viva y `npm run bd:viva` sigue
 rojo, el estado es `review`. Nunca digas verde con el comando rojo.
@@ -75,20 +75,29 @@ npm run teams -- nueva --titulo "…" --asignado Enzo --prioridad ALTA \
 
 # Publicar en la bandeja
 npm run teams -- publicar --categoria AVANCE --titulo "…" --texto "…" --autor Juanma
+
+# Papelera: listar o archivar las tareas done cerradas hace más de 24 h
+npm run teams -- papelera --autor Juanma
+npm run teams -- papelera --autor Juanma --confirmar
 ```
 
 Cada `estado` y cada `nueva` escriben además una nota en `task_notes` y un registro en
-`task_audit_logs`: la auditoría del tablero es el historial, no un resumen que alguien recuerda.
+`task_audit_logs`; `papelera --confirmar` respalda las tareas con sus notas en `docs/agentes/papelera/`
+(ignorado en Git para no versionar volcados de `team_*` en este repo) y registra `DELETE` en
+`task_audit_logs` con el `previous_state` completo, siguiendo el mismo contrato que `tasks.js` en
+`quimicashop`.
 
 ## 6. El ritual de cierre de sesión
 
 1. **Auditar**: leer el tablero y contrastarlo con `git log` y la suite. Qué quedó hecho, qué espera la
-   base viva.
+   base viva o las claves.
 2. **Mover**: `done` con evidencia; `review` lo que está en repo sin verificar en vivo; el resto queda
    anotado con lo que falta.
-3. **Crear** las tareas que la sesión dejó descubiertas (deuda, hallazgos, verificaciones pendientes).
-4. **Publicar** en la bandeja: una nota `AVANCE` con lo hecho y una `BLOQUEO` si algo frena al equipo.
-5. **Cerrar** `memory.md` con el estado real y el tablero ya sincronizado.
+3. **Crear** las tareas que la sesión dejó descubiertas (deuda, hallazgos, controles en vivo pendientes).
+4. **Papelera**: correr `npm run teams -- papelera --autor <key> --confirmar` para retirar del tablero
+   activo las tareas `done` con más de 24 horas de antigüedad.
+5. **Publicar** en la bandeja: una nota `AVANCE` con lo hecho y una `BLOQUEO` si algo frena al equipo.
+6. **Cerrar** `memory.md` con el estado real y el tablero ya sincronizado.
 
 Publicar en la bandeja **no** manda emails: el email del equipo sigue saliendo sólo por
 `/api/notifications`, y avisar por correo es una decisión aparte.
@@ -110,5 +119,5 @@ Publicar en la bandeja **no** manda emails: el email del equipo sigue saliendo s
 ## 8. Cuándo se borra este puente
 
 Cuando Teams tenga su propia función de tablero (o su CLI en `quimicashop`), se borra
-`scripts/teams-tablero.mjs`, las variables `TEAMS_*` de este repo y esta referencia; igual que
-`/api/notifications` (`docs/estado/SEPARACION.md`).
+`scripts/teams-tablero.mjs`, `scripts/teams-papelera-reglas.mjs`, las variables `TEAMS_*` de este repo y
+esta referencia; igual que `/api/notifications` (`docs/estado/SEPARACION.md`).

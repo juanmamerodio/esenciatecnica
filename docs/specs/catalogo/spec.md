@@ -116,8 +116,8 @@ No se agregan dependencias: la página se verifica en el navegador, no con jsdom
 
 ## 8. Estado de implementación (auditoría del 2026-10-27)
 
-`npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde, contra PGlite:
-la base viva sigue a medio migrar, así que nada de esto está verificado en producción.
+`npm run typecheck` sin errores y `npm test` en verde contra PGlite (conteo vigente en
+[`memory.md`](../../../memory.md)). La verificación visual en navegador queda en la punta a punta (#23).
 
 | Criterio / HU | Estado | Evidencia |
 |---|---|---|

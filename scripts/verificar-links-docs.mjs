@@ -11,7 +11,7 @@
  * ruta nueva equivalente, en el mismo estilo (relativo) que tenía.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const RAIZ = process.cwd().replace(/\\/g, "/");
@@ -85,7 +85,7 @@ const versionados = new Set(
   })
     .split("\n")
     .map((linea) => linea.trim())
-    .filter(Boolean),
+    .filter((linea) => Boolean(linea) && existsSync(path.join(RAIZ, linea))),
 );
 
 const archivos = [...versionados].filter((archivo) => /\.md$/.test(archivo));
@@ -169,3 +169,7 @@ if (ARREGLAR) {
 }
 console.log(`\nLinks que siguen sin resolver: ${rotos.length}`);
 for (const [origen, link] of rotos) console.log(`  ${origen}  →  ${link}`);
+
+if (rotos.length > 0 || (!ARREGLAR && corregidos > 0)) {
+  process.exitCode = 1;
+}

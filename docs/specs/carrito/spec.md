@@ -120,7 +120,7 @@ No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8)
 
 ## 8. Estado de implementación (auditoría del 2026-10-27)
 
-`npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde. La aritmética se
+`npm run typecheck` sin errores y `npm test` en verde (conteo vigente en [`memory.md`](../../../memory.md)). La aritmética se
 testea contra el módulo puro; `localStorage` y el render **no** se ejecutan en el suite, así que la
 persistencia y el contador quedan para la verificación manual.
 
@@ -155,6 +155,5 @@ persistencia y el contador quedan para la verificación manual.
 
 > El ticket `T4 · Carrito` ([#9](https://github.com/juanmamerodio/esenciatecnica/issues/9)) se cerró el 2026-10-28 con su comentario de evidencia: la
 > implementación y sus tests están en `main` y lo único que falta es la verificación en vivo de arriba.
-> La desviación de formato de precio se cerró en el issue **#44** (spec
-> [`formato-del-dinero`](../formato-del-dinero/spec.md)): el redondeo vive en la aritmética y el formato es
+> La desviación de formato de precio se cerró en el issue [#44](https://github.com/juanmamerodio/esenciatecnica/issues/44): el redondeo vive en la aritmética y el formato es
 > adaptativo, así que el total que se muestra es el que viaja al pedido.

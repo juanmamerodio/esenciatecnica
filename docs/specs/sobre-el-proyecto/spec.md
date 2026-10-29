@@ -133,5 +133,4 @@ claves del issue #20), igual que el resto del front.
 
 - Verificación en navegador de `/about` (jerarquía de encabezados, responsive, foco visible, ruta activa) dentro de la punta a punta (#23).
 
-> La desviación de HU-1 (el ícono de laboratorio) se cerró en **#43**: ver
-> [`iconos-y-copy-del-dominio/spec.md`](../iconos-y-copy-del-dominio/spec.md).
+> La desviación de HU-1 (el ícono de laboratorio) se cerró en el issue [#43](https://github.com/juanmamerodio/esenciatecnica/issues/43).

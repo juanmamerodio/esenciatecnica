@@ -77,18 +77,11 @@ borrar `GEMINI_API_KEY` de Vercel y del `.env.example`.
 
 ---
 
-## 4. 🟡 `tsc --noEmit` no pasa (el build sí, porque está silenciado)
+## 4. ✅ `tsc --noEmit` y `ignoreBuildErrors` — cerrado
 
-`next.config.ts` tiene `typescript.ignoreBuildErrors: true`. Errores actuales:
-
-- Diccionarios `es.json`/`en.json` sin `hero` y `categories` que exige `Dictionary`
-  (`src/lib/types.ts`).
-- `catalog` sin `title`/`subtitle`; `cart` sin `continueShopping`.
-- `CartClient` pasa `lang` a `CartItem`, que no lo declara.
-- `verify-payment` usa `isProcessed` y `updateStatus` con firmas incorrectas.
-
-**Fix:** alinear `Dictionary` con los JSON reales (o completar los JSON), corregir las firmas y
-recién entonces sacar `ignoreBuildErrors`.
+`next.config.ts` tenía `typescript.ignoreBuildErrors: true` por los errores de los diccionarios y del
+camino legacy. Retirado el código legacy (`T0`–`T8`) y con `npm run typecheck` en 0 errores, se quitó
+`ignoreBuildErrors` de `next.config.ts` para que el build valide tipos además de CI.
 
 ---
 

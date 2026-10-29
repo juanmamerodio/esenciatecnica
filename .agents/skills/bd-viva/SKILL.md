@@ -8,61 +8,29 @@ whenToUse: "Al cerrar o auditar la migración del proyecto Supabase vivo (`otjph
 
 ## 1. PROPÓSITO
 
-Correr el único control que mira el proyecto Supabase **vivo** y leer su salida sin maquillarla. El
-criterio de cierre y el runbook están en
+Correr el único control que mira el proyecto Supabase **vivo** (`otjphjnrwihqzzhbfnmh`) y leer su
+salida sin maquillarla. El script vive en
+[`scripts/verificar-bd-viva.mjs`](../../../scripts/verificar-bd-viva.mjs) (reglas puras en
+[`scripts/bd-viva-reglas.mjs`](../../../scripts/bd-viva-reglas.mjs)), el criterio de cierre está en
 [`docs/specs/migracion-otjph/spec.md`](../../../docs/specs/migracion-otjph/spec.md) y el procedimiento
-de aplicación, en [`docs/entrega/GUIA-ISABELLA.md`](../../../docs/entrega/GUIA-ISABELLA.md) §4.4.
-Esta skill es el procedimiento para ejecutarlo y diagnosticarlo, no la copia del spec.
+de aplicación en [`docs/entrega/GUIA-ISABELLA.md`](../../../docs/entrega/GUIA-ISABELLA.md) §4.4.
 
-## 2. COMANDO
+## 2. PARÁMETROS DE ENTRADA
 
-```bash
-npm run bd:viva
-```
+- `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` (leídos automáticamente de `.env.local` o del entorno por `npm run bd:viva`).
+- Sin banderas posicionales: el comando audita siempre las siete secciones del contrato público (esquema versionado, lectura pública, columnas legacy, RPC, tablas retiradas, RLS de lectura/escritura y buckets de Storage).
 
-Cubre la vista del catálogo, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las
-ejecute), las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets. Sale
-distinto de cero y resume cada desajuste nombrando tabla y columnas.
+## 3. GUARDRAILS
 
-## 3. LA TRAMPA QUE ORIGINÓ LA SKILL
-
-- **`npm test` NO prueba la base viva.** La suite corre contra PGlite y aplica las migraciones del
-  repo: queda verde con `otjph` a medio migrar. Un `npm test` verde con `bd:viva` rojo significa que
-  **el repo está bien y el proyecto vivo no**; son dos cosas distintas y las dos importan.
-- **Un `200 []` no es «sin datos», es una fuga.** Con RLS mal puesta, una tabla sensible responde `200`
-  vacía. Sólo `401`/`403` prueban que está cerrada.
-- **`bd:viva` no ejecuta RPC destructivas:** `cancelar_pedidos_vencidos()` se consulta con `GET` y las
-  demás con argumentos imposibles; una respuesta fuera de `401/403` delata que `anon` puede ejecutarlas.
-- **Un bucket que existe también puede dar `NoSuchBucket`.** `anon` no ve ningún bucket en la lista, así
-  que la ruta de metadatos contesta «Bucket not found» aunque el bucket esté. La sonda que sirve pide **un
-  objeto que no está** (`/storage/v1/object/authenticated/{bucket}/…`: `NoSuchKey` = existe) y después la
-  pública, que distingue público de privado (`NoSuchBucket` = privado). Si una `FALLA` nombra un bucket,
-  probá el objeto antes de creerle a la ficha. Medido el 28-10 con `productos`, que existía.
-- **Una respuesta sin `code` conocido no se interpreta.** `NoSuchKey` y `NoSuchBucket` llegan los dos con
-  `404` y HTTP 400: el `statusCode` no distingue nada. «No se pudo medir» no es «no existe» ni «privado»;
-  el control lo reporta como `FALLA`, y un `nota` es un control que la anon key no pudo hacer (el cierre
-  dice cuántos quedaron).
+- NO confundas este comando con `npm test`: `npm test` corre offline contra PGlite y da verde aunque `otjph` esté a medio migrar; `npm run bd:viva` mide la base viva por red.
+- NO leas un `bd:viva` rojo como «casi verde»: si queda una `FALLA`, el resultado es rojo y el estado de la tarea en el tablero es `review`, nunca `done`.
+- NO interpretes un `200 []` en una tabla cerrada como «sin datos»: es una fuga de RLS. Sólo `401`/`403` prueban que la tabla está cerrada.
+- NO uses la ruta de metadatos de Storage para medir buckets con la anon key (`NoSuchBucket` miente porque `anon` no lista buckets): el script usa dos sondas por objeto (ruta autenticada y ruta pública).
+- NO maquilles la salida ni edites [`scripts/verificar-bd-viva.mjs`](../../../scripts/verificar-bd-viva.mjs) para silenciar un fallo: la salida cruda se reporta en el issue [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15).
 
 ## 4. PASOS DE EJECUCIÓN
 
-1. **Correr** `npm run bd:viva` y transcribir la salida completa, sin resumir y sin maquillar.
-2. **Descartar el cache viejo antes de culpar al esquema.** El SQL Editor aplica el DDL, pero
-   `/rest/v1` sigue sirviendo el esquema cacheado. Verificá si ya se corrió
-   `notify pgrst, 'reload schema';`; si el cache está viejo, las `FALLA` pueden ser de lectura, no de
-   esquema.
-3. **Diagnosticar** cada `FALLA` por el objeto que nombra (tabla, columna, RPC o bucket). El mensaje
-   casi siempre alcanza; cada línea trae la tabla y las columnas que faltan.
-4. **Reportar** la salida en el issue [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15)
-   sin arreglarla a mano. El criterio de cierre es `bd:viva` en verde.
-5. **Cerrar el tablero** con la skill `tablero-teams`: con `bd:viva` rojo, el estado es `review`, no
-   `done`.
-
-## 5. GUARDRAILS
-
-- NO leas `bd:viva` rojo como «casi verde»: si queda una `FALLA`, el resultado es rojo y el estado de
-  la tarea es `review`.
-- NO maquilles la salida ni cambies el script para que pase: el diagnóstico va al issue con la salida
-  cruda.
-- NO confundas este comando con `npm test`: el segundo es local y offline; el primero depende de la
-  base viva, la anon key y la red.
-- NO corras `bd:viva` como sustituto de aplicar las migraciones: mide, no migra.
+1. **Correr** `npm run bd:viva` y transcribir la salida completa.
+2. **Descartar el cache viejo antes de culpar al esquema:** si el SQL Editor ya aplicó el DDL pero `/rest/v1` sigue sirviendo definiciones viejas, pedir `notify pgrst, 'reload schema';` y repetir la sonda.
+3. **Diagnosticar** cada `FALLA` por el objeto que nombra (tabla, columna, RPC o bucket). Las `nota` al final indican lo que la anon key no puede ver (`respaldo_legacy`, límites de tamaño y MIME de los buckets), que se firma en el SQL Editor.
+4. **Reportar** la salida en [#15](https://github.com/juanmamerodio/esenciatecnica/issues/15) y reflejar el estado real en el tablero con la skill `tablero-teams`.

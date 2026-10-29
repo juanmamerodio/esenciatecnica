@@ -67,7 +67,7 @@ Lo completás en el paso 4. **`.env.local` no se commitea nunca.** Ya está en `
 ```bash
 npm run typecheck   # esperado: 0 errores
 npm run lint        # esperado: 0 errores, 0 warnings
-npm test            # esperado: 230 tests en 19 archivos
+npm test            # esperado: suite completa en verde (conteo actual en memory.md)
 ```
 
 Si alguno viene **rojo antes de que toques nada**, anotalo y avisá. No es tuyo, pero te va a ensuciar

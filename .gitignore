@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# respaldos locales de papelera de Teams (la fuente vive en task_audit_logs de uchy...)
+docs/agentes/papelera/

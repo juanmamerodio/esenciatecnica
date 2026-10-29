@@ -128,7 +128,7 @@ No se agregan dependencias: sin jsdom ni Testing Library (`AGENTS.md` §4 y §8)
 
 ## 8. Estado de implementación (auditoría del 2026-10-27)
 
-`npm run typecheck` sin errores y `npm test` con 279 tests en 23 archivos, todos en verde, contra PGlite.
+`npm run typecheck` sin errores y `npm test` en verde contra PGlite (conteo vigente en [`memory.md`](../../../memory.md)).
 El render del detalle no se verifica en el suite (no hay jsdom): lo que sigue se apoya en el código y en el
 invariante de la vista, no en una ejecución del navegador.
 

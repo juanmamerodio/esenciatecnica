@@ -104,6 +104,22 @@ describe('#45 · las skills del proyecto existen y el runtime las puede cargar',
 
     const viva = skills().find((skill) => skill.carpeta === 'bd-viva');
     expect(viva?.cuerpo).toContain('docs/specs/migracion-otjph/spec.md');
+    expect(viva?.cuerpo).toContain('scripts/verificar-bd-viva.mjs');
+  });
+
+  it('sigue la anatomía de brain.md §4.1 en orden: PROPÓSITO → PARÁMETROS DE ENTRADA → GUARDRAILS → PASOS DE EJECUCIÓN', () => {
+    const secciones = ['PROPÓSITO', 'PARÁMETROS DE ENTRADA', 'GUARDRAILS', 'PASOS DE EJECUCIÓN'];
+    for (const { carpeta, cuerpo } of skills()) {
+      const posiciones = secciones.map((s) => cuerpo.indexOf(s));
+      for (const [i, s] of secciones.entries()) {
+        expect(posiciones[i], `${carpeta}: falta la sección «${s}»`).toBeGreaterThan(-1);
+      }
+      for (let i = 1; i < posiciones.length; i += 1) {
+        expect(posiciones[i], `${carpeta}: «${secciones[i]}» va antes que «${secciones[i - 1]}»`).toBeGreaterThan(
+          posiciones[i - 1] ?? -1,
+        );
+      }
+    }
   });
 
   it('la skill del tablero exige `--autor` y deja bitácora y auditoría', () => {

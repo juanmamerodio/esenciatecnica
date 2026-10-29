@@ -87,6 +87,7 @@ Qué tiene que hacer cada responsable, con el paso a paso.
 | [`entrega/HANDOFF-ISABELLA.md`](entrega/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
 | [`entrega/GUIA-ISABELLA.md`](entrega/GUIA-ISABELLA.md) | Paso a paso de la migración de `otjph` (issue #15). |
 | [`entrega/GUIA-QUEIPO.md`](entrega/GUIA-QUEIPO.md) | Paso a paso de secretos, verificación de punta a punta y cron. |
+| [`entrega/CREDITOS-FOTOS.md`](entrega/CREDITOS-FOTOS.md) | Atribución de las fotos de demostración del catálogo y del hero (#22). |
 
 ## `academico/` · Artefactos académicos y referencia visual
 
@@ -107,6 +108,7 @@ Material de cátedra. Se adapta al código y al modelo; **no** manda sobre la im
 | [`agentes/domain.md`](agentes/domain.md) | Cómo consumir glosario y ADRs. |
 | [`agentes/issue-tracker.md`](agentes/issue-tracker.md) | Issues y specs en GitHub con `gh`. |
 | [`agentes/triage-labels.md`](agentes/triage-labels.md) | Labels de triage. |
+| [`agentes/teams.md`](agentes/teams.md) | Tablero, bandeja, papelera y protocolo del puente `npm run teams`. |
 
 ---
 

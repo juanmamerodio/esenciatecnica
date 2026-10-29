@@ -11,12 +11,14 @@
  *   npm run teams -- nueva --titulo "…" --asignado Enzo --descripcion "…" [--estado backlog]
  *                        [--prioridad ALTA] [--tag BACKEND] [--der Pedido] [--horas 4] --autor Juanma
  *   npm run teams -- publicar --categoria AVANCE --titulo "…" --texto "…" --autor Juanma
+ *   npm run teams -- papelera [--horas 24] --autor Juanma [--confirmar]
  *
  * Cuando Teams tenga su propia función, se borra este puente (ver `docs/agentes/teams.md` §8).
  */
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tareasParaPapelera } from './teams-papelera-reglas.mjs';
 
 const AUTORES = ['Juanma', 'Isabella', 'Celeste', 'Enzo'];
 const ESTADOS = ['backlog', 'in_progress', 'review', 'done'];
@@ -266,6 +268,73 @@ async function publicar(banderas) {
   console.log(`✔ Bandeja [${nota.category}] ${nota.title}\n  ${nota.id} · no se envía ningún email`);
 }
 
+async function papelera(banderas) {
+  const autor = autorDe(banderas);
+  const horas = banderas.horas === undefined ? 24 : Number(banderas.horas);
+  if (banderas.horas === true || !Number.isFinite(horas) || horas <= 0) {
+    throw new Error(`--horas inválido: "${banderas.horas}".`);
+  }
+
+  const ahora = new Date();
+  const tareas = await rest('team_tasks?select=*&status=eq.done&order=completed_at.asc');
+  const viejas = tareasParaPapelera(tareas, { horas, ahora });
+
+  if (viejas.length === 0) {
+    console.log(`Sin tareas done con más de ${horas} h. Nada que mover.`);
+    return;
+  }
+
+  const corte = new Date(ahora.getTime() - horas * 60 * 60 * 1000);
+  console.log(`Tareas done con más de ${horas} h (${viejas.length}):`);
+  for (const t of viejas) {
+    console.log(`  · ${t.title} (${t.assignee}) — cerrada ${t.completed_at ?? t.updated_at}`);
+  }
+  console.log(`\nCorte: ${corte.toISOString()} · ahora: ${ahora.toISOString()}`);
+
+  if (!banderas.confirmar) {
+    console.log('\nModo seguro: no se borró nada. Para moverlas a la papelera, repetí con --confirmar.');
+    return;
+  }
+
+  const carpeta = resolve(RAIZ, 'docs/agentes/papelera');
+  mkdirSync(carpeta, { recursive: true });
+  const sello = ahora.toISOString().slice(0, 19).replace(/[:T]/g, '-');
+  const ruta = resolve(carpeta, `tareas-${sello}.json`);
+
+  const respaldo = {
+    generado: ahora.toISOString(),
+    autor,
+    criterio: `status=done y completed_at (o updated_at) anterior a ${corte.toISOString()}`,
+    tareas: [],
+  };
+  for (const t of viejas) {
+    const notas = await rest(`task_notes?select=*&task_id=eq.${t.id}`);
+    respaldo.tareas.push({ tarea: t, notas });
+  }
+  writeFileSync(ruta, `${JSON.stringify(respaldo, null, 2)}\n`, 'utf8');
+
+  for (const t of viejas) {
+    await rest(`team_tasks?id=eq.${t.id}`, { metodo: 'DELETE' });
+    try {
+      await rest('task_audit_logs', {
+        metodo: 'POST',
+        cuerpo: {
+          task_id: t.id,
+          action: 'DELETE',
+          changed_by: autor,
+          previous_state: t,
+          new_state: null,
+          diff_summary: `Tarea movida a la papelera por ${autor}`,
+        },
+      });
+    } catch (error) {
+      console.warn(`  ⚠ ${t.title}: se borró pero no se pudo dejar el log (${error.message}).`);
+    }
+  }
+
+  console.log(`\n✔ ${viejas.length} tareas movidas a la papelera. Respaldo: ${ruta}`);
+}
+
 function ayuda() {
   console.log(
     [
@@ -275,6 +344,8 @@ function ayuda() {
       '  estado "<id o título>" <backlog|in_progress|review|done> --autor <key> [--nota "…"]',
       '  nueva --titulo "…" --asignado <key> --descripcion "…" [--estado …] [--prioridad …] [--tag …] [--der …] [--horas n] --autor <key>',
       '  publicar --categoria <AVANCE|BLOQUEO|AYUDA|DEBATE|IDEA> --titulo "…" --texto "…" --autor <key>',
+      '  papelera [--horas 24] --autor <key> [--confirmar]',
+      '           lista las done con más de N h; con --confirmar las borra y respalda en docs/agentes/papelera/',
       '',
       `Autores: ${AUTORES.join(' · ')} (o TEAMS_AUTOR en el entorno)`,
       'Estados: backlog · in_progress · review · done — `review` = hecho en repo, sin verificar en vivo.',
@@ -291,6 +362,7 @@ try {
   else if (comando === 'estado') await estado(posicionales, banderas);
   else if (comando === 'nueva') await nueva(banderas);
   else if (comando === 'publicar') await publicar(banderas);
+  else if (comando === 'papelera') await papelera(banderas);
   else if (comando === 'ayuda' || banderas.ayuda) ayuda();
   else throw new Error(`Comando desconocido: "${comando}". Probá: npm run teams -- ayuda`);
 } catch (error) {
