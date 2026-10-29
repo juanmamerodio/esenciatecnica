@@ -1,116 +1,105 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (sesión de **#21**: la
-> base viva entra en contrato y `bd:viva` queda en verde; el camino crítico pasa a ser los secretos, el
-> seed con fotos y la verificación en pantalla).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-28 (segunda sesión: el rojo
+> de CI entra en la raíz —#50—, el seed deja de publicar copy de laboratorio —#51— y `AGENTS.md` deja de
+> guardar estado. El equipo queda con el camino crítico publicado para el 29-10).
 
 ## Ahora
-- Objetivo: **beta presentable el viernes 30-10**. La base viva ya está migrada y **verificada**; falta
-  la clave de servicio, datos de demo con foto y la corrida en el navegador.
-- **`npm run bd:viva` cierra en VERDE** contra `otjph` (28-10): vista con sus 12 columnas, RLS de las
-  diez tablas (`401/403`, no `200 []`), las cuatro RPC cerradas a `anon`, `detalle_carrito` ausente y
-  los dos buckets (`comprobantes` privado, `productos` público). Es el criterio de cierre de #15/#16.
-- El último rojo **no era del proyecto vivo sino del control**: la sonda de buckets pedía la ficha
-  (`GET /storage/v1/bucket/{id}`) y con la anon key esa ruta contesta `NoSuchBucket` **aunque el bucket
-  exista**, porque `anon` no ve ningún bucket en la lista. Corregido en **#21** (commit `65657d5`) con
-  dos sondas anónimas por objeto, y el control ahora también avisa si `comprobantes` quedara público.
-- **Los datos vivos no son el seed del repo**: los tres productos traen otro stock (50/30/100, ninguno
-  bajo el umbral) e `imagen_url` apunta a `ejemplo.com`. No disparan la alerta del panel ni muestran
-  fotos: es **B5 · #22**, y necesita la service role y una pasada por `/admin`.
-- Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
-  ella. Queda **una** firma que la anon key no puede dar: `respaldo_legacy` y sus conteos, en el SQL Editor.
+- Objetivo: **beta presentable el viernes 30-10**. No la traba el código: quedan **cuatro acciones humanas**,
+  ya publicadas como BLOQUEO en la bandeja de Teams.
+- Orden del camino crítico: **#20 secretos (Enzo)** → **#22 seed + fotos (Enzo)** → **#23 verificación en
+  navegador (Celeste)**. En paralelo, **firmar `respaldo_legacy`** en el SQL Editor cierra #16 y #15.
+- **`main` está en verde**: el build de CI dejó de necesitar secretos (#50, `8b0617b`) y la corrida
+  `40796836397` cerró `success` con los cinco pasos, `Build Next.js` incluido. Ya no hay un «rojo esperado»
+  que enseñe a ignorar el CI.
+- `AGENTS.md` **ya no guarda estado**. Los conteos y las fechas vivían ahí y se vencían solos —por eso cada
+  cierre re-fechaba §8, y por eso tres specs arrastran el «279 tests» de octubre—. El estado es **este
+  archivo**, y `AGENTS.md` §0 ahora manda leerlo primero. Regla nueva: **§7.13, sin clientes al importar**.
 - **Panel probado a medias** (28-10, `next dev` + la clave de Química): `/admin` sin credenciales da `401`
   con su `WWW-Authenticate`; con la clave da `200` y el cartel «Panel sin configurar · falta
-  `SUPABASE_SERVICE_ROLE_KEY`». O sea: el Basic Auth ya está conectado y lo único que falta para verlo con
-  datos es la clave de servicio. `GET /` con los datos vivos da **500** (ver hallazgo 3).
-- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): **46 tareas** —11
-  `backlog`, 6 `review`, 29 `done`—. La sesión movió a `done` *«Aplicar DDL del MVP en otjph»* y *«RLS y
-  Storage: cerrar lectura anónima y bucket comprobantes»*, creó la tarea de la Home en 500 y publicó un
-  **AVANCE** que corrige la nota de **BLOQUEO** del 27-10 (los 26 desajustes ya no están; la bandeja no se
-  edita, se supera con otra nota).
+  `SUPABASE_SERVICE_ROLE_KEY`». El Basic Auth está conectado; falta la clave de servicio para verlo con datos.
 - `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `VERCEL_OIDC_TOKEN` y
-  `ADMIN_PASSWORD` (la puso Juanma el 28-10). Faltan `SUPABASE_SERVICE_ROLE_KEY` —sin ella el panel
-  responde `503` y **no se puede ver el panel en vivo**—, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`,
-  `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*` (#20, Enzo).
+  `ADMIN_PASSWORD` (la puso Juanma el 28-10). Faltan `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`,
+  `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*` (#20, Enzo).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **397 tests** en 29 archivos ·
-  `docs:links` 0 links sin resolver · `npm run build` compila sin `RESEND_API_KEY`.
-- **GitHub**: `main` y `origin/main` al día (sesión #21 completa, desde `65657d5`). Las corridas `40792252142`
-  y `40793704253` dejan **Typecheck, Lint, Test y Docs links en verde** y **`Build Next.js` en rojo** con
-  `supabaseKey is required` en `/api/notifications`: es el **rojo esperado** por los secretos de Actions
-  que faltan (#20), no un defecto del repo.
-- BD prod `otjph…`: **VERDE** con el `bd:viva` del 28-10 (`01`–`06` aplicadas). Fuera del control, por
-  ser invisible a la anon key: `respaldo_legacy`, el límite de 5 MB y los MIME de cada bucket.
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **402 tests** en 30 archivos ·
+  `docs:links` 0 links sin resolver · `npm run build` compila con el **entorno vacío** (probado con las
+  ocho variables que la workflow pasa, todas en blanco).
+- **GitHub**: `main` hasta `d53fffe`. La corrida `40796836397` (`28e59ff`) cerró **success**: Typecheck,
+  Lint, Test, Docs links y **Build Next.js** en verde. Los secretos de Actions siguen faltando, pero el
+  build ya no los necesita.
+- BD prod `otjph…`: **VERDE** con el `bd:viva` del 28-10 (`01`–`06` aplicadas). Fuera del control, por ser
+  invisible a la anon key: `respaldo_legacy`, el límite de 5 MB y los MIME de cada bucket.
+- **Tablero**: auditado y sincronizado con `npm run teams` —cuatro tareas nuevas y dos notas, AVANCE y
+  BLOQUEO—. Sus números se leen con `npm run teams -- leer`; no se cachean acá ([`teams.md`](docs/agentes/teams.md) §7).
 
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
 |---|---|---|
-| #15 · D1 | cerrar la migración del MVP | ✅ en todo lo que mide `bd:viva` (verde); sigue abierto por la firma de `respaldo_legacy` |
-| #16 · B1 | respaldo + `00`–`06` aplicadas en `otjph` | ✅ `01`–`06` aplicadas y medidas; falta firmar `respaldo_legacy` (Juanma/Isabella) |
+| #15 · D1 | cerrar la migración del MVP | ✅ en todo lo que mide `bd:viva`; sigue abierto por la firma de `respaldo_legacy` |
+| #16 · B1 | respaldo + `00`–`06` aplicadas en `otjph` | ✅ `01`–`06` aplicadas y medidas; falta firmar `respaldo_legacy` |
 | #17 · B3 | `06`: `precio > 0`, `ET007`, mensajes del panel | ✅ código, test y `06` aplicada |
-| #18 · B4 | cron de vencidos los viernes | ✅ `cron-auth`, ruta, `vercel.json`; falta `CRON_SECRET` |
+| #18 · B4 | cron de vencidos los viernes | ✅ código y test; falta `CRON_SECRET` para correrlo en vivo |
 | #19 · A1 | el panel avisa si el remito no salió | ✅ helper + panel + tests |
 | #20 · O1 | secretos y entorno de producción | ⏳ Enzo; **es el camino crítico** |
-| #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ **cerrado**: control de buckets corregido y verde (`65657d5`) |
-| #22 · B5 | semilla y fotos de la beta | ⏳ el seed del repo no está aplicado y no hay fotos |
-| #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste, bloqueada por #20 y #22 |
+| #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
+| #22 · B5 | semilla y fotos de la beta | ⏳ el seed del repo no está aplicado en `otjph` y no hay fotos |
+| #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste, bloqueada sólo por #20 y #22 |
+| #49 | la Home en 500 por una `imagen_url` de host ajeno | ⏳ defensa en `backlog`; el seed de #22 apaga el síntoma |
+| #50 | el build de CI deja de necesitar secretos | ✅ cerrado (`8b0617b`); **CI en verde** |
+| #51 | el seed publicaba «laboratorio» | ✅ cerrado (`d53fffe`); el test ahora mira los datos |
 
-## Hecho (2026-10-28, #21 · el control de los buckets de `bd:viva`)
+## Hecho (2026-10-28, segunda sesión · #50, #51 y el contrato)
 | Cambio | Qué dejó |
 |---|---|
-| `scripts/bd-viva-reglas.mjs` + `verificar-bd-viva.mjs` | `evaluarBucket` (una sonda a la ficha del bucket) se parte en `evaluarBucketExistente` —ruta del objeto autenticado: `NoSuchKey` = existe— y `evaluarBucketPublico` —ruta pública: `NoSuchBucket` = privado—, con `rutaDeExistencia`, `rutaPublica` y `CLAVE_INEXISTENTE`. `BUCKETS` pasa de nombres a `{nombre, publico}`. El `statusCode` del cuerpo no decide: `NoSuchKey` y `NoSuchBucket` llegan los dos con `404` y HTTP 400. |
-| `tests/front/bd-viva.test.ts` | 22 tests (16 → 22): las dos sondas, el bucket de comprobantes público como fuga, el de productos privado como tienda sin fotos y la guardia de que el script **no** vuelva a usar la ruta de metadatos. |
-| `npm run bd:viva` | **VERDE** contra `otjph`, con los dos buckets y su visibilidad. |
-| Docs | `bd-mvp` §4.4/§5/§9.5 (el falso negativo y las dos sondas), `migracion-otjph` §7.5 y §8 (la medición del 28-10), `AGENTS.md` §8/§9, la skill `bd-viva` §3, y las filas que daban `bd:viva` por rojo en `admin`, `front-mvp` e `integracion-continua` (commit `95604d8`). |
-| GitHub | #21 cerrado por el mensaje de `65657d5` **con** su comentario de cinco bloques y la salida cruda de `bd:viva`. |
-| Revisión en contexto limpio | Dos ejes (Estándares y Spec) sobre `65657d5`. **Seis hallazgos, los seis corregidos en el commit de cierre:** el `return estado === 404` de `esBucketAusente` contradecía su propio comentario —un 404 sin `code` se leía como «no existe» y, en la sonda pública, como «privado»: la dirección sensible— y ahora **una respuesta sin `code` conocido se reporta, no se interpreta**; «no se pudo medir» ya no pasa por «privado»; el cierre dice **cuántos** controles quedaron como `nota`; `AGENTS.md` §8/§9 y el encabezado quedaron con el conteo y la fecha reales; y los specs de `admin`, `checkout`, `front-mvp`, `integracion-continua` y `migracion-otjph` dejaron de afirmar que la base está a medio migrar, con la referencia `archivo:línea` del seam actualizada. Un solo hallazgo era un falso positivo del revisor (leyó #21 antes de que se publicara el comentario de evidencia). |
-| Evidencia medida | `GET /storage/v1/bucket` con la anon key devuelve `[]`; `/storage/v1/bucket/productos` → `NoSuchBucket` aunque el bucket exista; `/storage/v1/object/authenticated/productos/…` → `NoSuchKey`; `/storage/v1/object/public/comprobantes/…` → `NoSuchBucket` (privado) y el mismo pedido sobre `productos` → `NoSuchKey` (público). |
-
-## Hecho (2026-10-27/28, en repo, comprimido)
-- **Tanda del 27-10:** los nueve specs y sus dieciséis tajadas (#33–#48) se implementaron en el orden de
-  [`docs/estado/ORDEN_DE_EJECUCION.md`](docs/estado/ORDEN_DE_EJECUCION.md) —dinero, CI, seguridad,
-  fundacionales, cosmética y gobernanza—, y los nueve issues `T0`–`T8` se cerraron con evidencia (**#48**).
-- **Cierre beta en repo:** `00` corregida (marcador real y conteos), `06` (`precio > 0` y `ET007`), cron
-  de vencidos con `CRON_SECRET`, el panel avisa si el remito no salió (A1), `bd:viva` ampliado a toda la
-  superficie pública (B2) y seed idempotente con un producto bajo el umbral (B5). El detalle vive en
-  [`bd-mvp`](docs/specs/bd-mvp/spec.md) y en [`migracion-otjph`](docs/specs/migracion-otjph/spec.md).
-- **Auditoría y retro del 27-10:** el tablero entra en el contrato (`AGENTS.md` §1/§3/§10/§11/§12,
-  [`teams.md`](docs/agentes/teams.md)) y nace `npm run teams`; `docs:links` entra en la definición de
-  terminado.
+| `src/app/api/notifications/route.ts` | `tablero()` perezoso y memoizado, igual que `correo()`, en lugar del `createClient` del cuerpo del módulo. Sin esto, `Collecting page data` moría con `supabaseKey is required` apenas el entorno no traía la clave —que es exactamente CI—. |
+| `tests/front/notificaciones.test.ts` (nuevo, 3 tests) | Importa la ruta con el entorno vacío —reproduce el rojo de CI— y falla si alguien vuelve a asignar `createClient(...)` al importar o a leer las cuatro claves fuera del accesor. |
+| `supabase/seed.sql` + `tests/front/sobre-el-proyecto.test.ts` | El copy del Alcohol en Gel pasa a «elaborado por el Departamento de Química»; el vocabulario retirado ahora se chequea en **todo** el SQL de `supabase/`, no sólo en `src/`. Importaba ya: #22 iba a sembrar ese texto para la demo. |
+| `AGENTS.md` | §0 manda leer `memory.md` primero; §2 suma el Estado como fuente y aclara que no es contrato; §7.13 «sin clientes al importar»; §8 deja de congelar conteos y fechas; §10 alinea `done` con la excepción de documentación y configuración; §12 arranca por `memory.md` y cierra con `docs:links`. |
+| Revisión en contexto limpio | Dos ejes sobre los 38 commits de `7ad618c..HEAD` (99 archivos, +7165/−845): **19 hallazgos** (12 de estándares y 7 de spec). Los dos bugs —el cron que trata la configuración faltante como fallo transitorio y el total pegajoso del checkout— y la deuda quedaron como **tareas nuevas del tablero**; no se parchearon en la sesión del review (AGENTS §6.5). |
+| GitHub | **#50** y **#51** creados, arreglados y cerrados con su comentario de evidencia; commits `8b0617b` (fix + test), `28e59ff` (AGENTS.md) y `d53fffe` (seed) en `main`. |
+| Teams | Cuatro tareas nuevas —firmar `respaldo_legacy`, el cron, el total del checkout y `bd:viva` con `admin`/`roll`— más la deuda del review; y dos notas: AVANCE del cierre y BLOQUEO con las cuatro acciones humanas que quedan. |
 
 ## Hallazgos abiertos
-> **Los hallazgos de código están cerrados y la base viva ya no es uno.** Lo que queda son claves, datos
-> de demo y verificación en pantalla.
-1. 🔴 **Secretos (#20, Enzo):** sin `SUPABASE_SERVICE_ROLE_KEY` no hay panel, checkout ni cron en vivo, y
-   **es lo único que separa a la beta de la demo**. `ADMIN_PASSWORD` ya está.
-2. 🟡 **Seed y fotos (#22):** el catálogo vivo no es el del repo (stock 50/30/100 sin nadie bajo el
-   umbral, `imagen_url` en `ejemplo.com`), así que el popup de alerta no tiene qué mostrar y la tienda no
-   tiene fotos. Se arregla corriendo `supabase/seed.sql` y subiendo fotos desde `/admin`.
+> Los hallazgos de código del cierre anterior están cerrados y la base viva ya no es uno. Lo que queda son
+> claves, datos de demo y verificación en pantalla, más la deuda que dejó el review de esta sesión —que ya
+> tiene tarea—.
+1. 🔴 **Secretos (#20, Enzo):** sin `SUPABASE_SERVICE_ROLE_KEY` no hay panel con datos, ni checkout, ni cron
+   en vivo, y **es lo único que separa a la beta de la demo**. `ADMIN_PASSWORD` ya está.
+2. 🟡 **Seed y fotos (#22):** el catálogo vivo no es el del repo (stock 50/30/100 sin nadie bajo el umbral,
+   `imagen_url` en `ejemplo.com`), así que el popup de alerta no tiene qué mostrar y la tienda no tiene
+   fotos. Se arregla corriendo `supabase/seed.sql` y subiendo fotos desde `/admin`. El seed ya no trae copy
+   de laboratorio (#51).
 3. 🔴 **La Home devuelve 500 con esos datos ([#49](https://github.com/juanmamerodio/esenciatecnica/issues/49)):**
-   medido el 28-10 con `next dev` y la base viva (`GET /` → `500`): `next/image` tira al validar el `src`
-   de `https://ejemplo.com/…`, un host fuera de `images.remotePatterns`, y el `onError` del placeholder no
-   corre porque la excepción es del render. Una fila con un host ajeno al contrato tumba la página entera.
-   Se desbloquea con el punto 2 (el seed deja `imagen_url` en `NULL`); la defensa —placeholder para hosts
-   ajenos, con test— es una tarea `backlog` del tablero.
+   `next/image` tira al validar un `src` fuera de `images.remotePatterns` y el `onError` no corre porque la
+   excepción es del render. El seed lo apaga (deja `imagen_url` en `NULL`); la **defensa** —placeholder para
+   hosts ajenos, con test— sigue en `backlog` y la encontró de nuevo el review de spec.
 4. 🟡 **`respaldo_legacy` sin firmar:** `bd:viva` no puede verlo (la anon key no lee otros esquemas); lo
-   firma quien corrió `00` en el SQL Editor.
+   firma quien corrió `00` en el SQL Editor. Tarea nueva del tablero.
 5. 🟡 **Verificación en pantalla (#23, Celeste):** ninguna tajada del front se vio en un navegador con la
-   base migrada; bloqueada por #20 y #22. El panel ya se probó a medias el 28-10 (Basic Auth y el cartel de
+   base migrada; bloqueada por #20 y #22. El panel se probó a medias el 28-10 (Basic Auth y el cartel de
    falta de clave), no el flujo.
-6. 🟡 **Deuda de las skills del proyecto (revisión del 28-10):** la skill de `bd-viva` no nombra
-   `scripts/verificar-bd-viva.mjs`, `tablero-teams` copia el bloque de comandos en vez de apuntarlo y
-   falta `PARÁMETROS DE ENTRADA`; el test fija exactamente dos skills. Tarea `backlog` del tablero.
-7. 🟡 **Contrato del tablero vs excepción de documentación:** `teams.md` §3 define `done` como «commit y
-   test», pero `AGENTS.md` §8 exceptúa documentación y configuración, y `npm run teams` rechaza escribir
-   una nota sobre una tarea que ya está en su estado (no hay `--forzar`). Decidir con el equipo si §3 la
-   nombra.
-8. ⏳ **Línea base de tests desactualizada:** `AGENTS.md` §8 ya dice **397 en 29** (lo corrigió esta
-   sesión, porque su bloque se re-fechó), pero `carrito`, `catalogo` y `detalle-producto` en su §8 siguen
-   con el número viejo. Tarea `backlog` del tablero, todavía abierta por esos tres specs.
+6. 🟡 **Deuda del review del 28-10:** dos bugs con tarea propia (el cron y el total del checkout), `bd:viva`
+   tolerando que `admin`/`roll` no existan, y el resto —`estadoHttp()` sin consumidor, el guard de env
+   duplicado en los tres servicios de servidor, `describirError` repetido, los `alter table` de más en `00`,
+   `codigoDe` duplicado en el PostgREST falso, `format.ts` como módulo del dinero— en «Deuda de estándares
+   del cierre beta».
+7. 🟡 **Deuda de las skills del proyecto (revisión del 28-10):** la skill de `bd-viva` no nombra
+   `scripts/verificar-bd-viva.mjs`, `tablero-teams` copia el bloque de comandos en vez de apuntarlo y falta
+   `PARÁMETROS DE ENTRADA`; el test fija exactamente dos skills. Tarea `backlog` del tablero.
+8. ✅ **Contrato del tablero vs excepción de documentación:** `AGENTS.md` §10 ahora nombra la excepción de
+   §8, así que `done` no se contradice entre documentos. Queda decidir si `teams.md` §3 la nombra también.
+9. 🟡 **Línea base de tests en tres specs:** `carrito`, `catalogo` y `detalle-producto` siguen diciendo
+   «279 tests en 23 archivos». `AGENTS.md` §8 ya no congela conteos —esa es la regla que faltaba—, así que
+   queda limpiar los tres. Tarea `backlog` del tablero.
 
 ## Reglas
 - 1 ticket = 1 sesión = 1 commit quirúrgico. TDD. Español único. Sin IA. Sin envío.
+- **Sin clientes al importar** (AGENTS §7.13): Supabase y Resend se instancian dentro de la función que los
+  usa. Un cliente en el cuerpo del módulo ata `npm run build` a que la clave exista y tumba el build en CI.
+- **El contrato no guarda estado** (AGENTS §8): los conteos, las fechas y el semáforo viven **acá**;
+  `AGENTS.md` guarda las reglas y qué mide cada comando. Un número congelado en el contrato ya nació viejo.
 - Dinero `NUMERIC(12,2)`; `precio > 0` y `monto > 0`; total derivado; un remito por comprobante; un
   comprobante pendiente por pedido.
 - El total **se calcula**, se redondea y se **muestra** con la misma regla: `subtotalDeLinea` y
@@ -138,6 +127,11 @@
   para `/admin` y `/api/admin`. El test de T0 verifica que el middleware **no** negocia idioma (ADR 0005).
 - **`foto_url` = clave del objeto** (bucket privado, signed URL al leer); **`imagen_url` = URL pública**
   (bucket público `productos`). El seed no inventa fotos: se suben desde `/admin`.
+- **El build no lee secretos.** Que compile con el entorno vacío **no** significa que la app funcione sin
+  claves: significa que un fork y CI pueden correr la puerta completa. Si el build vuelve a pedir una clave,
+  hay un cliente instanciado al importar (§7.13).
+- **Una superficie pública se prueba contra la base viva, no contra el build.** El rojo del build era del
+  build; el de los buckets era del control (`bd-viva`).
 - **Vitest resuelve `@/`** con un alias en `vitest.config.ts`, porque `admin.ts` importa las listas
   canónicas de estados como valores.
 - El panel **no** expone la clave del bucket: el modelo de lectura entrega sólo la signed URL.
