@@ -19,10 +19,15 @@
   fotos: es **B5 · #22**, y necesita la service role y una pasada por `/admin`.
 - Decisión vigente: **Juanma aplica las migraciones con revisión de Isabella**; el DDL sigue siendo de
   ella. Queda **una** firma que la anon key no puede dar: `respaldo_legacy` y sus conteos, en el SQL Editor.
-- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): **45 tareas** —10
+- **Panel probado a medias** (28-10, `next dev` + la clave de Química): `/admin` sin credenciales da `401`
+  con su `WWW-Authenticate`; con la clave da `200` y el cartel «Panel sin configurar · falta
+  `SUPABASE_SERVICE_ROLE_KEY`». O sea: el Basic Auth ya está conectado y lo único que falta para verlo con
+  datos es la clave de servicio. `GET /` con los datos vivos da **500** (ver hallazgo 3).
+- **Tablero de Teams** (leído con `npm run teams -- leer`, nunca cacheado acá): **46 tareas** —11
   `backlog`, 6 `review`, 29 `done`—. La sesión movió a `done` *«Aplicar DDL del MVP en otjph»* y *«RLS y
-  Storage: cerrar lectura anónima y bucket comprobantes»*, y publicó un **AVANCE** que corrige la nota de
-  **BLOQUEO** del 27-10 (los 26 desajustes ya no están; la bandeja no se edita, se supera con otra nota).
+  Storage: cerrar lectura anónima y bucket comprobantes»*, creó la tarea de la Home en 500 y publicó un
+  **AVANCE** que corrige la nota de **BLOQUEO** del 27-10 (los 26 desajustes ya no están; la bandeja no se
+  edita, se supera con otra nota).
 - `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `VERCEL_OIDC_TOKEN` y
   `ADMIN_PASSWORD` (la puso Juanma el 28-10). Faltan `SUPABASE_SERVICE_ROLE_KEY` —sin ella el panel
   responde `503` y **no se puede ver el panel en vivo**—, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`,
@@ -82,18 +87,25 @@
 2. 🟡 **Seed y fotos (#22):** el catálogo vivo no es el del repo (stock 50/30/100 sin nadie bajo el
    umbral, `imagen_url` en `ejemplo.com`), así que el popup de alerta no tiene qué mostrar y la tienda no
    tiene fotos. Se arregla corriendo `supabase/seed.sql` y subiendo fotos desde `/admin`.
-3. 🟡 **`respaldo_legacy` sin firmar:** `bd:viva` no puede verlo (la anon key no lee otros esquemas); lo
+3. 🔴 **La Home devuelve 500 con esos datos ([#49](https://github.com/juanmamerodio/esenciatecnica/issues/49)):**
+   medido el 28-10 con `next dev` y la base viva (`GET /` → `500`): `next/image` tira al validar el `src`
+   de `https://ejemplo.com/…`, un host fuera de `images.remotePatterns`, y el `onError` del placeholder no
+   corre porque la excepción es del render. Una fila con un host ajeno al contrato tumba la página entera.
+   Se desbloquea con el punto 2 (el seed deja `imagen_url` en `NULL`); la defensa —placeholder para hosts
+   ajenos, con test— es una tarea `backlog` del tablero.
+4. 🟡 **`respaldo_legacy` sin firmar:** `bd:viva` no puede verlo (la anon key no lee otros esquemas); lo
    firma quien corrió `00` en el SQL Editor.
-4. 🟡 **Verificación en pantalla (#23, Celeste):** ninguna tajada del front se vio en un navegador con la
-   base migrada; bloqueada por #20 y #22.
-5. 🟡 **Deuda de las skills del proyecto (revisión del 28-10):** la skill de `bd-viva` no nombra
+5. 🟡 **Verificación en pantalla (#23, Celeste):** ninguna tajada del front se vio en un navegador con la
+   base migrada; bloqueada por #20 y #22. El panel ya se probó a medias el 28-10 (Basic Auth y el cartel de
+   falta de clave), no el flujo.
+6. 🟡 **Deuda de las skills del proyecto (revisión del 28-10):** la skill de `bd-viva` no nombra
    `scripts/verificar-bd-viva.mjs`, `tablero-teams` copia el bloque de comandos en vez de apuntarlo y
    falta `PARÁMETROS DE ENTRADA`; el test fija exactamente dos skills. Tarea `backlog` del tablero.
-6. 🟡 **Contrato del tablero vs excepción de documentación:** `teams.md` §3 define `done` como «commit y
+7. 🟡 **Contrato del tablero vs excepción de documentación:** `teams.md` §3 define `done` como «commit y
    test», pero `AGENTS.md` §8 exceptúa documentación y configuración, y `npm run teams` rechaza escribir
    una nota sobre una tarea que ya está en su estado (no hay `--forzar`). Decidir con el equipo si §3 la
    nombra.
-7. ⏳ **Línea base de tests desactualizada:** `AGENTS.md` §8 ya dice **397 en 29** (lo corrigió esta
+8. ⏳ **Línea base de tests desactualizada:** `AGENTS.md` §8 ya dice **397 en 29** (lo corrigió esta
    sesión, porque su bloque se re-fechó), pero `carrito`, `catalogo` y `detalle-producto` en su §8 siguen
    con el número viejo. Tarea `backlog` del tablero, todavía abierta por esos tres specs.
 
