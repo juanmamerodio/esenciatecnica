@@ -33,6 +33,11 @@ distinto de cero y resume cada desajuste nombrando tabla y columnas.
   vacía. Sólo `401`/`403` prueban que está cerrada.
 - **`bd:viva` no ejecuta RPC destructivas:** `cancelar_pedidos_vencidos()` se consulta con `GET` y las
   demás con argumentos imposibles; una respuesta fuera de `401/403` delata que `anon` puede ejecutarlas.
+- **Un bucket que existe también puede dar `NoSuchBucket`.** `anon` no ve ningún bucket en la lista, así
+  que la ruta de metadatos contesta «Bucket not found» aunque el bucket esté. La sonda que sirve pide **un
+  objeto que no está** (`/storage/v1/object/authenticated/{bucket}/…`: `NoSuchKey` = existe) y después la
+  pública, que distingue público de privado (`NoSuchBucket` = privado). Si una `FALLA` nombra un bucket,
+  probá el objeto antes de creerle a la ficha. Medido el 28-10 con `productos`, que existía.
 
 ## 4. PASOS DE EJECUCIÓN
 

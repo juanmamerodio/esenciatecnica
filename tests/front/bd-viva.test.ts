@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BUCKETS,
+  CLAVE_INEXISTENTE,
   COLUMNAS_LEGACY,
   COLUMNAS_PUBLICAS,
   COLUMNAS_VISTA,
@@ -10,10 +11,13 @@ import {
   columnasFaltantes,
   columnasProhibidas,
   esPermisoDenegado,
+  evaluarBucketExistente,
+  evaluarBucketPublico,
   evaluarEscrituraCerrada,
   evaluarLecturaCerrada,
   evaluarRpc,
-  evaluarBucket,
+  rutaDeExistencia,
+  rutaPublica,
 } from '../../scripts/bd-viva-reglas.mjs';
 import { leer } from './ayudantes';
 
@@ -78,8 +82,11 @@ describe('B2 · la matriz de tablas cerradas es la del contrato', () => {
     expect(COLUMNAS_PUBLICAS).toEqual(expect.arrayContaining(['producto', 'stock', 'vista_catalogo']));
   });
 
-  it('declara los dos buckets y las cuatro RPC', () => {
-    expect(BUCKETS).toEqual(['comprobantes', 'productos']);
+  it('declara los dos buckets con su visibilidad y las cuatro RPC', () => {
+    expect(BUCKETS).toEqual([
+      { nombre: 'comprobantes', publico: false },
+      { nombre: 'productos', publico: true },
+    ]);
     expect(Object.keys(RPC).sort()).toEqual([
       'aprobar_comprobante',
       'cancelar_pedidos_vencidos',
@@ -135,12 +142,45 @@ describe('B2 · las decisiones no confunden cerrar con estar vacío', () => {
     expect(evaluarRpc(401).motivo).toMatch(/cerrada/);
   });
 
-  it('un bucket ausente (NoSuchBucket) no se confunde con uno privado sin permiso', () => {
-    expect(evaluarBucket(200, []).ok).toBe(true);
-    expect(evaluarBucket(400, { code: 'NoSuchBucket', statusCode: '404' }).ok).toBe(false);
-    expect(evaluarBucket(400, { statusCode: '403', error: 'Unauthorized' }).ok).toBe(true);
-    expect(evaluarBucket(403, null).ok).toBe(true);
-    expect(evaluarBucket(400, { message: 'otra cosa' }).ok).toBe(false);
+  it('un bucket existe si la sonda autenticada encuentra el bucket aunque el objeto no esté', () => {
+    const existe = { code: 'NoSuchKey', statusCode: '404', message: 'Object not found' };
+    expect(evaluarBucketExistente(400, existe).ok).toBe(true);
+    expect(evaluarBucketExistente(400, existe).motivo).toMatch(/existe/);
+
+    // Sin permiso también prueba que existe: la anon key no lo ve, pero la API lo conoce.
+    expect(evaluarBucketExistente(403, null).ok).toBe(true);
+    expect(evaluarBucketExistente(400, { statusCode: '403' }).ok).toBe(true);
+    expect(evaluarBucketExistente(200, null).ok).toBe(true);
+  });
+
+  it('un bucket ausente (NoSuchBucket) no se confunde con uno existente', () => {
+    const ausente = { code: 'NoSuchBucket', statusCode: '404', message: 'Bucket not found' };
+    expect(evaluarBucketExistente(400, ausente).ok).toBe(false);
+    expect(evaluarBucketExistente(400, ausente).motivo).toMatch(/no existe/);
+    expect(evaluarBucketExistente(400, { message: 'otra cosa' }).ok).toBe(false);
+  });
+
+  it('la visibilidad se mide con la ruta pública: el privado no resuelve, el público sí', () => {
+    const ausente = { code: 'NoSuchBucket', statusCode: '404', message: 'Bucket not found' };
+    const existe = { code: 'NoSuchKey', statusCode: '404', message: 'Object not found' };
+
+    expect(evaluarBucketPublico(false, 400, ausente).motivo).toMatch(/privado/);
+    expect(evaluarBucketPublico(true, 400, existe).motivo).toMatch(/público/);
+    expect(evaluarBucketPublico(false, 401, null).ok).toBe(true);
+  });
+
+  it('un bucket de comprobantes público es una fuga: el contrato lo quiere privado', () => {
+    const existe = { code: 'NoSuchKey', statusCode: '404', message: 'Object not found' };
+    const revision = evaluarBucketPublico(false, 400, existe);
+    expect(revision.ok).toBe(false);
+    expect(revision.motivo).toMatch(/expuesto/);
+  });
+
+  it('un bucket de productos privado rompe la tienda: el contrato lo quiere público', () => {
+    const ausente = { code: 'NoSuchBucket', statusCode: '404', message: 'Bucket not found' };
+    const revision = evaluarBucketPublico(true, 400, ausente);
+    expect(revision.ok).toBe(false);
+    expect(revision.motivo).toMatch(/fotos/);
   });
 
   it('detecta columnas del contrato faltantes y columnas legacy que sobran', () => {
@@ -174,5 +214,24 @@ describe('B2 · el script usa las reglas y no la service role', () => {
     expect(script).toMatch(/COLUMNAS_VISTA/);
     expect(script).toMatch(/BUCKETS/);
     expect(script).toMatch(/TABLAS_CERRADAS/);
+  });
+
+  it('sondea los buckets por la ruta del objeto, no por la de metadatos', () => {
+    // La ruta de metadatos (`/storage/v1/bucket/{id}`) da un falso `NoSuchBucket` con la anon key:
+    // la lista de buckets que `anon` ve está vacía, así que la API contesta "Bucket not found"
+    // aunque el bucket exista. Medido el 2026-10-28 contra `otjph`: `productos` existía y aun así
+    // el control lo daba por ausente, dejando la puerta de cierre en rojo para siempre.
+    expect(script).not.toMatch(/\/storage\/v1\/bucket/);
+    expect(script).toMatch(/rutaDeExistencia/);
+    expect(script).toMatch(/rutaPublica/);
+  });
+
+  it('las sondas piden un objeto inexistente, una por cada visibilidad', () => {
+    expect(rutaDeExistencia('productos')).toBe(
+      `/storage/v1/object/authenticated/productos/${CLAVE_INEXISTENTE}`,
+    );
+    expect(rutaPublica('comprobantes')).toBe(
+      `/storage/v1/object/public/comprobantes/${CLAVE_INEXISTENTE}`,
+    );
   });
 });

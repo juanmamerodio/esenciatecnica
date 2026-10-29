@@ -1,6 +1,6 @@
 # Spec · Cerrar la migración del MVP en `otjph`
 
-> **Feature:** `migracion-otjph` · **Estado:** migraciones escritas, falta aplicarlas · **Fecha:** 2026-10-26, revisado el 2026-10-27.
+> **Feature:** `migracion-otjph` · **Estado:** `01`–`06` aplicadas en `otjph`, `bd:viva` en **verde**; falta la firma de `respaldo_legacy` (no visible con la anon key) · **Fecha:** 2026-10-26, revisado el 2026-10-28.
 > **Origen:** auditoría de la sesión del 26-10 sobre el estado real de `otjphjnrwihqzzhbfnmh`.
 > **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) + `supabase/migrations/`.
 > **Responsable:** Isabella Infante (Database & SQL Architecture).
@@ -228,8 +228,30 @@ RPC cerradas a `anon`, los buckets y `detalle_carrito`). El total medido es **26
 
 El detalle por superficie está en [`bd-mvp/spec.md`](../bd-mvp/spec.md) §9.1 y §9.2, y el resumen vigente
 en [`memory.md`](../../../memory.md). La escritura anónima ya está denegada: la fuga es de **lectura**.
-`respaldo_legacy` tampoco existe en `otjph` (`404`): lo crea `00`, que hay que correr **antes** de `01`.
+`respaldo_legacy` tampoco existía en `otjph` (`404`): lo crea `00`, que hay que correr **antes** de `01`.
 El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
+
+### 7.5 La medición del 28-10 cierra en verde
+
+Con `01`–`06` aplicadas, `npm run bd:viva` del 2026-10-28 termina en
+`VERDE · el proyecto vivo coincide con el esquema versionado`: las diez tablas cerradas responden
+`401`/`403` (no `200 []`), la vista tiene sus doce columnas, `detalle_carrito` y las columnas legacy no
+existen, las cuatro RPC existen y están cerradas a `anon`, y los dos buckets existen —`comprobantes`
+privado y `productos` público—.
+
+El último control que quedaba en rojo era un **defecto del propio control**, no del proyecto vivo: la
+sonda de los buckets pedía `/storage/v1/bucket/{id}` con la anon key, y esa ruta contesta
+`NoSuchBucket` aunque el bucket exista, porque `anon` no ve ningún bucket en la lista. Corregido en
+[#21](https://github.com/juanmamerodio/esenciatecnica/issues/21); el detalle de las dos sondas está en
+[`bd-mvp/spec.md`](../bd-mvp/spec.md) §9.5.
+
+Sigue **afuera** del control lo que la anon key no puede ver: `respaldo_legacy` y su conteo —lo firma
+quien corrió `00` en el SQL Editor—, el límite de 5 MB y los tipos MIME de cada bucket.
+
+Los **datos** vivos tampoco son los del seed del repo: los tres productos traen otro stock
+(50/30/100, ninguno bajo el umbral) y `imagen_url` apunta a `ejemplo.com`, así que no disparan la alerta
+del panel ni muestran fotos. Eso es B5 · [#22](https://github.com/juanmamerodio/esenciatecnica/issues/22),
+no esta migración.
 
 ---
 
@@ -247,11 +269,12 @@ El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
 | `supabase/seed.sql` | implementado | Tres productos idempotentes, stock no destructivo y uno bajo el umbral; `tests/db/seed.test.ts`; commit `943e380`. |
 | `bd:viva` con las diez tablas cerradas, las RPC cerradas a `anon`, los buckets y `detalle_carrito` | implementado | `scripts/bd-viva-reglas.mjs:11-73`, `scripts/verificar-bd-viva.mjs:186-222`; `tests/front/bd-viva.test.ts`; commit `fed815a`. |
 | Cron de vencidos los viernes | implementado | `vercel.json` (`59 2 * * 6`), `src/app/api/cron/vencidos/route.ts`; `tests/front/cron.test.ts`; commit `8d0bf44`. |
-| Aplicar `00`–`06` y el seed en `otjph` | pendiente | El proyecto vivo sigue con el esquema legacy y **26 desajustes** (B1 · #16, B3 · #17). Es el único camino crítico. |
-| `npm run bd:viva` en verde | pendiente | Es el criterio de cierre y hoy está **rojo** (#15). |
-| Cerrar la lectura anónima y borrar lo retirado | pendiente | El `200 []` de las diez tablas, `stock.porcentaje` y `detalle_carrito` los mide `bd:viva`; los cierran `01`–`03` al aplicarse. |
-| Buckets `comprobantes` y `productos` | pendiente | Hoy dan `NoSuchBucket` con la anon key; los crean `04` y `05` (B2 · #21 lo verifica). |
-| `respaldo_legacy` | pendiente | No existe en `otjph` (`404`); lo crea `00`, que hay que correr **antes** de `01`. |
+| Aplicar `00`–`06` en `otjph` | implementado | `bd:viva` del 28-10 en **verde**: `01`–`06` aplicadas (esquema, vista, RLS, RPC y buckets). De `00` queda la firma de `respaldo_legacy` (B1 · #16, B3 · #17). |
+| Correr `supabase/seed.sql` en `otjph` | sin verificar | Los datos vivos no son los del seed: stock 50/30/100 (ninguno bajo el umbral) e `imagen_url` en `ejemplo.com`. Es B5 · #22. |
+| `npm run bd:viva` en verde | implementado | Salida del 28-10: `VERDE · el proyecto vivo coincide con el esquema versionado` (#15). |
+| Cerrar la lectura anónima y borrar lo retirado | implementado | Las diez tablas responden `401`/`403`; `detalle_carrito`, `stock.porcentaje`, `detalle_del_pedido.id_detalle` y la vista vieja ya no existen. |
+| Buckets `comprobantes` y `productos` | implementado | Sondas anónimas del 28-10: `comprobantes` existe y es privado; `productos` existe y es público (B2 · #21). |
+| `respaldo_legacy` | sin verificar | La anon key no ve otros esquemas: lo firma quien corrió `00` en el SQL Editor. |
 | Secretos y entorno de producción | pendiente | O1 · #20 (Enzo): `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `CRON_SECRET` y `NEXT_PUBLIC_TRANSFERENCIA_*`. |
 | Verificación manual en navegador con la base migrada | pendiente | B6 · #23 (Celeste), bloqueada por #16 y #20. |
 | Scheduler del cron (antes fuera de alcance) | implementado | B4 · #18: `vercel.json` + `CRON_SECRET`; fallback manual en `bd-mvp` §9.3. |
@@ -260,14 +283,15 @@ El cierre sigue siendo el mismo y no se negocia: **`npm run bd:viva` en verde**.
 | `npm test` como evidencia de la base viva | retirado | Corre contra PGlite y deja `otjph` a medio migrar en verde; el único control es `bd:viva` (`memory.md`, reglas). |
 
 En verde **en repo**: `typecheck` y `lint` en 0, `npm test` con 388 tests en 29 archivos y `npm run build`
-que compila sin `RESEND_API_KEY`. Nada de eso dice que la base viva esté bien: la medición del 27-10 la
-deja en **26 desajustes** y `bd:viva` sigue **rojo** hasta aplicar las migraciones.
+que compila sin `RESEND_API_KEY`. Y desde el 28-10 también está verde **la base viva**: `bd:viva` cierra
+en `VERDE` con `01`–`06` aplicadas (§7.5). Lo que queda no es esquema: son los secretos, el seed y las
+fotos, y la verificación en pantalla.
 
 ### Pendiente
 
-- **Aplicar** `00`–`06` y `supabase/seed.sql` en `otjph`, en orden y con `respaldo_legacy.conteos`
-  verificado antes de `01` (B1 · #16, B3 · #17; Juanma con revisión de Isabella). Runbook en `bd-mvp` §9.3.
+- **Firmar `respaldo_legacy`** en el SQL Editor: es lo único de B1 que la anon key no puede ver
+  (`bd:viva` ya está verde).
 - **Cargar los secretos** de producción (O1 · #20, Enzo): sin la service role no hay checkout, panel ni cron.
-- **Firmar el cierre** con `npm run bd:viva` en verde (#15): es el único control que mira la base viva.
-- **Verificación punta a punta en navegador** (B6 · #23, Celeste), bloqueada por #16 y #20.
-- **Fotos reales de la beta**: subirlas desde `/admin` al bucket `productos` (B5 · #22).
+- **Correr el seed del repo y subir las fotos** desde `/admin` (B5 · #22): los datos vivos no son los del
+  seed y no hay ningún producto bajo el umbral que dispare la alerta del panel.
+- **Verificación punta a punta en navegador** (B6 · #23, Celeste), bloqueada por #20 y #22.

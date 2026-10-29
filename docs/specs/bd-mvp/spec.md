@@ -52,11 +52,14 @@ buckets, omitía `estados_comprobante` de los nombres físicos y no tenía issue
    El cron de Vercel corre en UTC: `59 2 * * 6` = viernes 23:59 ART. Se documenta el fallback manual
    por SQL Editor para cuando el plan de Vercel no dispare el job.
 4. **`bd:viva` cubre todo el contrato:** columnas de tablas y vista, columnas legacy que sobran, las
-   cuatro RPC, las dos tablas retiradas, `detalle_carrito`, los dos buckets y **las diez tablas
-   cerradas** (`cliente`, `pedido`, `detalle_del_pedido`, `estados_pedidos`, `estados_comprobante`,
-   `comprobante`, `remitos_de_venta`, `alerta_de_estado`, `admin`, `roll`). Para las cerradas exige
-   **permiso denegado** (`401`/`403`), no “cero filas”: un `200 []` con RLS apagada es una fuga que
-   hoy pasa inadvertida.
+   cuatro RPC, las dos tablas retiradas, `detalle_carrito`, los dos buckets **con su visibilidad**
+   (privado `comprobantes`, público `productos`) y **las diez tablas cerradas** (`cliente`, `pedido`,
+   `detalle_del_pedido`, `estados_pedidos`, `estados_comprobante`, `comprobante`, `remitos_de_venta`,
+   `alerta_de_estado`, `admin`, `roll`). Para las cerradas exige **permiso denegado** (`401`/`403`),
+   no “cero filas”: un `200 []` con RLS apagada es una fuga que hoy pasa inadvertida.
+   Los buckets se miden con **dos sondas anónimas** (existencia y visibilidad), no con la ruta de
+   metadatos: `anon` no ve ningún bucket en la lista y esa ruta contesta `NoSuchBucket` aunque el
+   bucket exista (falso negativo medido el 2026-10-28, §9.5).
 5. **Datos de la demo:** seed idempotente con tres productos, stock y una alerta; las fotos se suben
    al bucket `productos` desde el panel y `producto.imagen_url` guarda su URL pública.
 
@@ -230,7 +233,7 @@ expone por PostgREST.
 | `rechazar_comprobante(integer)` | liberación de reserva | motivo mostrado en UI |
 | `cancelar_pedidos_vencidos()` | cron y idempotencia | scheduler real de Vercel |
 | `vista_catalogo` + RLS | lectura pública y fuga de datos | seguridad de la service role |
-| `bd:viva` | deriva entre repo y `otjph`: vista con sus 12 columnas, columnas legacy, cuatro RPC, tablas retiradas, **diez tablas cerradas con 401/403**, escritura anónima y buckets; sale distinto de cero y resume los desajustes | cuerpos de funciones, datos fila por fila y columnas de las tablas cerradas (no verificables con la anon key) |
+| `bd:viva` | deriva entre repo y `otjph`: vista con sus 12 columnas, columnas legacy, cuatro RPC, tablas retiradas, **diez tablas cerradas con 401/403**, escritura anónima y los dos buckets con su visibilidad (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado y visibilidad por la pública); sale distinto de cero y resume los desajustes | cuerpos de funciones, datos fila por fila, el `public`/`private` de la ficha del bucket, su límite de tamaño y sus tipos MIME, y las columnas de las tablas cerradas (no verificables con la anon key) |
 | Migración `06` | `precio > 0`, `ET007`, `23505` | estilos del panel |
 
 No se testean internals (nombres de triggers, OIDs ni planes). El cron se prueba con el módulo puro de
@@ -355,3 +358,29 @@ dos veces ni toca los pedidos `Pago Validado` (HU-5).
 
 El **camino crítico** es B1: sin el esquema aplicado no hay demo. B3, B4, A1 y O1 arrancan en paralelo
 hoy; B2, B5 y B6 esperan el esquema.
+
+### 9.5 El control de los buckets daba falso negativo (2026-10-28)
+
+`bd:viva` no podía pasar nunca: pedía `/storage/v1/bucket/{id}` con la anon key, y esa ruta contesta
+`NoSuchBucket` **aunque el bucket exista**, porque la lista de buckets visibles para `anon` está vacía
+(`GET /storage/v1/bucket` devuelve `[]`). Medido contra `otjph` el 2026-10-28 con el bucket `productos`
+—creado por `05` y sirviendo su ruta pública— la API igual decía «Bucket not found».
+
+La sonda que sí distingue es pedir **un objeto que no está**, y son dos, porque la visibilidad es la
+otra mitad del contrato:
+
+| Sonda anónima | El bucket existe | El bucket no existe |
+|---|---|---|
+| `/storage/v1/object/authenticated/{bucket}/…` | `NoSuchKey` | `NoSuchBucket` |
+| `/storage/v1/object/public/{bucket}/…` | `NoSuchKey` = **público** | `NoSuchBucket` = privado o ausente |
+
+El `statusCode` del cuerpo **no** se usa para decidir: `NoSuchKey` y `NoSuchBucket` llegan los dos con
+`404` y HTTP 400. La única marca que distingue es `code`. La visibilidad se evalúa **después** de probar
+la existencia, así que un `NoSuchBucket` en la ruta pública significa «privado», no «ausente»; si el
+bucket de `comprobantes` fuera público, el control falla con el motivo a la vista (la imagen que sube el
+Cliente quedaría expuesta).
+
+Con la corrección, la medición del 28-10 sobre `otjph` cierra en **verde**: esquema, vista, RLS de las
+diez tablas, RPC cerradas a `anon`, `detalle_carrito` ausente y los dos buckets (privado y público).
+Sigue afuera lo que la anon key no puede ver: `respaldo_legacy`, el límite de 5 MB y los tipos MIME de
+cada bucket.

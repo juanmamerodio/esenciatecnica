@@ -195,15 +195,16 @@ npm run docs:links # verifica los enlaces relativos de la documentación
 ([`ci.yml`](.github/workflows/ci.yml)) corre
 en cada push y cada PR contra `main`, en este orden: `typecheck` → `lint` → `test` → `docs:links` →
 `build`; el primer paso que falla corta el job. Ninguno de los cuatro primeros lee secretos, así que
-también corre en un fork. `npm run bd:viva` **no entra en CI**: depende de la base viva y hoy está rojo
-por diseño; su lugar es el cierre de la migración ([issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15)).
+también corre en un fork. `npm run bd:viva` **no entra en CI**: depende de la base viva y de la anon key,
+así que su lugar es el cierre y la auditoría de la migración
+([issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15)).
 
-Estado actual (2026-10-27, tras el cierre beta en repo: `00` corregida, `06`, cron, A1, `bd:viva` y seed):
+Estado actual (2026-10-28, con `01`–`06` aplicadas en `otjph` y `bd:viva` en verde):
 
 - `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
 - `npm run lint` → 0 errores y 0 warnings. El warning de `<img>` se fue con `ReceiptUploader.tsx` en `T5`.
 - `npm test` → 279 tests en 23 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corren contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar los deja en verde. Para el proyecto real está `npm run bd:viva` (issue #15).
-- `npm run bd:viva` → cubre la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets; sale distinto de cero y resume los desajustes. Hoy sigue **rojo** contra `otjph` hasta aplicar las migraciones (#16/#17).
+- `npm run bd:viva` → cubre la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets **con su visibilidad** (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado, visibilidad por la pública); sale distinto de cero y resume los desajustes. Contra `otjph`, con `01`–`06` aplicadas, **está verde desde el 28-10**; lo que la anon key no puede ver (`respaldo_legacy`) lo firma el SQL Editor.
 - `npm run build` → compila **sin** `RESEND_API_KEY`: desde `T8` Resend se instancia por llamada y no al importar. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
@@ -221,8 +222,9 @@ Un ticket está terminado solo si:
 ## 9. Deuda y orden de migración
 
 1. Enviar el modelo a Isabella y cerrar el DDL: [`docs/entrega/HANDOFF-ISABELLA.md`](docs/entrega/HANDOFF-ISABELLA.md).
-   **Abierto:** la migración de `otjph` está a medio aplicar (26 desajustes medidos con el `bd:viva`
-   ampliado el 2026-10-27).
+   **Cerrado en lo medible:** `01`–`06` están aplicadas en `otjph` y `npm run bd:viva` da **verde**
+   (28-10); los 26 desajustes del 27-10 ya no están. Queda la firma de `respaldo_legacy`, que la anon key
+   no puede ver.
    El cierre es la spec [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md), **issue #15**,
    y el criterio es `npm run bd:viva` en verde. Estado al día en [`memory.md`](memory.md).
 2. Eliminar i18n (`[lang]`, diccionarios, middleware de idioma). ✅ Hecho: `T0 · Español único` (issue #2).

@@ -61,8 +61,41 @@ export const COLUMNAS_LEGACY = {
   detalle_del_pedido: ['id_detalle'],
 };
 
-/** Buckets de Storage del MVP: `comprobantes` privado y `productos` público (spec `bd-mvp` §3.3). */
-export const BUCKETS = ['comprobantes', 'productos'];
+/**
+ * Buckets de Storage del MVP (spec `bd-mvp` §3.3). La visibilidad no es decoración: un bucket de
+ * comprobantes público expone la imagen que sube el Cliente, y un bucket de productos privado deja
+ * la tienda sin fotos. Las dos se miden con la anon key.
+ */
+export const BUCKETS = [
+  { nombre: 'comprobantes', publico: false },
+  { nombre: 'productos', publico: true },
+];
+
+/**
+ * Clave que **no existe** en ningún bucket: la sonda pide un objeto y el error delata al bucket.
+ * Se nombra para que el próximo lector no la confunda con un dato real ni la suba por error.
+ */
+export const CLAVE_INEXISTENTE = 'bd-viva-control-inexistente';
+
+/**
+ * Sonda de **existencia**. `GET /storage/v1/bucket/{id}` no sirve con la anon key: la lista de
+ * buckets visibles para `anon` está vacía, así que la API responde `NoSuchBucket` aunque el bucket
+ * exista — el falso negativo que se midió el 2026-10-28 sobre el bucket `productos`, que sí existía.
+ *
+ * Pedir un objeto que no está por la ruta autenticada sí distingue: `NoSuchKey` = el bucket existe;
+ * `NoSuchBucket` = no existe.
+ */
+export function rutaDeExistencia(bucket) {
+  return `/storage/v1/object/authenticated/${bucket}/${CLAVE_INEXISTENTE}`;
+}
+
+/**
+ * Sonda de **visibilidad**: la ruta pública resuelve sólo buckets públicos. Sobre un bucket que ya
+ * se probó existente, un `NoSuchBucket` (o un `401`/`403`) significa «privado».
+ */
+export function rutaPublica(bucket) {
+  return `/storage/v1/object/public/${bucket}/${CLAVE_INEXISTENTE}`;
+}
 
 /** Las cuatro RPC del contrato, con sus argumentos (spec `bd-mvp` §3.4). */
 export const RPC = {
@@ -128,22 +161,48 @@ export function evaluarRpc(estado, cuerpo) {
 }
 
 /**
- * Bucket de Storage. La API devuelve HTTP 400 con `NoSuchBucket` cuando no existe; un 401/403 (o
- * `statusCode` 403 en el cuerpo) significa que existe pero la anon key no lo ve.
+ * El cuerpo de Storage que delata un bucket que la sonda no resolvió. El `statusCode` del cuerpo
+ * **no sirve** para decidir: `NoSuchKey` y `NoSuchBucket` llegan los dos con `statusCode: 404` y
+ * HTTP 400. La única marca que distingue es `code`.
  */
-export function evaluarBucket(estado, cuerpo) {
-  if (estado === 200) return resultado(true, 'existe');
-  if (estado === 401 || estado === 403) return resultado(true, 'existe (no visible para anon)');
+function esBucketAusente(estado, cuerpo) {
+  if (cuerpo?.code === 'NoSuchKey') return false;
+  if (cuerpo?.code === 'NoSuchBucket') return true;
+  return estado === 404;
+}
 
-  const codigo = cuerpo?.code;
-  const estadoInterno = String(cuerpo?.statusCode ?? '');
-  if (codigo === 'NoSuchBucket' || estadoInterno === '404') {
-    return resultado(false, 'no existe (NoSuchBucket)');
-  }
-  if (estadoInterno === '403' || estadoInterno === '401') {
+/**
+ * Existencia del bucket, medida con la sonda autenticada (`rutaDeExistencia`). Un `NoSuchKey` es la
+ * prueba de que el bucket existe y el objeto no; un `401`/`403` también (existe, la anon key no lo
+ * ve). Sólo `NoSuchBucket` significa que no está.
+ */
+export function evaluarBucketExistente(estado, cuerpo) {
+  if (esPermisoDenegado(estado)) return resultado(true, 'existe (no visible para anon)');
+  if (cuerpo?.code === 'NoSuchKey') return resultado(true, 'existe');
+  if (estado === 200) return resultado(true, 'existe');
+  if (String(cuerpo?.statusCode ?? '') === '403' || String(cuerpo?.statusCode ?? '') === '401') {
     return resultado(true, 'existe (no visible para anon)');
   }
+  if (esBucketAusente(estado, cuerpo)) return resultado(false, 'no existe (NoSuchBucket)');
   return resultado(false, `respuesta inesperada (HTTP ${estado})`);
+}
+
+/**
+ * Visibilidad del bucket, medida con la sonda pública (`rutaPublica`) **sobre un bucket que ya se
+ * probó existente**. Ahí `NoSuchBucket` no habla de existencia: habla de que la ruta pública no lo
+ * sirve, o sea que es privado. El contrato manda cuál tiene que ser cada uno.
+ */
+export function evaluarBucketPublico(esperado, estado, cuerpo) {
+  const publico = !esPermisoDenegado(estado) && !esBucketAusente(estado, cuerpo);
+  if (publico === esperado) {
+    return resultado(true, esperado ? 'existe y es público' : 'existe y es privado');
+  }
+  return resultado(
+    false,
+    esperado
+      ? 'es privado y el contrato lo quiere público: la tienda no podría servir las fotos'
+      : 'es público y el contrato lo quiere privado: el comprobante del Cliente quedaría expuesto',
+  );
 }
 
 /** Columnas del contrato que no aparecen en el objeto vivo. */

@@ -31,10 +31,13 @@ import {
   TABLAS_FASE_2,
   TABLAS_LEGACY_AUSENTES,
   columnasFaltantes,
-  evaluarBucket,
+  evaluarBucketExistente,
+  evaluarBucketPublico,
   evaluarEscrituraCerrada,
   evaluarLecturaCerrada,
   evaluarRpc,
+  rutaDeExistencia,
+  rutaPublica,
 } from './bd-viva-reglas.mjs';
 
 const RAIZ = process.cwd();
@@ -213,12 +216,22 @@ for (const tabla of TABLAS_CERRADAS) {
 }
 
 // ── 7. Storage ─────────────────────────────────────────────────────────────────
+// Dos sondas por bucket, las dos anónimas: la de existencia (ruta del objeto autenticado) y la de
+// visibilidad (ruta pública). La ruta de metadatos (`storage/v1/bucket/{id}`) no se usa: `anon` no
+// ve ningún bucket en la lista, así que contesta `NoSuchBucket` aunque el bucket exista.
 console.log('\n7. Storage');
 for (const bucket of BUCKETS) {
-  const { estado, cuerpo } = await pedir(`/storage/v1/bucket/${bucket}`);
-  const revision = evaluarBucket(estado, cuerpo);
-  if (revision.ok) ok(`bucket ${bucket}: ${revision.motivo}`);
-  else mal(`bucket ${bucket}: ${revision.motivo}`);
+  const existencia = await pedir(rutaDeExistencia(bucket.nombre));
+  const revision = evaluarBucketExistente(existencia.estado, existencia.cuerpo);
+  if (!revision.ok) {
+    mal(`bucket ${bucket.nombre}: ${revision.motivo}`);
+    continue;
+  }
+
+  const publica = await pedir(rutaPublica(bucket.nombre));
+  const visibilidad = evaluarBucketPublico(bucket.publico, publica.estado, publica.cuerpo);
+  if (visibilidad.ok) ok(`bucket ${bucket.nombre}: ${visibilidad.motivo}`);
+  else mal(`bucket ${bucket.nombre}: ${visibilidad.motivo}`);
 }
 
 // ── Cierre ─────────────────────────────────────────────────────────────────────
