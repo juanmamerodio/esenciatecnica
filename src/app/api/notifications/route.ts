@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // El cliente de correo se arma por llamada y no al importar: instanciarlo arriba ataba
 // `npm run build` a que RESEND_API_KEY existiera en el entorno (AGENTS §8).
@@ -13,15 +13,25 @@ function correo(): Resend {
 
 // Este endpoint es un puente temporal hacia el proyecto Supabase de Teams.
 // Si TEAMS_SUPABASE_* no está definido, cae al proyecto del e-commerce para no romper el flujo actual.
-const supabaseUrl =
-  process.env.TEAMS_SUPABASE_URL ||
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  'https://uchyattzuhaltsaxazce.supabase.co';
-const supabaseKey =
-  process.env.TEAMS_SUPABASE_ANON_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+// El cliente se arma por llamada, igual que el de correo: instanciarlo al importar ataba
+// `npm run build` a que las claves existieran en el entorno y tumbaba esta ruta en CI, donde no hay
+// secretos (AGENTS §8, issue #50).
+let clienteDelTablero: SupabaseClient | null = null;
+
+function tablero(): SupabaseClient {
+  if (!clienteDelTablero) {
+    const url =
+      process.env.TEAMS_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      'https://uchyattzuhaltsaxazce.supabase.co';
+    const clave =
+      process.env.TEAMS_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      '';
+    clienteDelTablero = createClient(url, clave);
+  }
+  return clienteDelTablero;
+}
 
 // Correos oficiales del equipo sincronizados con Supabase team_members
 const DEFAULT_FALLBACK_EMAILS: Record<string, string> = {
@@ -68,7 +78,7 @@ export async function OPTIONS() {
  */
 export async function GET() {
   try {
-    const { data: members, error } = await supabase
+    const { data: members, error } = await tablero()
       .from('team_members')
       .select('key, name, role, email, notify_on_meetings, notify_on_tasks, notify_on_discussions');
 
@@ -120,7 +130,7 @@ export async function POST(req: Request) {
     let recipientList: Array<{ key: string; name: string; email: string }> = [];
 
     try {
-      const { data: members } = await supabase
+      const { data: members } = await tablero()
         .from('team_members')
         .select('key, name, email');
 
