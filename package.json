@@ -13,6 +13,7 @@
     "db:types": "node scripts/generar-tipos-bd.mjs",
     "bd:viva": "node scripts/verificar-bd-viva.mjs",
     "docs:links": "node scripts/verificar-links-docs.mjs",
+    "demo:sembrar": "node scripts/sembrar-demo.mjs",
     "teams": "node scripts/teams-tablero.mjs"
   },
   "dependencies": {

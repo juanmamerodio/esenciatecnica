@@ -8,9 +8,22 @@ import { leerCatalogo } from "@/lib/catalogo-servidor";
 // El catálogo cambia con el stock: no se cachea una foto vieja de la tienda.
 export const dynamic = "force-dynamic";
 
+/**
+ * Foto del hero: asset propio de la identidad (`public/hero/portada.jpg`).
+ *
+ * Antes la portada era la del primer producto del catálogo, o sea la del primero **por orden
+ * alfabético**: la imagen cambiaba sola al publicar un producto y un producto agotado o sin foto
+ * dejaba el hero en el placeholder. La HU-1 de la spec `front-mvp` pide que el hero muestre la
+ * identidad institucional; qué foto lo ilustra es una decisión de diseño, no un dato del catálogo.
+ */
+const FOTO_DEL_HERO = {
+  url: "/hero/portada.jpg",
+  nombre: "Aplicación de una crema elaborada en el taller de Química",
+  categoria: "Cosmética",
+} as const;
+
 export default async function HomePage() {
   const resultado = await leerCatalogo();
-  const portada = resultado.estado === "ok" ? resultado.productos[0] : undefined;
 
   return (
     <div className="space-y-24 pb-20">
@@ -47,9 +60,9 @@ export default async function HomePage() {
         <div className="relative">
           <div className="overflow-hidden rounded-card border border-border bg-surface shadow-soft">
             <ImagenProducto
-              url={portada?.imagenUrl ?? null}
-              nombre={portada?.nombre ?? "Elaboración del Departamento de Química"}
-              categoria={portada?.categoria ?? "Cosmética"}
+              url={FOTO_DEL_HERO.url}
+              nombre={FOTO_DEL_HERO.nombre}
+              categoria={FOTO_DEL_HERO.categoria}
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>

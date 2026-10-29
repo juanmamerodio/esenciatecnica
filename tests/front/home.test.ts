@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { RAIZ, archivosFuente, leer } from './ayudantes';
@@ -84,5 +84,30 @@ describe('T1 · estructura del catálogo', () => {
       .map((ruta) => relative(RAIZ, ruta));
 
     expect(ofensores).toEqual([]);
+  });
+});
+
+describe('#22 · el hero tiene foto propia', () => {
+  /**
+   * La portada era `productos[0]`: el primer producto **por orden alfabético**. Eso ataba la foto
+   * del hero a qué producto se llamaba primero —y a que tuviera foto—, así que publicar «Alcohol en
+   * Gel» cambiaba la portada y dejarla sin `imagen_url` la mandaba al placeholder. La HU-1 de la
+   * spec `front-mvp` pide la identidad institucional en el hero; la foto es decisión de diseño.
+   */
+  it('la Home usa el asset de la identidad y no el primer producto del catálogo', () => {
+    const home = leer('src/app/page.tsx');
+    expect(home).toContain('/hero/portada.jpg');
+    expect(home).not.toMatch(/productos\[0\]/);
+    expect(home).not.toMatch(/portada\?\./);
+  });
+
+  it('el asset del hero existe en `public/`', () => {
+    expect(existsSync(join(RAIZ, 'public', 'hero', 'portada.jpg'))).toBe(true);
+  });
+
+  it('la foto del hero sigue pasando por el componente que valida la URL', () => {
+    // Si el hero dejara de usar `ImagenProducto`, una URL rota volvería a tumbar la Home (#49).
+    const home = leer('src/app/page.tsx');
+    expect(home).toMatch(/<ImagenProducto[\s\S]*FOTO_DEL_HERO\.url/);
   });
 });
