@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { RAIZ, archivosFuente, leer } from './ayudantes';
@@ -133,5 +133,28 @@ describe('#43 · la marca y el producto dejan de ser un vaso de laboratorio', ()
       expect(iconos.length, archivo).toBeGreaterThan(0);
       for (const icono of iconos) expect(icono[2], archivo).toMatch(/aria-hidden/);
     }
+  });
+});
+
+describe('#51 · el vocabulario retirado también rige para los datos', () => {
+  /** Todos los `.sql` de `supabase/`, recursivo: migraciones y seed. */
+  function archivosSql(directorio: string): string[] {
+    return readdirSync(directorio, { withFileTypes: true }).flatMap((entrada) => {
+      const ruta = join(directorio, entrada.name);
+      if (entrada.isDirectory()) return archivosSql(ruta);
+      return entrada.name.endsWith('.sql') ? [ruta] : [];
+    });
+  }
+
+  it('el seed no publica «laboratorio»: esa descripción sale en la card y en el detalle', () => {
+    expect(leer('supabase/seed.sql')).not.toMatch(VOCABULARIO_RETIRADO);
+  });
+
+  it('ningún `.sql` de `supabase/` publica vocabulario retirado', () => {
+    const ofensores = archivosSql(join(RAIZ, 'supabase'))
+      .filter((archivo) => VOCABULARIO_RETIRADO.test(readFileSync(archivo, 'utf8')))
+      .map((archivo) => relative(RAIZ, archivo).replace(/\\/g, '/'));
+
+    expect(ofensores).toEqual([]);
   });
 });

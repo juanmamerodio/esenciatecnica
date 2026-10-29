@@ -14,7 +14,7 @@ select v.nombre, v.categoria, v.tipo, v.descripcion, v.precio, v.tiempo_producci
 from (values
   ('Crema Hidratante Facial', 'Cosmética', 'Emulsión', 'Base de aloe vera y manzanilla', 2500.00, 3),
   ('Jabón Líquido Neutro', 'Higiene', 'Líquido', 'Fórmula suave hipoalergénica', 1800.00, 2),
-  ('Alcohol en Gel', 'Higiene', 'Gel', 'Alcohol en gel con glicerina, elaborado en el laboratorio', 1200.00, 1)
+  ('Alcohol en Gel', 'Higiene', 'Gel', 'Alcohol en gel con glicerina, elaborado por el Departamento de Química', 1200.00, 1)
 ) as v(nombre, categoria, tipo, descripcion, precio, tiempo_produccion)
 where not exists (
   select 1 from public.producto p where lower(p.nombre) = lower(v.nombre)
