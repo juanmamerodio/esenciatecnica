@@ -36,7 +36,7 @@
 ## Semáforo
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **397 tests** en 29 archivos ·
   `docs:links` 0 links sin resolver · `npm run build` compila sin `RESEND_API_KEY`.
-- **GitHub**: `main` y `origin/main` al día (sesión #21, hasta `1b09cb4`). Las corridas `40792252142`
+- **GitHub**: `main` y `origin/main` al día (sesión #21 completa, desde `65657d5`). Las corridas `40792252142`
   y `40793704253` dejan **Typecheck, Lint, Test y Docs links en verde** y **`Build Next.js` en rojo** con
   `supabaseKey is required` en `/api/notifications`: es el **rojo esperado** por los secretos de Actions
   que faltan (#20), no un defecto del repo.
