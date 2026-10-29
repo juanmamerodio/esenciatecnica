@@ -13,13 +13,18 @@ Este documento es el contrato operativo para cualquier agente que trabaje en est
 
 Leer, en este orden:
 
-1. [`GLOSSARY.md`](GLOSSARY.md) — vocabulario canónico.
-2. [`docs/MODELO.md`](docs/MODELO.md) — ERD Mermaid y reglas de integridad.
-3. [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md) — inventario, duplicados y contradicciones.
-4. [`docs/metodo/brain.md`](docs/metodo/brain.md) — filosofía de trabajo de la agencia.
-5. [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) — deuda conocida (desactualizada; corregir contra el modelo).
+1. [`memory.md`](memory.md) — **el estado**: qué quedó hecho, qué falta y qué está verde. Hiper-corto; se
+   lee al abrir la sesión y se reescribe al cerrarla.
+2. [`GLOSSARY.md`](GLOSSARY.md) — vocabulario canónico.
+3. [`docs/MODELO.md`](docs/MODELO.md) — ERD Mermaid y reglas de integridad.
+4. [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md) — inventario, duplicados y contradicciones.
+5. [`docs/metodo/brain.md`](docs/metodo/brain.md) — filosofía de trabajo de la agencia.
+6. [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) — deuda conocida (desactualizada; corregir contra el modelo).
 
-Si hay conflicto entre documentos, manda el orden anterior. El modelo del MVP está aprobado; si falta un campo o una regla, **no lo inventes**: documentalo en `docs/MODELO.md` y consultá antes de codificar.
+Si hay conflicto entre documentos, manda el orden anterior, con una excepción: **`memory.md` es estado, no
+contrato**. Si contradice al código o a la base viva, mandan el código y la base, y lo que se corrige es
+`memory.md`. El modelo del MVP está aprobado; si falta un campo o una regla, **no lo inventes**: documentalo
+en `docs/MODELO.md` y consultá antes de codificar.
 
 ---
 
@@ -47,6 +52,7 @@ El Hub y el entorno Teams viven en [`quimicashop`](https://github.com/juanmamero
 | Académico | [`docs/academico/DER-quimica.csv`](docs/academico/DER-quimica.csv), [`docs/academico/DCU-Quimica.csv`](docs/academico/DCU-Quimica.csv), [`docs/academico/DFD1-Quimica.csv`](docs/academico/DFD1-Quimica.csv), [`docs/academico/DFD2-Quimica.csv`](docs/academico/DFD2-Quimica.csv), [`docs/academico/DFD3-Quimica.csv`](docs/academico/DFD3-Quimica.csv), [`docs/academico/informe_Escencia_Tecnica.md`](docs/academico/informe_Escencia_Tecnica.md) | Se adapta al código/modelo; no manda sobre la implementación. |
 | Referencia visual | [`docs/academico/prototype1.html`](docs/academico/prototype1.html) | Solo diseño/UX; sus productos son contenido de muestra, no catálogo. |
 | Historia | `quimicashop/diagrams/minutas/`, `CHANGELOG.md` | Evidencia de decisiones; no es spec vigente. |
+| Estado | [`memory.md`](memory.md) | Qué está hecho, qué falta y qué está verde **hoy**. No es contrato: si contradice al código o a la base, mandan el código y la base. |
 | Filosofía | [`docs/metodo/brain.md`](docs/metodo/brain.md) | Principios de trabajo; no estructura de agencia. |
 
 **Jerarquía operativa:** el código y la base nueva son la realidad; el modelo Mermaid es la representación acordada; el DER académico se adapta. Nunca convivan dos esquemas: si algo no está en el modelo, se decide y se documenta antes de codificar.
@@ -174,6 +180,7 @@ Al cerrar un módulo, preguntá qué regla, test o documento habría evitado el 
 10. **Errores explícitos.** No silenciar errores con `catch {}` vacío; loguear y devolver un estado claro.
 11. **Accesibilidad y responsive.** `aria-label`, foco visible, contraste AA, safe areas.
 12. **Español** en UI, emails, docs y nombres de dominio. Los identificadores técnicos pueden ir en inglés si el modelo lo pide.
+13. **Sin clientes al importar.** Supabase y Resend se instancian dentro de la función que los usa, nunca en el cuerpo del módulo. Un cliente en el cuerpo ata `npm run build` a que la clave exista en el entorno y tumba el build en CI, donde no hay secretos (issues #50 y T8).
 
 ---
 
@@ -185,7 +192,7 @@ Comandos:
 npm run typecheck
 npm run lint
 npm run build
-npm test          # suite de base de datos (Vitest + PGlite)
+npm test          # Vitest: base en PGlite y estructura del front
 npm run db:types  # regenera src/lib/database.types.ts desde el SQL
 npm run bd:viva   # compara las migraciones con el proyecto Supabase vivo (en red)
 npm run docs:links # verifica los enlaces relativos de la documentación
@@ -194,18 +201,23 @@ npm run docs:links # verifica los enlaces relativos de la documentación
 **La puerta es local y de GitHub, con los mismos comandos.** El workflow de **GitHub Actions**
 ([`ci.yml`](.github/workflows/ci.yml)) corre
 en cada push y cada PR contra `main`, en este orden: `typecheck` → `lint` → `test` → `docs:links` →
-`build`; el primer paso que falla corta el job. Ninguno de los cuatro primeros lee secretos, así que
-también corre en un fork. `npm run bd:viva` **no entra en CI**: depende de la base viva y de la anon key,
+`build`; el primer paso que falla corta el job. Ninguno de los cinco lee secretos: el build instancia sus
+clientes por llamada (regla 13), así que un fork sin secretos corre la puerta completa. `npm run bd:viva`
+**no entra en CI**: depende de la base viva y de la anon key,
 así que su lugar es el cierre y la auditoría de la migración
 ([issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15)).
 
-Estado actual (2026-10-28, con `01`–`06` aplicadas en `otjph` y `bd:viva` en verde):
+**El contrato no guarda estado.** Acá queda qué mide cada comando y qué significa “terminado”; los números,
+las fechas y qué está verde hoy viven en [`memory.md`](memory.md), que se reescribe al cerrar cada sesión.
+Congelar conteos en el contrato garantiza que queden viejos: ya pasó con los de esta sección y con los de
+tres specs.
 
-- `npm run typecheck` → 0 errores. La línea base ya no es roja: cualquier error nuevo es del ticket en curso.
-- `npm run lint` → 0 errores y 0 warnings. El warning de `<img>` se fue con `ReceiptUploader.tsx` en `T5`.
-- `npm test` → 397 tests en 29 archivos: `tests/db/` (Vitest + PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corren contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar los deja en verde. Para el proyecto real está `npm run bd:viva` (issue #15).
-- `npm run bd:viva` → cubre la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets **con su visibilidad** (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado, visibilidad por la pública); sale distinto de cero y resume los desajustes. Contra `otjph`, con `01`–`06` aplicadas, **está verde desde el 28-10**; lo que la anon key no puede ver (`respaldo_legacy`) lo firma el SQL Editor.
-- `npm run build` → compila **sin** `RESEND_API_KEY`: desde `T8` Resend se instancia por llamada y no al importar. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
+- `npm run typecheck` — `tsc --noEmit`. La línea base es 0: cualquier error nuevo es del ticket en curso.
+- `npm run lint` — ESLint. La línea base es 0 errores y 0 warnings.
+- `npm test` — Vitest sobre `tests/db/` (PGlite) y `tests/front/` (módulos puros y estructura del front), sin red ni Docker. **Corre contra PGlite, no contra la base viva**: un proyecto Supabase a medio migrar lo deja en verde. Para el proyecto real está `npm run bd:viva`.
+- `npm run docs:links` — cada enlace relativo de la documentación resuelve.
+- `npm run bd:viva` — mide la superficie pública de la base viva: la vista, las columnas legacy, las cuatro RPC (existencia **y** que `anon` no las ejecute), `detalle_carrito`, las diez tablas cerradas (exige `401`/`403`), la escritura anónima y los dos buckets **con su visibilidad** (dos sondas anónimas por bucket: existencia por la ruta del objeto autenticado, visibilidad por la pública). Sale distinto de cero y resume los desajustes; lo que la anon key no puede ver (`respaldo_legacy`) lo firma el SQL Editor.
+- `npm run build` — **no lee secretos**: los clientes de Supabase y Resend se arman por llamada (§7.13), así que compila con el entorno vacío y también en un fork. El middleware (`src/middleware.ts`) entra en el build y protege `/admin` y `/api/admin`. Sigue configurado con `ignoreBuildErrors: true`; no lo tomes como prueba de tipos.
 
 Un ticket está terminado solo si:
 
@@ -254,7 +266,7 @@ Roles vigentes (fuente: `team_members` del proyecto Teams; si la base cambia, es
 | Celeste Cáceres | Diseño UX/UI & Testing QA |
 | Enzo Queipo | Backend, Admin Panel & Relaciones |
 
-- El tablero vive en `quimicashop` (`team_tasks`): es la fuente de prioridades y se **sincroniza** al cerrar cada sesión con `npm run teams`. `done` sólo con código y test; `review` = hecho en repo, sin verificar en vivo. Protocolo y contrato: [`docs/agentes/teams.md`](docs/agentes/teams.md).
+- El tablero vive en `quimicashop` (`team_tasks`): es la fuente de prioridades y se **sincroniza** al cerrar cada sesión con `npm run teams`. `done` con evidencia: el commit y el test que la cubren, o la razón por la que el cambio es sólo de documentación o configuración (AGENTS §8); `review` = hecho en repo, sin verificar en vivo. Protocolo y contrato: [`docs/agentes/teams.md`](docs/agentes/teams.md).
 - Las minutas son historia y evidencia; no son spec.
 - Las decisiones de dominio se consultan con el equipo; no se inventan.
 
@@ -302,12 +314,12 @@ código muerto.
 
 ## 12. Checklist de tarea (inicio y cierre)
 
-1. Leer `GLOSSARY.md`, `docs/MODELO.md` y el ticket.
+1. Leer `memory.md`, `GLOSSARY.md`, `docs/MODELO.md` y el ticket.
 2. Confirmar que el área que vas a tocar está cubierta por el modelo aprobado.
 3. Correr `npm run typecheck` y anotar la línea base.
 4. Hacer el cambio más chico que resuelva el ticket.
 5. Escribir/ajustar el test antes del código de producción.
-6. Verificar typecheck, lint y test.
+6. Verificar `typecheck`, `lint`, `test` y `docs:links`; el `build`, si tocaste rutas, configuración o el borde.
 7. Actualizar glosario, modelo o ADR si cambió una decisión.
 8. Commit quirúrgico con mensaje claro; sin archivos sueltos.
 9. Al cerrar: auditar el tablero contra lo hecho, mover estados con `npm run teams`, crear lo que falte, publicar el avance y reescribir `memory.md` ([`docs/agentes/teams.md`](docs/agentes/teams.md) §6).
