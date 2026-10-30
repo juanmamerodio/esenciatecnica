@@ -1,8 +1,9 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Diferenciación de configuración faltante en el cron vía FaltaConfiguracion con 503 vs fallo transitorio con 500; 457 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Unificación de las 19 tareas pendientes de Teams en el Spec Maestro de Cierre Beta #53 y `docs/specs/cierre-beta/spec.md` tras sesión /grill-me; 457 tests en verde).
 
 ## Ahora
+- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams (3 en review + 16 en backlog) en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
   verificado en Resend (SPF/DKIM) y sin cargar `RESEND_API_KEY` + `RESEND_FROM_EMAIL` en Vercel, Resend
   en modo sandbox sólo permite enviar al correo del titular de la cuenta: **no se puede testear el envío
@@ -19,10 +20,10 @@
 
 ## Semáforo
 - Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **457 tests** en 34 archivos ·
-  `docs:links` 0 links sin resolver sobre 39 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+  `docs:links` 0 links sin resolver sobre 40 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
-- **GitHub**: `main` en verde. Cerrados #17, #19 y #25 con evidencia; quedan abiertos sólo el paraguas #1
+- **GitHub**: `main` en verde. Publicado el spec de cierre beta #53; abiertos el paraguas #1
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
 - BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones).
   Fuera del alcance de la anon key: `respaldo_legacy`, el tope de 5 MB y los MIME de cada bucket.
@@ -33,6 +34,7 @@
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
 |---|---|---|
+| #53 · Spec | Spec Maestro de Cierre Beta (unificación de 19 tareas) | ✅ publicado (`ready-for-agent`) |
 | #15 · D1 | cerrar la migración del MVP | ✅ en todo lo que mide `bd:viva`; abierto sólo por la firma de `respaldo_legacy` |
 | #16 · B1 | respaldo + `00`–`06` aplicadas en `otjph` | ✅ `01`–`06` aplicadas y medidas; falta firmar `respaldo_legacy` en el SQL Editor |
 | #17 · B3 | `06`: `precio > 0`, `ET007`, mensajes del panel | ✅ cerrado |
