@@ -973,3 +973,38 @@ describe('T7 · estructura del panel y del borde', () => {
     expect(existsSync(join(RAIZ, 'src/app/api/products/route.ts'))).toBe(true);
   });
 });
+
+describe('HU-5 a HU-7 · Mejoras de UX, navegación y feedback del Panel /admin', () => {
+  it('HU-5: elimina el banner inferior residual y sintetiza los subtítulos de las secciones', () => {
+    const pagina = leer('src/app/admin/page.tsx');
+    expect(pagina).not.toMatch(/El panel está protegido con la contraseña del Administrador/);
+    expect(pagina).not.toMatch(/MVP/);
+    expect(pagina).not.toMatch(/el disponible lo calcula la base/i);
+    expect(pagina).not.toMatch(/baja lógica/i);
+    expect(pagina).not.toMatch(/umbral/i);
+  });
+
+  it('HU-6: incorpora sub-navegación rápida por anclas con id y scroll-mt-20', () => {
+    const pagina = leer('src/app/admin/page.tsx');
+    expect(pagina).toMatch(/href="#pedidos"/);
+    expect(pagina).toMatch(/href="#stock"/);
+    expect(pagina).toMatch(/href="#productos"/);
+
+    // Los contenedores tienen sus IDs y la clase scroll-mt-20 para compensar el header fijo
+    expect(pagina).toMatch(/id="pedidos"[^>]*scroll-mt-20|scroll-mt-20[^>]*id="pedidos"/);
+    expect(pagina).toMatch(/id="stock"[^>]*scroll-mt-20|scroll-mt-20[^>]*id="stock"/);
+    expect(pagina).toMatch(/id="productos"[^>]*scroll-mt-20|scroll-mt-20[^>]*id="productos"/);
+  });
+
+  it('HU-7: sustituye "umbral" por "Stock mínimo" y "Stock bajo" en la UI de stock preservando contratos internos', () => {
+    const stockUi = leer('src/components/admin/PanelDeStock.tsx');
+    expect(stockUi).toMatch(/Stock mínimo/);
+    expect(stockUi).toMatch(/Stock bajo, sin atender/);
+    expect(stockUi).not.toMatch(/Umbral de aviso/);
+    expect(stockUi).not.toMatch(/En el umbral de aviso, sin atender/);
+
+    // Preserva nombres de campos y variables internas de base de datos / API
+    expect(stockUi).toMatch(/cantidad_warning/);
+  });
+});
+

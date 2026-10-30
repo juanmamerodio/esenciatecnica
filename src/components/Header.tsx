@@ -14,7 +14,7 @@ import { useCartStore } from "@/lib/store";
 const DESTINOS = [
   { nombre: "Inicio", href: "/" },
   { nombre: "Catálogo", href: "/catalog" },
-  { nombre: "Sobre el proyecto", href: "/about" },
+  { nombre: "Noticias", href: "/about" },
 ] as const;
 
 function esRutaActiva(pathname: string, href: string): boolean {

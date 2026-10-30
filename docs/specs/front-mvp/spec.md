@@ -268,7 +268,7 @@ formas de query ni detalles de implementación.
 - T2 a T8: catálogo con buscador, detalle, carrito, checkout, “Sobre el proyecto”, admin, remito y emails.
 - Fotos reales de producto: las carga el Administrador desde el panel (T7). La Home solo consume `imagen_url`.
 - i18n, Gemini/IA, envío y seguimiento, cuentas de Cliente, carrito persistente en Supabase.
-- DDL, migraciones, RLS y datos reales: los revisa Isabella Infante ([`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)).
+- DDL, migraciones, RLS y datos reales: los revisa Isabella Infante ([`docs/specs/migracion-otjph/spec.md`](../migracion-otjph/spec.md)).
 - Cualquier skill externa (incluida `awesome-ecommerce-skills`): no se instala la colección; si una tajada
   necesita una skill puntual, se vendea adaptada a la regla de §3.4 y con sus propias guardrails.
 - Dominio, deploy y `.env` de producción.

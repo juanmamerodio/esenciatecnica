@@ -231,7 +231,7 @@ export async function confirmarPedido(
  * del carrito sólo manda antes de confirmar (#34 · hallazgo 5 de `deuda-codigo-25-10`).
  */
 export function totalAVisualizar(totalDeLaBase: number | null, totalDelCarrito: number): number {
-  return totalDeLaBase ?? totalDelCarrito;
+  return redondearACentavos(totalDeLaBase ?? totalDelCarrito);
 }
 
 type Revision =

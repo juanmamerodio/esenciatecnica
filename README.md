@@ -4,12 +4,7 @@
 > **E.E.S.T N°1 Luciano Reyes** · Campana, Buenos Aires · 7mo Año Programación 2026.
 
 > [!IMPORTANT]
-> **Estado: el front del MVP está completo; la base viva no.** El código ya está sobre el esquema
-> normalizado (los nombres legacy `productos`, `pedidos` y `verificaciones` no quedan en el repo), pero
-> el proyecto Supabase `otjph…` sigue a medio migrar: `npm run bd:viva` mide **13 desajustes** al
-> 2026-10-26. Criterio de cierre: [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md)
-> e [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15). El estado al día está en
-> [`memory.md`](memory.md).
+> **Estado: el front y la base viva (`otjph…`) están en verde.** Las migraciones `00`–`06` y la semilla de demo están aplicadas (`npm run bd:viva` en verde). El criterio de cierre y lo que resta del entorno humano están en [`docs/specs/migracion-otjph/spec.md`](docs/specs/migracion-otjph/spec.md), [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15) y [`memory.md`](memory.md).
 
 ---
 
@@ -47,10 +42,7 @@ El índice completo, por carpeta, está en **[`docs/README.md`](docs/README.md)*
 | [`docs/MODELO.md`](docs/MODELO.md) | ERD Mermaid del MVP, estados y reglas de integridad. |
 | [`docs/specs/`](docs/specs/front-mvp/spec.md) | Specs por feature, linkeadas desde cada issue. |
 | [`docs/adr/`](docs/adr/0001-modelo-normalizado-mermaid.md) | Decisiones de arquitectura. |
-| [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md) | Inventario, duplicados y contradicciones entre docs, código y bases. |
-| [`docs/entrega/GUIA-ISABELLA.md`](docs/entrega/GUIA-ISABELLA.md) | **Paso a paso** para Isabella: respaldar `otjph`, aplicar `00 → 05`, cerrar con `bd:viva` verde. Incluye cómo usar Claude Code y las skills. |
-| [`docs/entrega/GUIA-QUEIPO.md`](docs/entrega/GUIA-QUEIPO.md) | **Paso a paso** para Enzo: claves y entorno, verificación de punta a punta, cron de los viernes y el aviso de correo. Incluye cómo usar Claude Code y las skills. |
-| [`docs/entrega/HANDOFF-ISABELLA.md`](docs/entrega/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
+| [`docs/estado/AUDITORIA_BD.md`](docs/estado/AUDITORIA_BD.md) | Auditoría del esquema de la base y de los tests. |
 | [`docs/metodo/TESTING.md`](docs/metodo/TESTING.md) | Guía corta de Vitest y TDD. |
 | [`docs/metodo/brain.md`](docs/metodo/brain.md) | Filosofía de trabajo (SDD, TDD, módulos profundos, contexto). |
 | [`docs/academico/DER-quimica.csv`](docs/academico/DER-quimica.csv) | DER académico de 13 entidades. |
@@ -58,9 +50,8 @@ El índice completo, por carpeta, está en **[`docs/README.md`](docs/README.md)*
 | `docs/academico/DFD1-Quimica.csv`, `DFD2`, `DFD3` | DFD niveles 1–3. |
 | [`docs/academico/informe_Escencia_Tecnica.md`](docs/academico/informe_Escencia_Tecnica.md) | Informe de cátedra. |
 | [`docs/academico/prototype1.html`](docs/academico/prototype1.html) | Prototipo visual; referencia de diseño, no catálogo. |
-| [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) | Deuda conocida (escrita contra el esquema legacy). |
 | [`docs/estado/SEPARACION.md`](docs/estado/SEPARACION.md) | Separación real entre e-commerce y Teams. |
-| [`docs/agents/`](docs/agentes/domain.md) | Configuración de skills: issue tracker, triage y docs de dominio. |
+| [`docs/agentes/`](docs/agentes/domain.md) | Configuración de agentes: issue tracker, triage, dominio y Teams. |
 
 ---
 
@@ -108,9 +99,7 @@ El índice completo, por carpeta, está en **[`docs/README.md`](docs/README.md)*
 7. Alerta de stock: popup en /admin; sin email al Administrador.
 ```
 
-El MVP termina en `Pago Validado` + remito: **no hay envío ni seguimiento**. El código legacy todavía
-conserva Gemini y el esquema viejo; en el sistema final la IA no existe. La migración está en
-[`docs/MODELO.md`](docs/MODELO.md) y [`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md).
+El MVP termina en `Pago Validado` + remito: **no hay envío ni seguimiento** y la validación de pagos es manual (sin IA). El modelo completo está en [`docs/MODELO.md`](docs/MODELO.md) y la auditoría del esquema en [`docs/estado/AUDITORIA_BD.md`](docs/estado/AUDITORIA_BD.md).
 
 ---
 
@@ -152,8 +141,9 @@ La `anon key` es pública por diseño, pero **no** debe ser la misma para el e-c
 ```bash
 npm run typecheck   # 0 errores
 npm run lint        # 0 errores, 0 warnings
-npm test            # 230 tests: tests/db (PGlite) y tests/front, sin red
-npm run build       # compila sin RESEND_API_KEY; no valida tipos (ignoreBuildErrors: true)
+npm test            # tests/db (PGlite) y tests/front, sin red
+npm run docs:links  # verifica los enlaces relativos de la documentación
+npm run build       # compila sin secretos y validando tipos
 npm run bd:viva     # compara el repo contra el proyecto Supabase vivo (en red)
 ```
 
@@ -161,9 +151,8 @@ npm run bd:viva     # compara el repo contra el proyecto Supabase vivo (en red)
 > migrar deja la suite en verde. El control de la base real es `npm run bd:viva`, y es el criterio de
 > cierre del [issue #15](https://github.com/juanmamerodio/esenciatecnica/issues/15).
 
-El CI de GitHub Actions corre `npm run build` en cada push a `main` y en cada PR.
-El estado real de la deuda está en [`docs/estado/DEUDA_TECNICA.md`](docs/estado/DEUDA_TECNICA.md) y en
-[`docs/estado/AUDITORIA.md`](docs/estado/AUDITORIA.md).
+El CI de GitHub Actions corre `typecheck`, `lint`, `test`, `docs:links` y `build` en cada push a `main` y en cada PR.
+El estado al día vive en [`memory.md`](memory.md).
 
 ---
 

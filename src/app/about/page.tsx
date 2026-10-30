@@ -75,7 +75,7 @@ export default function AboutPage() {
           </span>
 
           <h1 className="text-4xl font-bold leading-[1.1] tracking-tight text-text sm:text-5xl">
-            Sobre el proyecto
+            Noticias de Esencia Técnica
           </h1>
 
           <p className="max-w-2xl text-base leading-relaxed text-muted sm:text-lg">

@@ -2,7 +2,7 @@
 
 > **Estado:** aprobado el 2026-10-22.
 > **Decisiones:** modelo normalizado; MVP sin envío; carrito en cliente con cookies; Admin con Basic Auth; remito HTML; tests con Vitest; validación manual sin IA.
-> **Responsable de la base:** Isabella Infante (SQL). El brief para ella está en [`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md).
+> **Responsable de la base:** Isabella Infante (SQL). La auditoría del esquema está en [`AUDITORIA_BD.md`](./estado/AUDITORIA_BD.md).
 > **Criterio:** el código es la realidad operativa; el DER académico se adapta al código y ambos convergen en este modelo.
 
 ---
@@ -32,7 +32,7 @@
 
 > Los nombres del ERD son lógicos. La tabla física puede conservar el plural actual
 > (`estados_pedidos`, `estados_comprobante`, `remitos_de_venta`, `alerta_de_estado`); el mapeo está en
-> [`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md).
+> [`AUDITORIA_BD.md`](./estado/AUDITORIA_BD.md).
 
 ```mermaid
 erDiagram
@@ -250,7 +250,7 @@ Ventaja: es lo que hoy funciona contra el proyecto viejo. Desventajas: no hay `C
 ## 7. Handoff a Isabella
 
 El detalle de los cambios de DDL, constraints, índices, RLS y limpieza de datos está en
-[`HANDOFF-ISABELLA.md`](./entrega/HANDOFF-ISABELLA.md). Resumen:
+[`AUDITORIA_BD.md`](./estado/AUDITORIA_BD.md). Resumen:
 
 1. Eliminar FKs recíprocas (`producto.id_stock`, `cliente.id_carrito`, `pedido.id_estado`).
 2. Agregar `estado_actual` a `pedido` y `comprobante`; conservar las tablas de historial.

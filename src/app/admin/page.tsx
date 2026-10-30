@@ -49,20 +49,42 @@ export default async function AdminPage() {
         subtitulo="Pedidos con su estado actual, validación manual de comprobantes, stock, alertas y productos de la tienda."
       />
 
+      <nav
+        aria-label="Accesos rápidos del panel"
+        className="flex flex-wrap items-center gap-2 border-b border-border-soft pb-4"
+      >
+        <a
+          href="#pedidos"
+          className="chip border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent hover:text-accent"
+        >
+          Pedidos
+        </a>
+        <a
+          href="#stock"
+          className="chip border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent hover:text-accent"
+        >
+          Stock
+        </a>
+        <a
+          href="#productos"
+          className="chip border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-text transition-colors hover:border-accent hover:text-accent"
+        >
+          Productos
+        </a>
+      </nav>
+
       {alertas.estado === "ok" ? (
         <AvisoDeAlertas alertas={alertas.alertas} />
       ) : (
         <ErrorDeSeccion mensaje={alertas.mensaje} />
       )}
 
-      <section aria-labelledby="titulo-pedidos" className="space-y-4">
+      <section id="pedidos" aria-labelledby="titulo-pedidos" className="scroll-mt-20 space-y-4">
         <h2 id="titulo-pedidos" className="text-xl font-bold tracking-tight text-text">
           Pedidos
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Compará la imagen y el monto del comprobante contra el total del pedido antes de aprobar:
-          la validación es manual y el MVP termina en “Pago Validado” con su remito. Aprobar descuenta
-          el stock y libera la reserva; rechazar sólo libera la reserva.
+          Validá los comprobantes de transferencia contra el total antes de aprobar o rechazar cada pedido.
         </p>
 
         {pedidos.estado === "ok" ? (
@@ -72,13 +94,12 @@ export default async function AdminPage() {
         )}
       </section>
 
-      <section aria-labelledby="titulo-stock" className="space-y-4">
+      <section id="stock" aria-labelledby="titulo-stock" className="scroll-mt-20 space-y-4">
         <h2 id="titulo-stock" className="text-xl font-bold tracking-tight text-text">
           Stock
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Corregí la cantidad actual y el umbral de aviso. El disponible lo calcula la base como
-          cantidad actual menos reservada; cuando toca el umbral, aparece la alerta del panel.
+          Ajustá la cantidad actual y el stock mínimo para recibir alertas cuando quede poco disponible.
         </p>
 
         {stock.estado === "ok" ? (
@@ -88,13 +109,12 @@ export default async function AdminPage() {
         )}
       </section>
 
-      <section aria-labelledby="titulo-productos" className="space-y-4">
+      <section id="productos" aria-labelledby="titulo-productos" className="scroll-mt-20 space-y-4">
         <h2 id="titulo-productos" className="text-xl font-bold tracking-tight text-text">
           Productos
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Alta, edición, baja lógica y foto real de cada producto. Dar de baja no borra nada: el
-          producto deja de publicarse y conserva su historial.
+          Gestioná el catálogo, precios, tiempos de producción y fotos oficiales de cada producto.
         </p>
 
         {stock.estado === "ok" ? (
@@ -103,14 +123,6 @@ export default async function AdminPage() {
           <ErrorDeSeccion mensaje={stock.mensaje} />
         )}
       </section>
-
-      <p className="flex items-start gap-3 text-xs leading-relaxed text-muted">
-        <ShieldCheck aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-        <span>
-          El panel está protegido con la contraseña del Administrador. Las alertas de stock se ven
-          sólo acá: no se envían por email. El email del remito es para el Cliente (T8).
-        </span>
-      </p>
     </div>
   );
 }

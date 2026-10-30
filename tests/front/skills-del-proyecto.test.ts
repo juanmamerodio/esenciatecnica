@@ -159,4 +159,9 @@ describe('#45 · las skills del proyecto existen y el runtime las puede cargar',
       expect(seccion, `§11 no nombra la skill «${carpeta}»`).toContain(carpeta);
     }
   });
+
+  it('`AGENTS.md` aplica divulgación progresiva (brain.md §2.3) y no supera las 100 líneas', () => {
+    const lineas = leer('AGENTS.md').trimEnd().split(/\r?\n/);
+    expect(lineas.length, `AGENTS.md tiene ${lineas.length} líneas (máximo 100)`).toBeLessThanOrEqual(100);
+  });
 });

@@ -12,8 +12,8 @@ Correr el único control que mira el proyecto Supabase **vivo** (`otjphjnrwihqzz
 salida sin maquillarla. El script vive en
 [`scripts/verificar-bd-viva.mjs`](../../../scripts/verificar-bd-viva.mjs) (reglas puras en
 [`scripts/bd-viva-reglas.mjs`](../../../scripts/bd-viva-reglas.mjs)), el criterio de cierre está en
-[`docs/specs/migracion-otjph/spec.md`](../../../docs/specs/migracion-otjph/spec.md) y el procedimiento
-de aplicación en [`docs/entrega/GUIA-ISABELLA.md`](../../../docs/entrega/GUIA-ISABELLA.md) §4.4.
+[`docs/specs/migracion-otjph/spec.md`](../../../docs/specs/migracion-otjph/spec.md) y la auditoría de base
+en [`docs/estado/AUDITORIA_BD.md`](../../../docs/estado/AUDITORIA_BD.md).
 
 ## 2. PARÁMETROS DE ENTRADA
 

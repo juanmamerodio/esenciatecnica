@@ -298,8 +298,8 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 - **Reimplementar la regla en el front**: reservas, descuentos de stock, estados y numeración del remito son
   de la base.
 - **Ver el comprobante sin autenticación**: el bucket es privado y la URL firmada vence.
-- **RLS y políticas**: las revisa Isabella Infante ([`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md)); las
-  migraciones `05` y `06` entran en el handoff para su revisión.
+- **RLS y políticas**: las revisa Isabella Infante ([`migracion-otjph/spec.md`](../migracion-otjph/spec.md)); las
+  migraciones `05` y `06` entran en su revisión.
 - **Búsqueda, filtros y paginación del panel**: el MVP tiene un solo Administrador y un catálogo chico.
 - **Envío, seguimiento y estados posteriores a `Pago Validado`**: fuera del MVP (`AGENTS.md` §5.5).
 - **Reabrir un pedido rechazado**: el rechazo es terminal (spec `bd-mvp` §7, decisión 3); el Cliente vuelve a comprar.
@@ -319,7 +319,7 @@ mano una vez en el navegador; la lógica que decide está en el módulo puro y s
 1. **Migraciones `05` y `06` aplicadas en `otjph…`** ✅ **Cerrado el 2026-10-28** (Juanma aplicó, Isabella
    revisa): el bucket `productos` existe —público, medido con la anon key— y `06` está aplicada, así que
    `ET007` y la restricción de precio corren en vivo. El DDL está en
-   [`HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) y **no** se aplica a producción desde acá.
+   [`migracion-otjph/spec.md`](../migracion-otjph/spec.md) y **no** se aplica a producción desde acá.
 2. **`SUPABASE_SERVICE_ROLE_KEY`** en `.env.local` y en Vercel (Enzo, tarea *Secretos y entorno*): sin ella
    el panel no puede leer ni escribir y responde `503`. `ADMIN_PASSWORD` ya está cargada (28-10).
 3. **Esta spec** aprobada y linkeada en [#13](https://github.com/juanmamerodio/esenciatecnica/issues/13).

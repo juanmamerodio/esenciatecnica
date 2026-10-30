@@ -13,9 +13,9 @@ contrato operativo en [`../AGENTS.md`](../AGENTS.md).
 | El modelo de datos y las reglas del dominio | [`MODELO.md`](MODELO.md) |
 | La spec de una feature | [`specs/<feature>/spec.md`](specs/front-mvp/spec.md) |
 | Por qué se decidió algo | [`adr/`](adr/0001-modelo-normalizado-mermaid.md) |
-| El estado real, la auditoría y la deuda | [`estado/`](estado/AUDITORIA.md) |
+| El estado real, la auditoría de BD y la separación | [`estado/`](estado/AUDITORIA_BD.md) |
 | Cómo trabajamos (SDD, TDD, contexto) | [`metodo/`](metodo/brain.md) |
-| Qué tiene que hacer una persona del equipo | [`entrega/`](entrega/HANDOFF-ISABELLA.md) |
+| Créditos y entregables del catálogo | [`entrega/`](entrega/CREDITOS-FOTOS.md) |
 | Los diagramas y el informe de cátedra | [`academico/`](academico/informe_Escencia_Tecnica.md) |
 | Cómo configurar a un agente | [`agentes/`](agentes/domain.md) |
 
@@ -66,9 +66,7 @@ Qué es verdad hoy: inventario, contradicciones y deuda conocida. Se corrige con
 
 | Documento | Contenido |
 |---|---|
-| [`estado/AUDITORIA.md`](estado/AUDITORIA.md) | Inventario, duplicados, dos bases, tres catálogos y contradicciones. |
 | [`estado/AUDITORIA_BD.md`](estado/AUDITORIA_BD.md) | Auditoría de la base y de los tests. |
-| [`estado/DEUDA_TECNICA.md`](estado/DEUDA_TECNICA.md) | Deuda conocida; escrita contra el esquema legacy. |
 | [`estado/SEPARACION.md`](estado/SEPARACION.md) | Separación real entre e-commerce y Teams. |
 
 ## `metodo/` · Método de trabajo
@@ -78,15 +76,10 @@ Qué es verdad hoy: inventario, contradicciones y deuda conocida. Se corrige con
 | [`metodo/brain.md`](metodo/brain.md) | Filosofía de trabajo (SDD, TDD, módulos profundos, contexto). |
 | [`metodo/TESTING.md`](metodo/TESTING.md) | Guía corta de Vitest y TDD. |
 
-## `entrega/` · Handoffs y guías por persona
-
-Qué tiene que hacer cada responsable, con el paso a paso.
+## `entrega/` · Créditos y entregables
 
 | Documento | Contenido |
 |---|---|
-| [`entrega/HANDOFF-ISABELLA.md`](entrega/HANDOFF-ISABELLA.md) | Brief de DDL, constraints, RLS y limpieza para Isabella. |
-| [`entrega/GUIA-ISABELLA.md`](entrega/GUIA-ISABELLA.md) | Paso a paso de la migración de `otjph` (issue #15). |
-| [`entrega/GUIA-QUEIPO.md`](entrega/GUIA-QUEIPO.md) | Paso a paso de secretos, verificación de punta a punta y cron. |
 | [`entrega/CREDITOS-FOTOS.md`](entrega/CREDITOS-FOTOS.md) | Atribución de las fotos de demostración del catálogo y del hero (#22). |
 
 ## `academico/` · Artefactos académicos y referencia visual

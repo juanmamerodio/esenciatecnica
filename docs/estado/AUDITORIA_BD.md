@@ -3,7 +3,7 @@
 > **Fecha:** 2026-10-22, re-observada el **2026-10-23** (§3.5) · **Alcance:** proyecto Supabase `otjphjnrwihqzzhbfnmh` (e-commerce).
 > **Método:** introspección de solo lectura con la anon key + lectura del esquema por PostgREST + pruebas
 > ejecutables contra PostgreSQL 17 real (PGlite/WASM) con las migraciones de `supabase/migrations/`.
-> **Referencias:** [`MODELO.md`](../MODELO.md) · [`HANDOFF-ISABELLA.md`](../entrega/HANDOFF-ISABELLA.md) · [`spec`](../specs/bd-mvp/spec.md).
+> **Referencias:** [`MODELO.md`](../MODELO.md) · [`spec`](../specs/bd-mvp/spec.md).
 > **Autor:** agente de implementación · **Responsable DDL:** Isabella Infante.
 
 ---

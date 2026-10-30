@@ -87,7 +87,7 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
       <div className="card overflow-x-auto p-4 sm:p-6">
         <table className="w-full min-w-[44rem] text-sm">
           <caption className="sr-only">
-            Stock por producto: cantidad actual, reservada, disponible, umbral de aviso y edición.
+            Stock por producto: cantidad actual, reservada, disponible, stock mínimo y edición.
           </caption>
           <thead>
             <tr className="text-left font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
@@ -95,7 +95,7 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
               <th scope="col" className="py-2 text-right">Reservada</th>
               <th scope="col" className="py-2 text-right">Disponible</th>
               <th scope="col" className="py-2 text-right">Cantidad actual</th>
-              <th scope="col" className="py-2 text-right">Umbral de aviso</th>
+              <th scope="col" className="py-2 text-right">Stock mínimo</th>
               <th scope="col" className="py-2 text-right">Acción</th>
             </tr>
           </thead>
@@ -113,7 +113,7 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
                     {fila.alerta ? (
                       <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-amber-900">
                         <BellRing aria-hidden className="h-3.5 w-3.5" />
-                        En el umbral de aviso, sin atender
+                        Stock bajo, sin atender
                       </span>
                     ) : null}
                   </td>
@@ -141,7 +141,7 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
 
                   <td className="py-3 text-right">
                     <label htmlFor={`umbral-${fila.idProducto}`} className="sr-only">
-                      Umbral de aviso de {fila.nombre}
+                      Stock mínimo de {fila.nombre}
                     </label>
                     <input
                       id={`umbral-${fila.idProducto}`}
@@ -181,9 +181,9 @@ export default function PanelDeStock({ stock }: { stock: StockDelPanel[] }) {
       </div>
 
       <p className="text-xs leading-relaxed text-muted">
-        El umbral 0 significa “sin umbral configurado”: la base no dispara la alerta. La alerta de la
-        fila es la que la base registró y todavía no se atendió; el disponible es la cantidad actual
-        menos la reservada.
+        El stock mínimo en 0 desactiva la alerta para ese producto. La alerta de la fila se genera
+        automáticamente cuando el disponible alcanza o cae por debajo del mínimo; el disponible es la
+        cantidad actual menos la reservada.
       </p>
     </div>
   );

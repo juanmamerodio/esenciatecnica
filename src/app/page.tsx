@@ -103,7 +103,7 @@ export default async function HomePage() {
         <div className="space-y-4">
           <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-accent">
             <Wallet aria-hidden className="h-4 w-4" />
-            Cómo se paga
+            Forma de pago
           </span>
           <h2 className="text-2xl font-bold tracking-tight text-text sm:text-3xl">
             Transferencia con validación manual
@@ -133,9 +133,8 @@ export default async function HomePage() {
           <li className="flex gap-3">
             <GraduationCap aria-hidden className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
             <span>
-              <strong className="block font-semibold text-text">Entrega a coordinar</strong>
-              El retiro o la entrega se acuerda después de la aprobación: el proyecto no incluye envío ni
-              seguimiento.
+              <strong className="block font-semibold text-text">Retiro en la escuela</strong>
+              El retiro de los pedidos se realiza en el Departamento de Química de la E.E.S.T N°1 Luciano Reyes (Int. Moro 1122, Campana), de Lunes a Viernes de 8:00 a 17:00 hs.
             </span>
           </li>
         </ul>

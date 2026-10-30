@@ -23,13 +23,8 @@ const RUTAS_VIEJAS = {
   "docs/README.md": "docs/README.md",
   "docs/brain.md": "docs/metodo/brain.md",
   "docs/TESTING.md": "docs/metodo/TESTING.md",
-  "docs/AUDITORIA.md": "docs/estado/AUDITORIA.md",
   "docs/AUDITORIA_BD.md": "docs/estado/AUDITORIA_BD.md",
-  "docs/DEUDA_TECNICA.md": "docs/estado/DEUDA_TECNICA.md",
   "docs/SEPARACION.md": "docs/estado/SEPARACION.md",
-  "docs/HANDOFF-ISABELLA.md": "docs/entrega/HANDOFF-ISABELLA.md",
-  "docs/GUIA-ISABELLA.md": "docs/entrega/GUIA-ISABELLA.md",
-  "docs/GUIA-QUEIPO.md": "docs/entrega/GUIA-QUEIPO.md",
   "docs/informe_Escencia_Tecnica.md": "docs/academico/informe_Escencia_Tecnica.md",
   "docs/prototype1.html": "docs/academico/prototype1.html",
   "docs/agents/domain.md": "docs/agentes/domain.md",
@@ -67,8 +62,6 @@ const ALIAS_SUELTOS = {
   "agents/issue-tracker.md": "docs/agentes/issue-tracker.md",
   "agents/triage-labels.md": "docs/agentes/triage-labels.md",
   "AUDITORIA_BD.md": "docs/estado/AUDITORIA_BD.md",
-  "AUDITORIA.md": "docs/estado/AUDITORIA.md",
-  "HANDOFF-ISABELLA.md": "docs/entrega/HANDOFF-ISABELLA.md",
   "TESTING.md": "docs/metodo/TESTING.md",
 };
 

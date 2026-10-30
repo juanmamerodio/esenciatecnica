@@ -396,6 +396,32 @@ describe('#34 · el total que se muestra en el resumen', () => {
     // El bug era renderizar el total del carrito en el resumen de la transferencia.
     expect(pagina).not.toMatch(/\{formatPrice\(total\)\}/);
   });
+
+  it('aplica redondeo canónico a centavos sobre el total de la base o del carrito', () => {
+    expect(totalAVisualizar(null, 2500.004)).toBe(2500);
+    expect(totalAVisualizar(null, 2500.006)).toBe(2500.01);
+    expect(totalAVisualizar(3000.004, 2500)).toBe(3000);
+    expect(totalAVisualizar(3000.006, 2500)).toBe(3000.01);
+  });
+
+  it('si el usuario altera el carrito se descarta el total previo de la base y el idPedido', () => {
+    const pagina = leer('src/app/checkout/page.tsx');
+    // Al cambiar items, se limpian el total de la base, el id del pedido previo y el monto editado
+    expect(pagina).toMatch(
+      /useEffect\(\s*\(\)\s*=>\s*\{[\s\S]*?setTotalDeLaBase\(null\);[\s\S]*?setIdPedido\(null\);[\s\S]*?setMontoEditado\(false\);[\s\S]*?\}\s*,\s*\[items\]\s*\)/,
+    );
+  });
+
+  it('si la creación del pedido falla o no devuelve total, el total de la base se resetea', () => {
+    const pagina = leer('src/app/checkout/page.tsx');
+    // Ante respuesta sin idPedido o sin total válido, se resetea el total de la base y el idPedido
+    expect(pagina).toMatch(
+      /if\s*\(\s*typeof cuerpo\.total === "number"\s*\)\s*setTotalDeLaBase\(cuerpo\.total\);\s*else\s+setTotalDeLaBase\(null\);/,
+    );
+    expect(pagina).toMatch(
+      /if\s*\(\s*cuerpo\.idPedido\s*\)\s*setIdPedido\(cuerpo\.idPedido\);\s*else\s+setIdPedido\(null\);/,
+    );
+  });
 });
 
 describe('#37 · los límites del borde, con su caso válido en el borde', () => {
@@ -561,5 +587,16 @@ describe('T5 · borde HTTP y retiro del camino legacy', () => {
     const page = leer('src/app/checkout/page.tsx');
     expect(page).toMatch(/use client/);
     expect(page).not.toMatch(/SERVICE_ROLE|service_role/);
+  });
+});
+
+describe('HU-4 · mensaje de confirmación empático y conciso', () => {
+  it('la pantalla de confirmación agradece, menciona validación por email y contacto sin tecnicismos', () => {
+    const pagina = leer('src/app/checkout/page.tsx');
+    expect(pagina).toContain('¡Gracias por tu compra! Ya registramos tu pedido.');
+    expect(pagina).toMatch(/Un Administrador del Departamento de Química\s+validará tu comprobante/);
+    expect(pagina).toMatch(/te avisaremos por email cuando quede aprobado/);
+    expect(pagina).toMatch(/Si tenés dudas, podés\s+acercarte a la escuela o escribirnos/);
+    expect(pagina).not.toMatch(/el proyecto no incluye envío ni seguimiento/i);
   });
 });

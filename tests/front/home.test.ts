@@ -111,3 +111,14 @@ describe('#22 · el hero tiene foto propia', () => {
     expect(home).toMatch(/<ImagenProducto[\s\S]*FOTO_DEL_HERO\.url/);
   });
 });
+
+describe('HU-3 · forma de pago y datos oficiales de retiro', () => {
+  it('renombra Cómo se paga a Forma de pago e informa la logística oficial de retiro', () => {
+    const home = leer('src/app/page.tsx');
+    expect(home).toContain('Forma de pago');
+    expect(home).not.toContain('Cómo se paga');
+    expect(home).toContain('Int. Moro 1122, Campana');
+    expect(home).toContain('Lunes a Viernes de 8:00 a 17:00 hs');
+    expect(home).toContain('Departamento de Química de la E.E.S.T N°1 Luciano Reyes');
+  });
+});

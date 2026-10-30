@@ -53,6 +53,14 @@ export default function CheckoutPage() {
   // El carrito vive en localStorage: hasta hidratar no se puede afirmar que esté vacío.
   useEffect(() => setMontado(true), []);
 
+  // Si el usuario altera el carrito tras un error o validación, se descarta el total viejo de la base
+  // y cualquier idPedido previo para que el total se recalcule con la aritmética canónica.
+  useEffect(() => {
+    setTotalDeLaBase(null);
+    setIdPedido(null);
+    setMontoEditado(false);
+  }, [items]);
+
   // El monto llega precargado con el total a transferir; si el Cliente lo editó, se respeta.
   useEffect(() => {
     if (montado && !montoEditado) {
@@ -96,6 +104,8 @@ export default function CheckoutPage() {
 
       if (!cuerpo) {
         setError("El checkout devolvió una respuesta que no se entiende. Volvé a intentar.");
+        setIdPedido(null);
+        setTotalDeLaBase(null);
         return;
       }
 
@@ -108,14 +118,18 @@ export default function CheckoutPage() {
       setError(cuerpo.mensaje);
       setCampos(cuerpo.campos ?? {});
       if (cuerpo.idPedido) setIdPedido(cuerpo.idPedido);
+      else setIdPedido(null);
       // La base ya calculó el total del pedido: desde acá es el número que se muestra y se cobra.
       if (typeof cuerpo.total === "number") setTotalDeLaBase(cuerpo.total);
+      else setTotalDeLaBase(null);
       if (cuerpo.motivo === "monto-no-coincide" && typeof cuerpo.total === "number") {
         setMonto(cuerpo.total.toFixed(2));
         setMontoEditado(false);
       }
     } catch {
       setError("No pudimos enviar el pedido. Revisá tu conexión y volvé a intentar.");
+      setIdPedido(null);
+      setTotalDeLaBase(null);
     } finally {
       setEnviando(false);
     }
@@ -134,9 +148,9 @@ export default function CheckoutPage() {
         </h1>
         <p className="font-mono text-2xl font-bold text-accent">{formatPrice(confirmacion.total)}</p>
         <p className="text-sm leading-relaxed text-muted">
-          Ya reservamos tus productos. Un Administrador de Química revisa el comprobante a mano y te
-          avisamos por email cuando el pago quede validado. El retiro o la entrega se coordinan después de
-          la aprobación: el proyecto no incluye envío ni seguimiento.
+          ¡Gracias por tu compra! Ya registramos tu pedido. Un Administrador del Departamento de Química
+          validará tu comprobante y te avisaremos por email cuando quede aprobado. Si tenés dudas, podés
+          acercarte a la escuela o escribirnos.
         </p>
         <Link href="/catalog" className="btn-primary gap-2">
           Volver al catálogo

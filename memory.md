@@ -1,10 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (auditoría de build,
-> retiro de `ignoreBuildErrors: true`, limpieza de 9 specs quemadas y scripts viejos, `/retro` sobre
-> skills y `docs:links`, comando `npm run teams -- papelera` con 27 tareas `done` > 24 h archivadas,
-> cierre de #17, #19 y #25 en GitHub, y avisos `AVANCE` + `BLOQUEO` publicados en Teams con la compra
-> urgente del dominio para Resend).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Mejoras de UX, Identidad y Feedback HU-1 a HU-7 completas: favicon, Noticias, retiro oficial, checkout empático, limpieza de /admin sin banner residual, sub-navegación rápida por anclas y terminología clara de stock mínimo/bajo; 453 tests en verde).
 
 ## Ahora
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
@@ -22,9 +18,9 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **441 tests** en 34 archivos ·
-  `docs:links` 0 links sin resolver sobre 43 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
-  `npm run build` compila las 16 rutas + `src/middleware.ts` **validando tipos en el build**
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **453 tests** en 34 archivos ·
+  `docs:links` 0 links sin resolver sobre 39 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+  `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde. Cerrados #17, #19 y #25 con evidencia; quedan abiertos sólo el paraguas #1
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
@@ -47,11 +43,15 @@
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
 
-## Hecho (2026-10-29 · auditoría de build, limpieza del repo, `/retro` y papelera de Teams)
+## Hecho (2026-10-29 · Mejoras de UX, Identidad y Feedback HU-1 a HU-7)
 | Cambio | Qué dejó |
 |---|---|
-| `scripts/teams-tablero.mjs` + `scripts/teams-papelera-reglas.mjs` + `tests/front/teams-papelera.test.ts` | Subcomando `npm run teams -- papelera [--horas 24] --autor <key> [--confirmar]`: selecciona tareas `done` con más de 24 h, guarda respaldo local en `docs/agentes/papelera/` (ignorado en Git por `AGENTS.md` §3), las borra de `team_tasks` y registra `DELETE` en `task_audit_logs`. 6 tests puros en verde; 27 tareas archivadas. |
-| `next.config.ts` + `AGENTS.md` §8 + `docs/estado/DEUDA_TECNICA.md` §4 | Se retiró `typescript.ignoreBuildErrors: true`. `npm run build` ahora valida tipos durante la compilación además de CI. Cierra el punto 4 de `DEUDA_TECNICA.md`. |
+| `src/app/admin/page.tsx` + `src/components/admin/PanelDeStock.tsx` + `tests/front/admin.test.ts` | **HU-5 a HU-7:** eliminación del banner inferior informativo residual de credenciales ("El panel está protegido..."), síntesis de los subtítulos de Pedidos, Stock y Productos a instrucciones breves y operativas sin jerga técnica interna, sub-navegación compacta por anclas (`#pedidos`, `#stock`, `#productos`) con `scroll-mt-20`, y sustitución en la UI de "umbral" por "Stock mínimo" y "Stock bajo, sin atender", preservando los nombres internos de base de datos (`umbral_minimo`). 3 tests nuevos (453 en total en verde). |
+| `src/app/icon.svg` + `src/components/Header.tsx` + `src/components/Footer.tsx` + `src/app/about/page.tsx` + `src/app/page.tsx` + `src/app/checkout/page.tsx` + tests | **HU-1 a HU-4:** Favicon institucional vectorial SVG (`#3D8C6E`), acceso "Noticias" en Header/Footer y título de `/about`, sección "Forma de pago" con datos oficiales de retiro en Home ("Int. Moro 1122, Campana", L a V 8:00 a 17:00 hs, Departamento de Química), y confirmación de compra cálida y empática en checkout sin tecnicismos internos. 5 tests nuevos. |
+| `src/lib/checkout.ts` + `src/app/checkout/page.tsx` + `tests/front/checkout.test.ts` | Recalcular `totalAVisualizar` con aritmética canónica (`redondearACentavos`) y resetear `totalDeLaBase`, `idPedido` y `montoEditado` si el usuario altera el carrito o si la creación del pedido falla / no devuelve total. 3 tests nuevos. Tarea de Teams movida a `done`. |
+| `AGENTS.md` + `tests/front/skills-del-proyecto.test.ts` | Reducción de `AGENTS.md` de **336 a 75 líneas (-77.7%)** aplicando divulgación progresiva (`brain.md` §2.3: Nivel 1–2 al abrir sesión, Nivel 3 bajo demanda) y test estructural que exige `<= 100` líneas. Retirados los 5 documentos históricos/legacy obsoletos (`AUDITORIA.md`, `DEUDA_TECNICA.md`, `HANDOFF-ISABELLA.md`, `GUIA-ISABELLA.md`, `GUIA-QUEIPO.md`: -1.346 líneas). |
+| `scripts/teams-tablero.mjs` + `scripts/teams-papelera-reglas.mjs` + `tests/front/teams-papelera.test.ts` | Subcomando `npm run teams -- papelera [--horas 24] --autor <key> [--confirmar]`: selecciona tareas `done` con más de 24 h, guarda respaldo local en `docs/agentes/papelera/` (ignorado en Git por `AGENTS.md` §1), las borra de `team_tasks` y registra `DELETE` en `task_audit_logs`. 6 tests puros en verde; 27 tareas archivadas. |
+| `next.config.ts` + `AGENTS.md` §8 | Se retiró `typescript.ignoreBuildErrors: true`. `npm run build` ahora valida tipos durante la compilación además de CI. |
 | `scripts/verificar-links-docs.mjs` | Filtra archivos borrados en el árbol de trabajo antes de abrirlos (evita `ENOENT`) y sale con `process.exitCode = 1` cuando hay links rotos o sin migrar, haciendo efectiva la puerta `docs:links` en CI. |
 | Limpieza de `docs/specs/`, `docs/estado/` y `scripts/` | Eliminados los 9 specs de tickets puntuales ya quemados (`busqueda-por-campos`, `detalle-404`, `deuda-codigo-25-10`, `formato-del-dinero`, `iconos-y-copy-del-dominio`, `integracion-continua`, `plantilla-de-spec`, `skills-del-proyecto`, `trazabilidad-issues`), `docs/estado/ORDEN_DE_EJECUCION.md`, `scripts/reorganizar-docs.mjs` y el directorio vacío `docs/agents/`. En `docs/specs/` quedan los 10 specs de features + `PLANTILLA.md`. |
 | `.agents/skills/*` + `docs/agentes/teams.md` + `tests/front/skills-del-proyecto.test.ts` | Cierra la deuda de skills del 28-10: anatomía de `brain.md` §4.1 en orden (`PROPÓSITO` → `PARÁMETROS DE ENTRADA` → `GUARDRAILS` → `PASOS DE EJECUCIÓN`), link a `scripts/verificar-bd-viva.mjs`, retiro de término legacy en `teams.md` y limpieza de conteos congelados en los specs. |
@@ -63,7 +63,7 @@
 3. 🟡 **Fotos definitivas del taller (#22, Celeste):** reemplazar desde `/admin` las fotos de demostración y pisar `public/hero/portada.jpg`.
 4. 🟡 **Verificación en pantalla (#23, Celeste):** recorrer la tienda y `/admin` en navegador (desktop y mobile) y dejar el resultado en la tarea `B6`.
 5. 🟡 **`respaldo_legacy` sin firmar (#16, Isabella / Juanma):** correr el bloque de conteos en el SQL Editor de `otjph` y pegarlo en #16.
-6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** `FaltaConfiguracion` en `src/lib/cron-servidor.ts`, recalcular `totalAVisualizar` si cambia el carrito tras un error en `checkout/page.tsx`, exigir `401/403` en `admin`/`roll` en `bd:viva`, y la tarea de juicio «Deuda de estándares del cierre beta».
+6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** `FaltaConfiguracion` en `src/lib/cron-servidor.ts`, exigir `401/403` en `admin`/`roll` en `bd:viva`, y la tarea de juicio «Deuda de estándares del cierre beta».
 
 ## Reglas y decisiones que no hay que redescubrir
 - **1 ticket = 1 sesión = 1 commit quirúrgico.** TDD. Español único. Sin IA. Sin envío.

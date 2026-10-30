@@ -63,6 +63,14 @@ describe('F0 · tokens de identidad', () => {
   it('las animaciones respetan prefers-reduced-motion', () => {
     expect(leer('src/app/globals.css')).toMatch(/prefers-reduced-motion/);
   });
+
+  it('existe el favicon vectorial institucional en src/app/icon.svg con el color corporativo', () => {
+    expect(existsSync(join(RAIZ, 'src', 'app', 'icon.svg'))).toBe(true);
+    const svg = leer('src/app/icon.svg');
+    expect(svg).toMatch(/<svg\b[^>]*>/);
+    expect(svg).toMatch(/viewBox=/);
+    expect(svg).toMatch(/#3D8C6E|61,\s*140,\s*110/i);
+  });
 });
 
 describe('F0 · shell compartido', () => {
@@ -87,11 +95,26 @@ describe('F0 · shell compartido', () => {
 
   it('el header ofrece las cinco salidas con estado activo y sin selector de idioma', () => {
     const header = leer('src/components/Header.tsx');
-    for (const destino of ['Inicio', 'Catálogo', 'Sobre el proyecto', 'Carrito', 'Gestión']) {
+    for (const destino of ['Inicio', 'Catálogo', 'Noticias', 'Carrito', 'Gestión']) {
       expect(header).toContain(destino);
     }
+    expect(header).not.toContain('Sobre el proyecto');
     expect(header).toMatch(/usePathname/);
     expect(header).not.toMatch(/locales\b|\[lang\]|dictionaries|@\/lib\/i18n/);
+  });
+
+  it('el header y el footer enlazan a Noticias en lugar de Sobre el proyecto', () => {
+    const header = leer('src/components/Header.tsx');
+    const footer = leer('src/components/Footer.tsx');
+    expect(header).toContain('Noticias');
+    expect(header).not.toContain('Sobre el proyecto');
+    expect(footer).toContain('Noticias');
+    expect(footer).not.toContain('Sobre el proyecto');
+  });
+
+  it('la página /about titula Noticias de Esencia Técnica', () => {
+    const about = leer('src/app/about/page.tsx');
+    expect(about).toMatch(/<h1[^>]*>\s*Noticias de Esencia Técnica\s*<\/h1>/);
   });
 
   it('los controles de ícono del header tienen nombre accesible', () => {

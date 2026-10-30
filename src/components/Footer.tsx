@@ -10,7 +10,7 @@ import { Sparkles } from "lucide-react";
  */
 const ACCESOS = [
   { nombre: "Catálogo", href: "/catalog" },
-  { nombre: "Sobre el proyecto", href: "/about" },
+  { nombre: "Noticias", href: "/about" },
   { nombre: "Carrito", href: "/cart" },
 ];
 

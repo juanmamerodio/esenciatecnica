@@ -2,7 +2,7 @@
 
 > **Feature:** `migracion-otjph` · **Estado:** `01`–`06` aplicadas en `otjph`, `bd:viva` en **verde**; falta la firma de `respaldo_legacy` (no visible con la anon key) · **Fecha:** 2026-10-26, revisado el 2026-10-28.
 > **Origen:** auditoría de la sesión del 26-10 sobre el estado real de `otjphjnrwihqzzhbfnmh`.
-> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/entrega/HANDOFF-ISABELLA.md`](../../entrega/HANDOFF-ISABELLA.md) + `supabase/migrations/`.
+> **Fuente de verdad:** [`docs/MODELO.md`](../../MODELO.md) + [`docs/estado/AUDITORIA_BD.md`](../../estado/AUDITORIA_BD.md) + `supabase/migrations/`.
 > **Responsable:** Isabella Infante (Database & SQL Architecture).
 > **Criterio de cierre:** `npm run bd:viva` en verde.
 
