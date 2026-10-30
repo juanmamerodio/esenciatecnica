@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (HU-1 a HU-4 de Spec Maestro #53: helper compartido de servicio, cron 503 ante FaltaConfiguracion, chequeo estricto 401/403 en bd:viva y retiro de estadoHttp; 472 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (HU-15 de Spec Maestro #53: DFD niveles 0 a 3 en Mermaid con almacenes D1–D7 y correcciones de Ariel; 479 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams (3 en review + 16 en backlog) en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
@@ -19,8 +19,8 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **472 tests** en 35 archivos ·
-  `docs:links` 0 links sin resolver sobre 40 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **479 tests** en 36 archivos ·
+  `docs:links` 0 links sin resolver sobre 41 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde. Publicado el spec de cierre beta #53; abiertos el paraguas #1
@@ -44,6 +44,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-30 · HU-15: DFD Académico en Mermaid #53)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/academico/DFD.md` + `docs/README.md` + `tests/front/dfd-academico.test.ts` | **HU-15 (#53):** Formalización de los Diagramas de Flujo de Datos (DFD) de niveles 0, 1, 2 y 3 en formato Mermaid (`flowchart TD`) incorporando todas las observaciones docentes de Ariel: eliminación de almacenes de datos en Nivel 0 (Diagrama de Contexto), estructuración de almacenes canónicos D1 a D7 (`CLIENTE`, `PRODUCTO`, `STOCK`, `PEDIDO`, `COMPROBANTE`, `REMITO_VENTA`, `ALERTA_STOCK`) alineados con `docs/MODELO.md`, explicitación del Carrito en el navegador del cliente (sin persistencia en BD), corrección de la liberación de reserva de stock por cron semanal de los viernes 23:59 ART (`cancelar_pedidos_vencidos`) en reemplazo de temporizadores diarios, y notificación de alertas de stock exclusiva como popup en `/admin` (sin correos electrónicos al Administrador). 7 tests nuevos (479 en 36 archivos en verde). Tarea de Celeste movida a `done` en Teams. |
 
 ## Hecho (2026-10-30 · HU-1 a HU-4: Cierre Beta - Núcleo Técnico #53)
 | Cambio | Qué dejó |

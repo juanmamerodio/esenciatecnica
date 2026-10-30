@@ -90,7 +90,8 @@ Material de cátedra. Se adapta al código y al modelo; **no** manda sobre la im
 |---|---|
 | [`academico/DER-quimica.csv`](academico/DER-quimica.csv) | DER de 13 entidades. |
 | [`academico/DCU-Quimica.csv`](academico/DCU-Quimica.csv) | Casos de uso. |
-| [`academico/DFD1-Quimica.csv`](academico/DFD1-Quimica.csv), [`DFD2-Quimica.csv`](academico/DFD2-Quimica.csv), [`DFD3-Quimica.csv`](academico/DFD3-Quimica.csv) | DFD niveles 1–3. |
+| [`academico/DFD.md`](academico/DFD.md) | Diagramas de Flujo de Datos (DFD niveles 0–3 en Mermaid) corregidos según observaciones docentes. |
+| [`academico/DFD1-Quimica.csv`](academico/DFD1-Quimica.csv), [`DFD2-Quimica.csv`](academico/DFD2-Quimica.csv), [`DFD3-Quimica.csv`](academico/DFD3-Quimica.csv) | DFD borradores originales niveles 1–3. |
 | [`academico/informe_Escencia_Tecnica.md`](academico/informe_Escencia_Tecnica.md) | Informe de cátedra. |
 | [`academico/prototype1.html`](academico/prototype1.html) | Prototipo HTML. Referencia de diseño, **no** catálogo de datos. |
 
