@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { revisarCron } from "@/lib/cron-auth";
+import { esFaltaDeConfiguracion } from "@/lib/errores-bd";
 
 /**
  * Manejador del cron de vencidos — B4 · issue #18.
@@ -19,7 +20,7 @@ export interface PuertoCron {
 
 type CuerpoDeError = {
   estado: "error";
-  motivo: "sin-secreto" | "no-autorizado" | "error-del-servidor";
+  motivo: "sin-secreto" | "no-autorizado" | "sin-configuracion" | "error-del-servidor";
   mensaje: string;
 };
 
@@ -28,6 +29,13 @@ const SIN_SECRETO: CuerpoDeError = {
   motivo: "sin-secreto",
   mensaje:
     "El cron no está configurado: falta CRON_SECRET en el entorno del servidor. Avisá al equipo del proyecto.",
+};
+
+const SIN_CONFIGURACION: CuerpoDeError = {
+  estado: "error",
+  motivo: "sin-configuracion",
+  mensaje:
+    "El cron no está configurado: falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL) en el entorno del servidor. Avisá al equipo del proyecto.",
 };
 
 const NO_AUTORIZADO: CuerpoDeError = {
@@ -66,6 +74,11 @@ export async function manejarCron(
     }
     return sinCache(NextResponse.json({ estado: "ok", cancelados }, { status: 200 }));
   } catch (error) {
+    if (esFaltaDeConfiguracion(error)) {
+      console.error("Cron de vencidos no disponible:", error.message);
+      return sinCache(NextResponse.json(SIN_CONFIGURACION, { status: 503 }));
+    }
+
     // Nada se silencia: el detalle queda en el log del servidor, no en la respuesta.
     console.error(
       "Cron de vencidos: no se pudo cancelar los pedidos:",

@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Mejoras de UX, Identidad y Feedback HU-1 a HU-7 completas: favicon, Noticias, retiro oficial, checkout empático, limpieza de /admin sin banner residual, sub-navegación rápida por anclas y terminología clara de stock mínimo/bajo; 453 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Diferenciación de configuración faltante en el cron vía FaltaConfiguracion con 503 vs fallo transitorio con 500; 457 tests en verde).
 
 ## Ahora
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
@@ -18,7 +18,7 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **453 tests** en 34 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **457 tests** en 34 archivos ·
   `docs:links` 0 links sin resolver sobre 39 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
@@ -43,9 +43,10 @@
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
 
-## Hecho (2026-10-29 · Mejoras de UX, Identidad y Feedback HU-1 a HU-7)
+## Hecho (2026-10-29 · Diferenciación de configuración en el cron)
 | Cambio | Qué dejó |
 |---|---|
+| `src/lib/cron-servidor.ts` + `src/lib/cron.ts` + `src/app/api/cron/vencidos/route.ts` + `tests/front/cron.test.ts` | **El cron no distingue configuración faltante de fallo transitorio:** el adaptador lanza `FaltaConfiguracion` (`src/lib/errores-bd.ts`) ante la ausencia de `SUPABASE_SERVICE_ROLE_KEY` o `NEXT_PUBLIC_SUPABASE_URL` y desacopla la ejecución de la RPC con `puertoSobre(cliente)`. `manejarCron` responde `503` con motivo `sin-configuracion` ante configuración faltante y `500` con `error-del-servidor` ante fallos de conexión o base sin filtrar detalles internos. 4 tests nuevos (457 en verde). Tarea de Teams pasada a `review`. |
 | `src/app/admin/page.tsx` + `src/components/admin/PanelDeStock.tsx` + `tests/front/admin.test.ts` | **HU-5 a HU-7:** eliminación del banner inferior informativo residual de credenciales ("El panel está protegido..."), síntesis de los subtítulos de Pedidos, Stock y Productos a instrucciones breves y operativas sin jerga técnica interna, sub-navegación compacta por anclas (`#pedidos`, `#stock`, `#productos`) con `scroll-mt-20`, y sustitución en la UI de "umbral" por "Stock mínimo" y "Stock bajo, sin atender", preservando los nombres internos de base de datos (`umbral_minimo`). 3 tests nuevos (453 en total en verde). |
 | `src/app/icon.svg` + `src/components/Header.tsx` + `src/components/Footer.tsx` + `src/app/about/page.tsx` + `src/app/page.tsx` + `src/app/checkout/page.tsx` + tests | **HU-1 a HU-4:** Favicon institucional vectorial SVG (`#3D8C6E`), acceso "Noticias" en Header/Footer y título de `/about`, sección "Forma de pago" con datos oficiales de retiro en Home ("Int. Moro 1122, Campana", L a V 8:00 a 17:00 hs, Departamento de Química), y confirmación de compra cálida y empática en checkout sin tecnicismos internos. 5 tests nuevos. |
 | `src/lib/checkout.ts` + `src/app/checkout/page.tsx` + `tests/front/checkout.test.ts` | Recalcular `totalAVisualizar` con aritmética canónica (`redondearACentavos`) y resetear `totalDeLaBase`, `idPedido` y `montoEditado` si el usuario altera el carrito o si la creación del pedido falla / no devuelve total. 3 tests nuevos. Tarea de Teams movida a `done`. |
@@ -63,7 +64,7 @@
 3. 🟡 **Fotos definitivas del taller (#22, Celeste):** reemplazar desde `/admin` las fotos de demostración y pisar `public/hero/portada.jpg`.
 4. 🟡 **Verificación en pantalla (#23, Celeste):** recorrer la tienda y `/admin` en navegador (desktop y mobile) y dejar el resultado en la tarea `B6`.
 5. 🟡 **`respaldo_legacy` sin firmar (#16, Isabella / Juanma):** correr el bloque de conteos en el SQL Editor de `otjph` y pegarlo en #16.
-6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** `FaltaConfiguracion` en `src/lib/cron-servidor.ts`, exigir `401/403` en `admin`/`roll` en `bd:viva`, y la tarea de juicio «Deuda de estándares del cierre beta».
+6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** exigir `401/403` en `admin`/`roll` en `bd:viva`, y la tarea de juicio «Deuda de estándares del cierre beta».
 
 ## Reglas y decisiones que no hay que redescubrir
 - **1 ticket = 1 sesión = 1 commit quirúrgico.** TDD. Español único. Sin IA. Sin envío.

@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { GET, POST } from '../../src/app/api/cron/vencidos/route';
 import { revisarCron } from '../../src/lib/cron-auth';
 import { manejarCron, type PuertoCron } from '../../src/lib/cron';
+import { FaltaConfiguracion } from '../../src/lib/errores-bd';
+import { puertoCronServidor, puertoSobre } from '../../src/lib/cron-servidor';
 import { RAIZ, leer } from './ayudantes';
 
 /**
@@ -23,11 +25,22 @@ function peticion(encabezado?: string): Request {
   });
 }
 
-function puertoFalso(opciones: { falla?: boolean; cancelados?: number } = {}) {
+function puertoFalso(
+  opciones: {
+    falla?: boolean;
+    faltaConfiguracion?: boolean;
+    cancelados?: number;
+  } = {},
+) {
   const llamadas: number[] = [];
   const puerto: PuertoCron = {
     async cancelarVencidos() {
       llamadas.push(1);
+      if (opciones.faltaConfiguracion) {
+        throw new FaltaConfiguracion(
+          'Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el cron no puede cancelar los vencidos.',
+        );
+      }
       if (opciones.falla) throw new Error('connection refused: detalle interno');
       return opciones.cancelados ?? 2;
     },
@@ -108,6 +121,46 @@ describe('B4 · POST /api/cron/vencidos', () => {
     expect(cuerpo.motivo).toBe('error-del-servidor');
     expect(cuerpo.mensaje).not.toMatch(/connection refused|detalle interno/);
   });
+
+  it('si falta configuración en el puerto responde 503 sin-configuracion', async () => {
+    const { puerto } = puertoFalso({ faltaConfiguracion: true });
+
+    const respuesta = await manejarCron(peticion(`Bearer ${SECRETO}`), puerto, SECRETO);
+    const cuerpo = (await respuesta.json()) as { estado: string; motivo: string; mensaje: string };
+
+    expect(respuesta.status).toBe(503);
+    expect(cuerpo.estado).toBe('error');
+    expect(cuerpo.motivo).toBe('sin-configuracion');
+    expect(cuerpo.mensaje).toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+  });
+});
+
+describe('B4 · puertoCronServidor distingue configuración de fallo de base', () => {
+  it('sin claves de entorno lanza FaltaConfiguracion al cancelar', async () => {
+    const urlPrevia = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const llavePrevia = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const puerto = puertoCronServidor();
+      await expect(puerto.cancelarVencidos()).rejects.toBeInstanceOf(FaltaConfiguracion);
+    } finally {
+      if (urlPrevia !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = urlPrevia;
+      if (llavePrevia !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = llavePrevia;
+    }
+  });
+
+  it('un fallo de la RPC lanza el error de base original y no FaltaConfiguracion', async () => {
+    const errorBd = new Error('connection refused: postgres offline');
+    const clienteFalso = {
+      rpc: async () => ({ data: null, error: errorBd }),
+    };
+
+    const puerto = puertoSobre(clienteFalso);
+    await expect(puerto.cancelarVencidos()).rejects.toThrow('connection refused: postgres offline');
+    await expect(puerto.cancelarVencidos()).rejects.not.toBeInstanceOf(FaltaConfiguracion);
+  });
 });
 
 describe('B4 · el cron queda versionado y con su horario explicado', () => {
@@ -159,6 +212,47 @@ describe('B4 · el cron queda versionado y con su horario explicado', () => {
       expect((await GET(sinSecreto)).status).toBe(503);
     } finally {
       if (previoSinSecreto !== undefined) process.env.CRON_SECRET = previoSinSecreto;
+    }
+  });
+
+  it('con CRON_SECRET pero sin claves de Supabase, GET y POST responden 503 sin-configuracion', async () => {
+    const previoCron = process.env.CRON_SECRET;
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    process.env.CRON_SECRET = SECRETO;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const peticionGet = new Request('http://localhost/api/cron/vencidos', {
+        headers: { authorization: `Bearer ${SECRETO}` },
+      });
+      const peticionPost = new Request('http://localhost/api/cron/vencidos', {
+        method: 'POST',
+        headers: { authorization: `Bearer ${SECRETO}` },
+      });
+
+      const resGet = await GET(peticionGet);
+      const resPost = await POST(peticionPost);
+
+      expect(resGet.status).toBe(503);
+      expect(resPost.status).toBe(503);
+
+      const cuerpoGet = (await resGet.json()) as { estado: string; motivo: string };
+      const cuerpoPost = (await resPost.json()) as { estado: string; motivo: string };
+
+      expect(cuerpoGet.motivo).toBe('sin-configuracion');
+      expect(cuerpoPost.motivo).toBe('sin-configuracion');
+    } finally {
+      if (previoCron !== undefined) process.env.CRON_SECRET = previoCron;
+      else delete process.env.CRON_SECRET;
+
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+      if (previaKey !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previaKey;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     }
   });
 
