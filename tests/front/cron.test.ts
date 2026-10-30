@@ -151,6 +151,40 @@ describe('B4 · puertoCronServidor distingue configuración de fallo de base', (
     }
   });
 
+  it('falta sólo SUPABASE_SERVICE_ROLE_KEY lanza FaltaConfiguracion', async () => {
+    const llavePrevia = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const urlPrevia = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const puerto = puertoCronServidor();
+      await expect(puerto.cancelarVencidos()).rejects.toBeInstanceOf(FaltaConfiguracion);
+    } finally {
+      if (llavePrevia !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = llavePrevia;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (urlPrevia !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = urlPrevia;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    }
+  });
+
+  it('falta sólo NEXT_PUBLIC_SUPABASE_URL lanza FaltaConfiguracion', async () => {
+    const urlPrevia = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const llavePrevia = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    try {
+      const puerto = puertoCronServidor();
+      await expect(puerto.cancelarVencidos()).rejects.toBeInstanceOf(FaltaConfiguracion);
+    } finally {
+      if (urlPrevia !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = urlPrevia;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (llavePrevia !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = llavePrevia;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    }
+  });
+
   it('un fallo de la RPC lanza el error de base original y no FaltaConfiguracion', async () => {
     const errorBd = new Error('connection refused: postgres offline');
     const clienteFalso = {
@@ -256,10 +290,10 @@ describe('B4 · el cron queda versionado y con su horario explicado', () => {
     }
   });
 
-  it('el adaptador llama a la RPC con la service role', () => {
+  it('el adaptador llama a la RPC con la service role mediante el helper compartido', () => {
     const adaptador = leer('src/lib/cron-servidor.ts');
     expect(adaptador).toMatch(/rpc\(\s*["']cancelar_pedidos_vencidos["']/);
-    expect(adaptador).toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(adaptador).toMatch(/obtenerClienteServicio/);
   });
 
   it('el fallback manual queda documentado en la spec bd-mvp', () => {

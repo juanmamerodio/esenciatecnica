@@ -1,7 +1,7 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizarEmail, type DatosDelCliente, type PuertoCheckout } from "@/lib/checkout";
 import { bucketDe, type ArchivoSubido } from "@/lib/archivo";
-import { FaltaConfiguracion } from "@/lib/errores-bd";
+import { obtenerClienteServicio } from "@/lib/cliente-servidor";
 import type { Database, Json } from "@/lib/database.types";
 
 /**
@@ -18,15 +18,10 @@ import type { Database, Json } from "@/lib/database.types";
 const BUCKET = bucketDe("comprobante");
 
 export function puertoCheckoutServidor(): PuertoCheckout {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const llave = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !llave) {
-    throw new FaltaConfiguracion(
-      "Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el checkout no puede registrar pedidos ni comprobantes.",
-    );
-  }
-
-  return puertoSobre(createClient<Database>(url, llave, { auth: { persistSession: false } }));
+  const cliente = obtenerClienteServicio(
+    "el checkout no puede registrar pedidos ni comprobantes.",
+  );
+  return puertoSobre(cliente);
 }
 
 /** Se separa para poder probar el adaptador con un cliente ya construido. */

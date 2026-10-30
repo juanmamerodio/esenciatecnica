@@ -1,7 +1,7 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { crearPanel, type PanelAdmin, type PuertoAdmin } from "@/lib/admin";
 import { bucketDe } from "@/lib/archivo";
-import { FaltaConfiguracion } from "@/lib/errores-bd";
+import { obtenerClienteServicio } from "@/lib/cliente-servidor";
 import type { Database } from "@/lib/database.types";
 
 /**
@@ -25,18 +25,10 @@ const BUCKET_PRODUCTOS = bucketDe("foto");
 const SEGUNDOS_DE_FIRMA = 10 * 60;
 
 export function crearPanelServidor(): PanelAdmin {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const llave = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !llave) {
-    // Se distingue de una falla real: sólo esto responde 503 con el mensaje del entorno (#35).
-    throw new FaltaConfiguracion(
-      "Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el panel no puede leer pedidos ni escribir stock.",
-    );
-  }
-
-  return crearPanel(
-    puertoAdminSobre(createClient<Database>(url, llave, { auth: { persistSession: false } })),
+  const cliente = obtenerClienteServicio(
+    "el panel no puede leer pedidos ni escribir stock.",
   );
+  return crearPanel(puertoAdminSobre(cliente));
 }
 
 /** Se separa para poder probar el adaptador con un cliente ya construido. */

@@ -114,12 +114,14 @@ function resultado(ok, motivo) {
   return { ok, motivo };
 }
 
-/** Lectura anónima de una tabla cerrada: exige permiso denegado, no "cero filas". */
-export function evaluarLecturaCerrada(estado, opciones = {}) {
+/** Lectura anónima de una tabla cerrada: exige permiso denegado, no "cero filas".
+ * HU-3 / #53: las diez tablas protegidas (incluidas admin y roll) exigen 401 o 403.
+ * Cualquier 404 es una falla estricta de seguridad (sin excepciones de Fase 2).
+ */
+export function evaluarLecturaCerrada(estado) {
   if (esPermisoDenegado(estado)) return resultado(true, 'permiso denegado');
   if (estado === 404) {
-    if (opciones.permitirAusente) return resultado(true, 'no existe (fase 2)');
-    return resultado(false, `no existe (HTTP 404): falta aplicar el esquema`);
+    return resultado(false, 'no existe (HTTP 404): falta aplicar el esquema');
   }
   if (estado === 200) {
     return resultado(

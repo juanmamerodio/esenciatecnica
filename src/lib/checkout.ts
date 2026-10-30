@@ -353,35 +353,24 @@ function coincideElMonto(uno: number, otro: number): boolean {
  * archivo y el de errores de base traducen el código a un **motivo del dominio** una sola vez
  * (#35 · #25) y acá sólo se elige el mensaje que lee el Cliente.
  */
-function describirError(error: unknown): { motivo: MotivoDeError; mensaje: string } {
-  switch (motivoDeBd(error)) {
-    case "stock-insuficiente":
-      return {
-        motivo: "stock-insuficiente",
-        mensaje: "No hay stock suficiente de uno de los productos. Ajustá las cantidades y volvé a intentar.",
-      };
-    case "producto-no-disponible":
-      return {
-        motivo: "producto-no-disponible",
-        mensaje: "Uno de los productos del pedido ya no está disponible. Quitalo del carrito y volvé a intentar.",
-      };
-    case "items-invalidos":
-      return {
-        motivo: "items-invalidos",
-        mensaje: "El pedido tiene un producto repetido o una cantidad inválida. Revisá el carrito.",
-      };
-    case "monto-no-coincide":
-      return {
-        motivo: "monto-no-coincide",
-        mensaje: "El importe tiene que coincidir con el total del pedido.",
-      };
-    case "pedido-no-pendiente":
-      return {
-        motivo: "pedido-no-pendiente",
-        mensaje: "El pedido ya no está pendiente de pago.",
-      };
-    default:
-      break;
+const MENSAJES_CHECKOUT: Record<string, string> = {
+  "stock-insuficiente":
+    "No hay stock suficiente de uno de los productos. Ajustá las cantidades y volvé a intentar.",
+  "producto-no-disponible":
+    "Uno de los productos del pedido ya no está disponible. Quitalo del carrito y volvé a intentar.",
+  "items-invalidos":
+    "El pedido tiene un producto repetido o una cantidad inválida. Revisá el carrito.",
+  "monto-no-coincide":
+    "El importe tiene que coincidir con el total del pedido.",
+  "pedido-no-pendiente":
+    "El pedido ya no está pendiente de pago.",
+};
+
+function describirError(error: unknown): { motivo: MotivoDelCheckout; mensaje: string } {
+  const motivo = motivoDeBd(error);
+  if (motivo && motivo in MENSAJES_CHECKOUT) {
+    const motivoCheckout = motivo as MotivoDelCheckout;
+    return { motivo: motivoCheckout, mensaje: MENSAJES_CHECKOUT[motivoCheckout]! };
   }
 
   return {

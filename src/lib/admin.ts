@@ -675,73 +675,63 @@ function errorDeContrato(mensaje: string): ErrorDelPanel {
  * `23505` no siempre es el nombre del producto: `01` tiene índices únicos en cliente, comprobante,
  * remito, alerta y detalle. El contexto de la operación decide el mensaje.
  */
+const MENSAJES_PANEL: Record<string, string> = {
+  "stock-insuficiente":
+    "No hay stock suficiente para completar la operación. Revisá las cantidades.",
+  "comprobante-no-pendiente":
+    "Ese comprobante ya no está pendiente: otro Administrador lo resolvió o el pedido venció.",
+  "monto-no-coincide":
+    "El monto del comprobante no coincide con el total del pedido: revisá la imagen y el importe.",
+  "pedido-no-pendiente":
+    "El pedido ya no está pendiente de pago, así que el comprobante no se puede validar.",
+  "datos-invalidos":
+    "Alguno de los datos no cumple las reglas del catálogo. Revisá los valores e intentá de nuevo.",
+};
+
 function describirError(error: unknown, contexto: "producto" | "general" = "general"): ErrorDelPanel {
-  switch (motivoDeBd(error)) {
-    case "stock-insuficiente":
-      return {
-        estado: "error",
-        motivo: "stock-insuficiente",
-        mensaje: "No hay stock suficiente para completar la operación. Revisá las cantidades.",
-      };
-    case "comprobante-no-pendiente":
-      return {
-        estado: "error",
-        motivo: "comprobante-no-pendiente",
-        mensaje:
-          "Ese comprobante ya no está pendiente: otro Administrador lo resolvió o el pedido venció.",
-      };
-    case "monto-no-coincide":
-      return {
-        estado: "error",
-        motivo: "monto-no-coincide",
-        mensaje:
-          "El monto del comprobante no coincide con el total del pedido: revisá la imagen y el importe.",
-      };
-    case "pedido-no-pendiente":
-      return {
-        estado: "error",
-        motivo: "pedido-no-pendiente",
-        mensaje: "El pedido ya no está pendiente de pago, así que el comprobante no se puede validar.",
-      };
-    case "stock-bajo-reserva":
-      return {
-        estado: "error",
-        motivo: "stock-bajo-reserva",
-        mensaje:
-          "No podés dejar la cantidad por debajo de lo reservado: hay pedidos pendientes que ya tomaron esas unidades. Revisá las cantidades.",
-        campos: {
-          cantidad_actual:
-            "No podés dejar la cantidad por debajo de lo reservado: revisá la cantidad actual.",
-        },
-      };
-    case "datos-duplicados":
-      if (contexto === "producto") {
-        return {
-          estado: "error",
-          motivo: "nombre-duplicado",
-          mensaje: "Ya hay un producto activo con ese nombre.",
-          campos: { nombre: "Ya hay un producto activo con ese nombre." },
-        };
-      }
-      return {
-        estado: "error",
-        motivo: "datos-duplicados",
-        mensaje:
-          "Ya existe otro registro con esos datos. Revisá los valores antes de volver a intentar.",
-      };
-    case "datos-invalidos":
-      // Último recurso: una constraint sin código de dominio. No se muestra el texto crudo.
-      return {
-        estado: "error",
-        motivo: "datos-invalidos",
-        mensaje:
-          "Alguno de los datos no cumple las reglas del catálogo. Revisá los valores e intentá de nuevo.",
-      };
-    default:
-      return {
-        estado: "error",
-        motivo: "error-del-servidor",
-        mensaje: "No pudimos completar la operación en el panel. Volvé a intentar en unos minutos.",
-      };
+  const motivo = motivoDeBd(error);
+
+  if (motivo === "stock-bajo-reserva") {
+    return {
+      estado: "error",
+      motivo: "stock-bajo-reserva",
+      mensaje:
+        "No podés dejar la cantidad por debajo de lo reservado: hay pedidos pendientes que ya tomaron esas unidades. Revisá las cantidades.",
+      campos: {
+        cantidad_actual:
+          "No podés dejar la cantidad por debajo de lo reservado: revisá la cantidad actual.",
+      },
+    };
   }
+
+  if (motivo === "datos-duplicados") {
+    if (contexto === "producto") {
+      return {
+        estado: "error",
+        motivo: "nombre-duplicado",
+        mensaje: "Ya hay un producto activo con ese nombre.",
+        campos: { nombre: "Ya hay un producto activo con ese nombre." },
+      };
+    }
+    return {
+      estado: "error",
+      motivo: "datos-duplicados",
+      mensaje:
+        "Ya existe otro registro con esos datos. Revisá los valores antes de volver a intentar.",
+    };
+  }
+
+  if (motivo && motivo in MENSAJES_PANEL) {
+    return {
+      estado: "error",
+      motivo: motivo as MotivoDelPanel,
+      mensaje: MENSAJES_PANEL[motivo],
+    };
+  }
+
+  return {
+    estado: "error",
+    motivo: "error-del-servidor",
+    mensaje: "No pudimos completar la operación en el panel. Volvé a intentar en unos minutos.",
+  };
 }

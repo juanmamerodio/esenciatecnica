@@ -116,8 +116,9 @@ describe('B2 · las decisiones no confunden cerrar con estar vacío', () => {
     expect(ausente.motivo).toMatch(/no existe|404/i);
   });
 
-  it('admin y roll pueden no existir (fase 2) sin ser una fuga', () => {
-    expect(evaluarLecturaCerrada(404, { permitirAusente: true }).ok).toBe(true);
+  it('las diez tablas cerradas (incluidas admin y roll) no toleran 404: es falla estricta', () => {
+    expect(evaluarLecturaCerrada(404).ok).toBe(false);
+    expect(evaluarLecturaCerrada(404).motivo).toMatch(/404/);
   });
 
   it('la escritura anónima exige 401/403', () => {

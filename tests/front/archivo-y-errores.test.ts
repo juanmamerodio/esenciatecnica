@@ -15,7 +15,6 @@ import {
   FaltaConfiguracion,
   camposDeZod,
   codigoDeError,
-  estadoHttp,
   motivoDeBd,
 } from '../../src/lib/errores-bd';
 import { respuestaDeError, respuestaDeFalla } from '../../src/lib/admin-http';
@@ -155,21 +154,26 @@ describe('#35 · un solo mapa de error de base a motivo', () => {
   });
 
   it('el mapa de motivo a HTTP es uno solo y cubre todos los motivos', () => {
-    expect(estadoHttp('datos-invalidos')).toBe(400);
-    expect(estadoHttp('items-invalidos')).toBe(400);
-    expect(estadoHttp('archivo-invalido')).toBe(400);
-    expect(estadoHttp('stock-insuficiente')).toBe(409);
-    expect(estadoHttp('producto-no-disponible')).toBe(409);
-    expect(estadoHttp('stock-bajo-reserva')).toBe(409);
-    expect(estadoHttp('comprobante-no-pendiente')).toBe(409);
-    expect(estadoHttp('pedido-no-pendiente')).toBe(409);
-    expect(estadoHttp('nombre-duplicado')).toBe(409);
-    expect(estadoHttp('datos-duplicados')).toBe(409);
-    expect(estadoHttp('monto-no-coincide')).toBe(422);
-    expect(estadoHttp('datos-inconsistentes')).toBe(500);
-    expect(estadoHttp('error-del-servidor')).toBe(500);
+    expect(ESTADO_HTTP['datos-invalidos']).toBe(400);
+    expect(ESTADO_HTTP['items-invalidos']).toBe(400);
+    expect(ESTADO_HTTP['archivo-invalido']).toBe(400);
+    expect(ESTADO_HTTP['stock-insuficiente']).toBe(409);
+    expect(ESTADO_HTTP['producto-no-disponible']).toBe(409);
+    expect(ESTADO_HTTP['stock-bajo-reserva']).toBe(409);
+    expect(ESTADO_HTTP['comprobante-no-pendiente']).toBe(409);
+    expect(ESTADO_HTTP['pedido-no-pendiente']).toBe(409);
+    expect(ESTADO_HTTP['nombre-duplicado']).toBe(409);
+    expect(ESTADO_HTTP['datos-duplicados']).toBe(409);
+    expect(ESTADO_HTTP['monto-no-coincide']).toBe(422);
+    expect(ESTADO_HTTP['datos-inconsistentes']).toBe(500);
+    expect(ESTADO_HTTP['error-del-servidor']).toBe(500);
 
     for (const estado of Object.values(ESTADO_HTTP)) expect(Number.isInteger(estado)).toBe(true);
+  });
+
+  it('HU-4 · estadoHttp() huérfana eliminada de errores-bd', () => {
+    const fuente = leer('src/lib/errores-bd.ts');
+    expect(fuente).not.toMatch(/export function estadoHttp/);
   });
 
   it('la conversión de los campos de Zod vive en el mapa', () => {
@@ -311,12 +315,113 @@ describe('#35 · una sola definición en el repo', () => {
     const clientes = fuentes.filter((archivo) => /^\s*["']use client["']/.test(fuente(archivo)));
     const ofensoras = clientes
       .filter((archivo) =>
-        /@\/lib\/errores-bd|@\/lib\/checkout-servidor|@\/lib\/admin-servidor|SERVICE_ROLE/.test(
+        /@\/lib\/errores-bd|@\/lib\/checkout-servidor|@\/lib\/admin-servidor|@\/lib\/cliente-servidor|SERVICE_ROLE/.test(
           fuente(archivo),
         ),
       )
       .map((archivo) => archivo.replace(/\\/g, '/'));
 
     expect(ofensoras).toEqual([]);
+  });
+});
+
+describe('HU-2 · Helper compartido de cliente de servicio (obtenerClienteServicio)', () => {
+  it('se importa sin requerir variables en tiempo de módulo (AGENTS §7.13)', async () => {
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previoLlave = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      const mod = await import('../../src/lib/cliente-servidor');
+      expect(typeof mod.obtenerClienteServicio).toBe('function');
+    } finally {
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      if (previoLlave !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previoLlave;
+    }
+  });
+
+  it('sin variables en el entorno lanza FaltaConfiguracion con el mensaje canónico', async () => {
+    const { obtenerClienteServicio } = await import('../../src/lib/cliente-servidor');
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previoLlave = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      expect(() => obtenerClienteServicio()).toThrow(FaltaConfiguracion);
+      expect(() => obtenerClienteServicio('contexto operativo')).toThrow(
+        /Falta SUPABASE_SERVICE_ROLE_KEY \(o NEXT_PUBLIC_SUPABASE_URL\): contexto operativo/,
+      );
+    } finally {
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      if (previoLlave !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previoLlave;
+    }
+  });
+
+  it('falta sólo SUPABASE_SERVICE_ROLE_KEY lanza FaltaConfiguracion', async () => {
+    const { obtenerClienteServicio } = await import('../../src/lib/cliente-servidor');
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previoLlave = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    try {
+      expect(() => obtenerClienteServicio()).toThrow(FaltaConfiguracion);
+    } finally {
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (previoLlave !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previoLlave;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    }
+  });
+
+  it('falta sólo NEXT_PUBLIC_SUPABASE_URL lanza FaltaConfiguracion', async () => {
+    const { obtenerClienteServicio } = await import('../../src/lib/cliente-servidor');
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previoLlave = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'clave-servicio';
+
+    try {
+      expect(() => obtenerClienteServicio()).toThrow(FaltaConfiguracion);
+    } finally {
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (previoLlave !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previoLlave;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    }
+  });
+
+  it('con variables presentes devuelve un cliente de Supabase configurado', async () => {
+    const { obtenerClienteServicio } = await import('../../src/lib/cliente-servidor');
+    const previoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const previoLlave = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://localhost:54321';
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'clave-servicio-prueba';
+
+    try {
+      const cliente = obtenerClienteServicio();
+      expect(cliente).toBeDefined();
+      expect(typeof cliente.from).toBe('function');
+      expect(typeof cliente.rpc).toBe('function');
+    } finally {
+      if (previoUrl !== undefined) process.env.NEXT_PUBLIC_SUPABASE_URL = previoUrl;
+      else delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (previoLlave !== undefined) process.env.SUPABASE_SERVICE_ROLE_KEY = previoLlave;
+      else delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+    }
+  });
+
+  it('los adaptadores de servidor usan el helper compartido en vez de guardias duplicadas', () => {
+    for (const ruta of [
+      'src/lib/admin-servidor.ts',
+      'src/lib/checkout-servidor.ts',
+      'src/lib/cron-servidor.ts',
+    ]) {
+      const fuente = leer(ruta);
+      expect(fuente, ruta).toMatch(/obtenerClienteServicio/);
+      expect(fuente, ruta).not.toMatch(/createClient<Database>\(/);
+    }
   });
 });

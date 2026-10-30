@@ -28,7 +28,6 @@ import {
   COLUMNAS_VISTA,
   RPC,
   TABLAS_CERRADAS,
-  TABLAS_FASE_2,
   TABLAS_LEGACY_AUSENTES,
   columnasFaltantes,
   evaluarBucketExistente,
@@ -196,11 +195,8 @@ for (const tabla of TABLAS_LEGACY_AUSENTES) {
 console.log('\n5. RLS: la anon key no lee ninguna tabla cerrada');
 for (const tabla of TABLAS_CERRADAS) {
   const { estado } = await pedir(`/rest/v1/${tabla}?select=*&limit=1`);
-  const revision = evaluarLecturaCerrada(estado, {
-    permitirAusente: TABLAS_FASE_2.includes(tabla),
-  });
-  if (revision.ok && revision.motivo.includes('fase 2')) nota(`${tabla}: ${revision.motivo}`);
-  else if (revision.ok) ok(`${tabla}: ${revision.motivo}`);
+  const revision = evaluarLecturaCerrada(estado);
+  if (revision.ok) ok(`${tabla}: ${revision.motivo}`);
   else mal(`${tabla}: ${revision.motivo}`);
 }
 
@@ -212,10 +208,6 @@ for (const tabla of TABLAS_CERRADAS) {
     headers: { 'Content-Type': 'application/json' },
     body: '{}',
   });
-  if (estado === 404 && TABLAS_FASE_2.includes(tabla)) {
-    nota(`${tabla}: no existe (fase 2)`);
-    continue;
-  }
   const revision = evaluarEscrituraCerrada(estado);
   if (revision.ok) ok(`${tabla}: ${revision.motivo}`);
   else mal(`${tabla}: ${revision.motivo}`);

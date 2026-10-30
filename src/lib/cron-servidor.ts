@@ -1,7 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
 import type { PuertoCron } from "@/lib/cron";
-import type { Database } from "@/lib/database.types";
-import { FaltaConfiguracion } from "@/lib/errores-bd";
+import { obtenerClienteServicio } from "@/lib/cliente-servidor";
 
 /**
  * Cliente mínimo para ejecutar la RPC de cancelación de vencidos.
@@ -21,15 +19,7 @@ export interface ClienteRpcCron {
 export function puertoCronServidor(): PuertoCron {
   return {
     async cancelarVencidos() {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const llave = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (!url || !llave) {
-        throw new FaltaConfiguracion(
-          "Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el cron no puede cancelar los vencidos.",
-        );
-      }
-
-      const cliente = createClient<Database>(url, llave, { auth: { persistSession: false } });
+      const cliente = obtenerClienteServicio("el cron no puede cancelar los vencidos.");
       return puertoSobre(cliente).cancelarVencidos();
     },
   };

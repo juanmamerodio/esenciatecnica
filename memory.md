@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-29 (Unificación de las 19 tareas pendientes de Teams en el Spec Maestro de Cierre Beta #53 y `docs/specs/cierre-beta/spec.md` tras sesión /grill-me; 457 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (HU-1 a HU-4 de Spec Maestro #53: helper compartido de servicio, cron 503 ante FaltaConfiguracion, chequeo estricto 401/403 en bd:viva y retiro de estadoHttp; 472 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams (3 en review + 16 en backlog) en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
@@ -19,13 +19,13 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **457 tests** en 34 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **472 tests** en 35 archivos ·
   `docs:links` 0 links sin resolver sobre 40 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde. Publicado el spec de cierre beta #53; abiertos el paraguas #1
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
-- BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones).
+- BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones; las 10 tablas cerradas responden estrictamente `401`/`403`).
   Fuera del alcance de la anon key: `respaldo_legacy`, el tope de 5 MB y los MIME de cada bucket.
 - **Tablero**: auditado, sincronizado y depurado con `npm run teams` (27 tareas `done` > 24 h movidas a la
   papelera; 6 tareas pasadas a `done`; 4 tareas operativas nuevas; avisos `BLOQUEO` y `AVANCE` en la
@@ -44,6 +44,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-30 · HU-1 a HU-4: Cierre Beta - Núcleo Técnico #53)
+| Cambio | Qué dejó |
+|---|---|
+| `src/lib/cliente-servidor.ts` + `src/lib/{admin,checkout,cron,remito}-servidor.ts` + `src/app/api/cron/vencidos/route.ts` + `scripts/bd-viva-reglas.mjs` + `scripts/verificar-bd-viva.mjs` + `src/lib/errores-bd.ts` + `src/lib/{admin,checkout}.ts` + tests | **HU-1 a HU-4 (#53):** Helper reutilizable `obtenerClienteServicio` en `src/lib/cliente-servidor.ts` con instanciación estricta en tiempo de ejecución (AGENTS §7.13) y excepción `FaltaConfiguracion`; eliminación de guardias duplicadas en los adaptadores del servidor; cron responde `503` con motivo semántico `sin-configuracion` ante credenciales ausentes, reservando `500` para fallos de red/base; `bd:viva` endurecido a `401`/`403` estricto en las diez tablas cerradas (sin tolerar `404` en `admin`/`roll`); eliminación de función huérfana `estadoHttp()` y unificación declarativa de `describirError` en diccionarios tipados. 15 tests nuevos (472 en 35 archivos en verde). |
 
 ## Hecho (2026-10-29 · Diferenciación de configuración en el cron)
 | Cambio | Qué dejó |
@@ -66,7 +71,7 @@
 3. 🟡 **Fotos definitivas del taller (#22, Celeste):** reemplazar desde `/admin` las fotos de demostración y pisar `public/hero/portada.jpg`.
 4. 🟡 **Verificación en pantalla (#23, Celeste):** recorrer la tienda y `/admin` en navegador (desktop y mobile) y dejar el resultado en la tarea `B6`.
 5. 🟡 **`respaldo_legacy` sin firmar (#16, Isabella / Juanma):** correr el bloque de conteos en el SQL Editor de `otjph` y pegarlo en #16.
-6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** exigir `401/403` en `admin`/`roll` en `bd:viva`, y la tarea de juicio «Deuda de estándares del cierre beta».
+6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** resuelta la exigencia de `401/403` en `admin`/`roll` en `bd:viva` (#53); pendiente la tarea de juicio «Deuda de estándares del cierre beta».
 
 ## Reglas y decisiones que no hay que redescubrir
 - **1 ticket = 1 sesión = 1 commit quirúrgico.** TDD. Español único. Sin IA. Sin envío.

@@ -1,5 +1,6 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { obtenerClienteServicio } from "@/lib/cliente-servidor";
 import type { Database } from "@/lib/database.types";
 import type { PuertoDeCorreo, PuertoDelRemito, PuertosDelRemito } from "@/lib/remito";
 
@@ -115,12 +116,5 @@ export function remitenteDelRemito(): string {
 }
 
 function clienteDeServicio(): SupabaseClient<Database> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const llave = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !llave) {
-    throw new Error(
-      "Falta SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_URL): el remito no se puede leer.",
-    );
-  }
-  return createClient<Database>(url, llave, { auth: { persistSession: false } });
+  return obtenerClienteServicio("el remito no se puede leer.");
 }

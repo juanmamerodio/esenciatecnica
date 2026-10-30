@@ -7,7 +7,7 @@ import type { z } from "zod";
  * el mapa de motivo a estado HTTP también vive acá y lo comparten el checkout y el panel. Antes
  * cada superficie traducía el mismo código a su manera y los dos mapas de HTTP podían divergir.
  *
- * Interfaces chicas: `motivoDeBd`, `estadoHttp`, `camposDeZod` y `FaltaConfiguracion`.
+ * Interfaces chicas: `motivoDeBd`, `ESTADO_HTTP`, `camposDeZod` y `FaltaConfiguracion`.
  */
 
 /**
@@ -79,10 +79,6 @@ export const ESTADO_HTTP: Record<MotivoDeError, number> = {
   "datos-inconsistentes": 500,
   "error-del-servidor": 500,
 };
-
-export function estadoHttp(motivo: MotivoDeError): number {
-  return ESTADO_HTTP[motivo];
-}
 
 /** El `errcode` de PostgreSQL/Supabase, si el error lo trae. */
 export function codigoDeError(error: unknown): string | null {
