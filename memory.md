@@ -1,9 +1,9 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Reforma Integral del Hub: Pestaña Interactiva de Diagramas Mermaid y Visor Académico; 507 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Optimización Visual y Compactación de Diagramas DFD N0 a N3; 513 tests en verde).
 
 ## Ahora
-- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
+- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Hoja de ruta secuencial en `docs/specs/cierre-beta/plan-ejecucion.md`.
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
   verificado en Resend (SPF/DKIM) y sin cargar `RESEND_API_KEY` + `RESEND_FROM_EMAIL` en Vercel, Resend
   en modo sandbox sólo permite enviar al correo del titular de la cuenta: **no se puede testear el envío
@@ -13,21 +13,23 @@
   canónicos (`Pendiente de Pago` ×2, `Pago Validado` ×2 con remitos `R-2026-0000{01,02}`, `Rechazado` y
   `Cancelado`), alertas de stock y hero propio (`public/hero/portada.jpg`). `/admin` responde `401` sin
   credenciales y `200` con la clave, sin pedir credenciales al navegar la tienda (#52).
-- **Trabas humanas restantes para el cierre beta:**
-  1. **Enzo (#20 / #18):** comprar el dominio y verificarlo en Resend (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`), cargar los datos bancarios de la Cooperadora (`NEXT_PUBLIC_TRANSFERENCIA_*`) y cargar `CRON_SECRET` en Vercel.
-  2. **Celeste (#23 / #22):** verificación punta a punta en navegador (desktop/mobile, consola, popup de alertas, vista imprimible del remito) y reemplazo de las fotos de demostración por las fotos reales del taller desde `/admin`.
-  3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
+- **Trabas humanas y orden secuencial:**
+  1. **Fase 0 (Inmediata en código):** resolver deuda de estándares pendiente de la revisión del 28-10 (`5324ac47`) y asentar conteos de `respaldo_legacy` (`52e566f4`).
+  2. **Fase 1 (Enzo #20 / #18):** cargar datos bancarios (`8943632c`), inyectar `CRON_SECRET` (`a1f81278`) y gestionar el dominio en Resend (`3503c1ff`).
+  3. **Fase 2 (Gate en vivo):** promover tareas en `review` a `done` (`cf2285f5`, `40ede00d`, `d028b233`).
+  4. **Fase 3 (QA E2E autónomo):** construir `scripts/verificar-e2e.mjs`, documentar `docs/testing/PLAN_DE_PRUEBAS.md`, asentar bitácora en Teams (`29509bd2`, `5823a2db`, `16878016`) y ratificar fotos de beta (`bede4513`).
+  5. **Fase 4 (Documentación y Expo):** confeccionar `docs/MANUAL_DE_USO_Y_DESARROLLO.md` (`da6b26f3`) y `docs/academico/PRESENTACION_EXPO_TEC1.md` (`b81c3468`).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **507 tests** en 38 archivos ·
-  `docs:links` 0 links sin resolver sobre 45 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **513 tests** en 38 archivos ·
+  `docs:links` 0 links sin resolver sobre 46 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde. Publicado el spec de cierre beta #53; abiertos el paraguas #1
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
 - BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones; las 10 tablas cerradas responden estrictamente `401`/`403`).
   Fuera del alcance de la anon key: `respaldo_legacy`, el tope de 5 MB y los MIME de cada bucket.
-- **Tablero**: auditado, sincronizado y depurado con `npm run teams` (aviso `AVANCE` de visor de diagramas en la bandeja). Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
+- **Tablero**: auditado, sincronizado y depurado con `npm run teams`. Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
 
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
@@ -42,6 +44,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-30 · Optimización Visual y Compactación de Diagramas DFD N0 a N3 #53)
+| Cambio | Qué dejó |
+|---|---|
+| `quimicashop/diagramas-visor.js` + `quimicashop/style.css` + `docs/academico/DFD.md` + `tests/front/hub-diagramas.test.ts` + `tests/front/dfd-academico.test.ts` | **HU-6 (Compactación y Optimización Visual):** Reorganización estructural de los DFD niveles 0 a 3 mediante subgrafos y carriles lógicos sin alterar la semántica canónica ni los textos de flujos: DFD N0 simétrico con entorno cliente y gestión/control enmarcando el proceso central P0; DFD N1 estructurado en tres carriles paralelos verticales (Entidades Externas | Procesos Principales 1.0–6.0 | Almacenes Canónicos D1–D7) eliminando cruces caóticos de cables; DFD N2 y N3 alineados en bloques verticales compactos de subprocesos y transacciones atómicas (`crear_pedido`, `aprobar_comprobante`). En `diagramas-visor.js`: reducción de espaciado Mermaid (`nodeSpacing: 40`, `rankSpacing: 45`), transición de aristas a `curve: 'linear'` para evitar bucles deformes y refinamiento de bordes de cluster. En `style.css`: ajuste fino de márgenes (padding 16px/24px) y centrado con `transform-origin: 50% 50%`. 6 tests nuevos en Vitest (513 tests en 38 archivos en verde). |
 
 ## Hecho (2026-10-30 · Reforma Integral del Hub: Visor Interactivo Mermaid #53)
 | Cambio | Qué dejó |

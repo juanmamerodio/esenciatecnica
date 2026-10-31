@@ -106,4 +106,20 @@ describe('HU-15 · DFD Académico (Niveles 0, 1, 2 y 3 en Mermaid)', () => {
     expect(doc).not.toMatch(/\[\(.*almac[ée]n\s+pedidos.*\)\]/i);
     expect(doc).not.toMatch(/\[\(.*D\d[:\s]+pedidos.*\)\]/i);
   });
+
+  it('organiza los niveles N0, N1, N2 y N3 con subgrafos estructurales para compactar el lienzo', () => {
+    const doc = leerDFD();
+    const bloques = bloquesMermaid(doc);
+    // N0 (bloque 0)
+    expect(bloques[0]).toMatch(/subgraph/i);
+    // N1 (bloque 1)
+    expect(bloques[1]).toMatch(/subgraph/i);
+    expect(bloques[1]).toMatch(/Entidades/i);
+    expect(bloques[1]).toMatch(/Procesos/i);
+    expect(bloques[1]).toMatch(/Almacenes/i);
+    // N2 (bloque 2)
+    expect(bloques[2]).toMatch(/subgraph/i);
+    // N3 (bloque 4 o transacciones)
+    expect(doc).toMatch(/subgraph\s+(TX|SUB|Transaccion|Proceso)/i);
+  });
 });

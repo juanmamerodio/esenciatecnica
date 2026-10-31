@@ -44,11 +44,21 @@ El Nivel 0 delimita la frontera del sistema de Esencia Técnica frente a sus ent
 
 ```mermaid
 flowchart TD
-    E1["Cliente (Comprador Invitado)"]
-    E2["Administrador de Química"]
-    E3["Temporizador Semanal (Vercel Cron)"]
+    %% Entidades Externas
+    subgraph EXT_CLI ["Entorno Cliente"]
+        direction TB
+        E1["Cliente (Comprador Invitado)"]
+    end
 
-    P0(("0. Sistema de Gestión y Venta de Cosmética Esencia Técnica"))
+    subgraph SISTEMA ["Frontera del Sistema · Esencia Técnica"]
+        P0(("0. Sistema de Gestión y Venta de Cosmética Esencia Técnica"))
+    end
+
+    subgraph EXT_GESTION ["Entorno Gestión y Control"]
+        direction TB
+        E2["Administrador de Química"]
+        E3["Temporizador Semanal (Vercel Cron)"]
+    end
 
     %% Flujos de Cliente
     E1 -->|"Solicitud de catálogo y productos"| P0
@@ -79,28 +89,37 @@ flowchart TD
 El Nivel 1 descompone el sistema central en seis procesos principales y expone los siete almacenes de datos canónicos (D1 a D7). Se explicita que el carrito reside en el cliente y no en la base de datos.
 
 ```mermaid
-flowchart TD
-    %% Entidades Externas
-    CLI["Cliente (Comprador Invitado)"]
-    ADM["Administrador de Química"]
-    CRON["Temporizador Semanal (Vercel Cron)"]
+flowchart LR
+    %% Carril 1: Entidades Externas
+    subgraph ENTIDADES ["Entidades Externas"]
+        direction TB
+        CLI["Cliente (Comprador Invitado)"]
+        ADM["Administrador de Química"]
+        CRON["Temporizador Semanal (Vercel Cron)"]
+    end
 
-    %% Almacenes Canónicos
-    D1[("D1: CLIENTE")]
-    D2[("D2: PRODUCTO")]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
-    D5[("D5: COMPROBANTE")]
-    D6[("D6: REMITO_VENTA")]
-    D7[("D7: ALERTA_STOCK")]
+    %% Carril 2: Procesos Principales
+    subgraph PROCESOS ["Procesos Principales"]
+        direction TB
+        P1(("1.0 Consultar Catálogo y Disponibilidad"))
+        P2(("2.0 Registrar Pedido y Reservar Stock"))
+        P3(("3.0 Gestionar Comprobante y Validación Manual"))
+        P4(("4.0 Administrar Catálogo y Stock Físico"))
+        P5(("5.0 Controlar Umbrales y Alertas de Stock"))
+        P6(("6.0 Cancelar Pedidos Vencidos (Cron)"))
+    end
 
-    %% Procesos Principales
-    P1(("1.0 Consultar Catálogo y Disponibilidad"))
-    P2(("2.0 Registrar Pedido y Reservar Stock"))
-    P3(("3.0 Gestionar Comprobante y Validación Manual"))
-    P4(("4.0 Administrar Catálogo y Stock Físico"))
-    P5(("5.0 Controlar Umbrales y Alertas de Stock"))
-    P6(("6.0 Cancelar Pedidos Vencidos (Cron)"))
+    %% Carril 3: Almacenes Canónicos
+    subgraph ALMACENES ["Almacenes de Datos (D1–D7)"]
+        direction TB
+        D1[("D1: CLIENTE")]
+        D2[("D2: PRODUCTO")]
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+        D5[("D5: COMPROBANTE")]
+        D6[("D6: REMITO_VENTA")]
+        D7[("D7: ALERTA_STOCK")]
+    end
 
     %% Flujos Proceso 1.0
     CLI -->|"Consulta de cosmética e higiene"| P1
@@ -159,22 +178,42 @@ Este diagrama detalla cómo interactúan la creación de pedidos, el registro de
 
 ```mermaid
 flowchart TD
-    CLI["Cliente (Comprador Invitado)"]
-    ADM["Administrador de Química"]
+    %% Actores Externos
+    subgraph ACTORES ["Actores Externos"]
+        direction LR
+        CLI["Cliente (Comprador Invitado)"]
+        ADM["Administrador de Química"]
+    end
 
-    D1[("D1: CLIENTE")]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
-    D5[("D5: COMPROBANTE")]
-    D6[("D6: REMITO_VENTA")]
+    %% Subsistemas de Procesos
+    subgraph SUB_PEDIDO ["Subsistema 2.0: Pedido y Reserva"]
+        direction TB
+        P21(("2.1 Validar Disponibilidad y Crear Pedido"))
+        P22(("2.2 Registrar Reserva de Stock"))
+    end
 
-    P21(("2.1 Validar Disponibilidad y Crear Pedido"))
-    P22(("2.2 Registrar Reserva de Stock"))
-    P31(("3.1 Subir Comprobante a Storage y BD"))
-    P32(("3.2 Cotejo Manual de Imagen y Monto"))
-    P33(("3.3 Ejecutar Aprobación y Venta"))
-    P34(("3.4 Ejecutar Rechazo"))
-    P35(("3.5 Despachar Remito de Venta por Email"))
+    subgraph SUB_COMPROBANTE ["Subsistema 3.0: Comprobante y Cotejo"]
+        direction TB
+        P31(("3.1 Subir Comprobante a Storage y BD"))
+        P32(("3.2 Cotejo Manual de Imagen y Monto"))
+    end
+
+    subgraph SUB_RESOLUCION ["Subsistema 3.0: Resolución y Remito"]
+        direction TB
+        P33(("3.3 Ejecutar Aprobación y Venta"))
+        P34(("3.4 Ejecutar Rechazo"))
+        P35(("3.5 Despachar Remito de Venta por Email"))
+    end
+
+    %% Almacenes Involucrados
+    subgraph ALMACENES ["Almacenes de Persistencia"]
+        direction TB
+        D1[("D1: CLIENTE")]
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+        D5[("D5: COMPROBANTE")]
+        D6[("D6: REMITO_VENTA")]
+    end
 
     %% Flujos de Creación de Pedido
     CLI -->|"Envío de pedido (items desde carrito del cliente + contacto)"| P21
@@ -221,21 +260,41 @@ Este diagrama detalla la administración del inventario, la generación de alert
 
 ```mermaid
 flowchart TD
-    ADM["Administrador de Química"]
-    CRON["Temporizador Semanal (Vercel Cron)"]
+    %% Actores Externos
+    subgraph ACTORES ["Actores Externos"]
+        direction LR
+        ADM["Administrador de Química"]
+        CRON["Temporizador Semanal (Vercel Cron)"]
+    end
 
-    D2[("D2: PRODUCTO")]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
-    D5[("D5: COMPROBANTE")]
-    D7[("D7: ALERTA_STOCK")]
+    %% Subsistemas de Procesos
+    subgraph SUB_INVENTARIO ["Subsistema 4.0: Catálogo e Inventario"]
+        direction TB
+        P41(("4.1 Gestión de Catálogo de Productos"))
+        P42(("4.2 Gestión de Stock Físico y Warning"))
+    end
 
-    P41(("4.1 Gestión de Catálogo de Productos"))
-    P42(("4.2 Gestión de Stock Físico y Warning"))
-    P51(("5.1 Evaluar Condición de Stock Bajo"))
-    P52(("5.2 Visualizar y Atender Alertas en Panel"))
-    P61(("6.1 Verificar Autorización del Cron"))
-    P62(("6.2 Cancelar Vencidos y Liberar Reserva"))
+    subgraph SUB_ALERTAS ["Subsistema 5.0: Detección y Popup de Alertas"]
+        direction TB
+        P51(("5.1 Evaluar Condición de Stock Bajo"))
+        P52(("5.2 Visualizar y Atender Alertas en Panel"))
+    end
+
+    subgraph SUB_CRON ["Subsistema 6.0: Cancelación Semanal de Vencidos"]
+        direction TB
+        P61(("6.1 Verificar Autorización del Cron"))
+        P62(("6.2 Cancelar Vencidos y Liberar Reserva"))
+    end
+
+    %% Almacenes Involucrados
+    subgraph ALMACENES ["Almacenes de Persistencia"]
+        direction TB
+        D2[("D2: PRODUCTO")]
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+        D5[("D5: COMPROBANTE")]
+        D7[("D7: ALERTA_STOCK")]
+    end
 
     %% Flujos Catálogo y Stock
     ADM -->|"Alta, edición o baja lógica de producto"| P41
@@ -273,18 +332,26 @@ Explosión detallada del proceso 2.1 / 2.2. Garantiza que no se sobrevenda stock
 
 ```mermaid
 flowchart TD
+    %% Actores y Almacenes
     CLI["Cliente (Navegador)"]
-    D1[("D1: CLIENTE")]
-    D2[("D2: PRODUCTO")]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
+    subgraph ALMACENES ["Almacenes Involucrados"]
+        direction TB
+        D1[("D1: CLIENTE")]
+        D2[("D2: PRODUCTO")]
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+    end
 
-    P211(("2.1.1 Recibir Carrito del Cliente y Contacto"))
-    P212(("2.1.2 Upsert de Cliente por Email"))
-    P213(("2.1.3 Validar Actividad y Stock Disponible"))
-    P214(("2.1.4 Calcular Subtotal y Total en BD"))
-    P215(("2.1.5 Insertar Pedido y Detalle con Historial"))
-    P216(("2.1.6 Incrementar Reserva de Stock"))
+    %% Transacción Atómica
+    subgraph TX1 ["Transacción crear_pedido (Reserva de Stock)"]
+        direction TB
+        P211(("2.1.1 Recibir Carrito del Cliente y Contacto"))
+        P212(("2.1.2 Upsert de Cliente por Email"))
+        P213(("2.1.3 Validar Actividad y Stock Disponible"))
+        P214(("2.1.4 Calcular Subtotal y Total en BD"))
+        P215(("2.1.5 Insertar Pedido y Detalle con Historial"))
+        P216(("2.1.6 Incrementar Reserva de Stock"))
+    end
 
     CLI -->|"Envía items del carrito (cliente) y datos de contacto"| P211
     P211 -->|"Verifica formato de email y DNI"| P212
@@ -313,18 +380,31 @@ Explosión detallada del proceso 3.2 / 3.3. Representa el hito final de venta de
 
 ```mermaid
 flowchart TD
-    ADM["Administrador de Química"]
-    CLI["Cliente"]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
-    D5[("D5: COMPROBANTE")]
-    D6[("D6: REMITO_VENTA")]
+    %% Actores Externos
+    subgraph ACTORES ["Actores Involucrados"]
+        direction LR
+        ADM["Administrador de Química"]
+        CLI["Cliente"]
+    end
 
-    P331(("3.3.1 Cotejar Monto de Comprobante vs Total"))
-    P332(("3.3.2 Transición Atómica de Estados"))
-    P333(("3.3.3 Descontar Stock Físico y Liberar Reserva"))
-    P334(("3.3.4 Generar Remito de Venta Correlativo"))
-    P335(("3.3.5 Despachar Correo Asíncrono (Resend)"))
+    %% Almacenes Involucrados
+    subgraph ALMACENES ["Almacenes Involucrados"]
+        direction TB
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+        D5[("D5: COMPROBANTE")]
+        D6[("D6: REMITO_VENTA")]
+    end
+
+    %% Transacción Atómica
+    subgraph TX2 ["Transacción aprobar_comprobante (Venta y Remito)"]
+        direction TB
+        P331(("3.3.1 Cotejar Monto de Comprobante vs Total"))
+        P332(("3.3.2 Transición Atómica de Estados"))
+        P333(("3.3.3 Descontar Stock Físico y Liberar Reserva"))
+        P334(("3.3.4 Generar Remito de Venta Correlativo"))
+        P335(("3.3.5 Despachar Correo Asíncrono (Resend)"))
+    end
 
     ADM -->|"Aprueba comprobante verificado en panel"| P331
     D5 -->|"Monto del comprobante subido"| P331
@@ -351,15 +431,24 @@ Explosión detallada del proceso 6.0. Cancela pedidos pendientes de pago los vie
 ```mermaid
 flowchart TD
     CRON["Vercel Cron Trigger"]
-    D3[("D3: STOCK")]
-    D4[("D4: PEDIDO")]
-    D5[("D5: COMPROBANTE")]
 
-    P621(("6.2.1 Invocación con Bearer CRON_SECRET"))
-    P622(("6.2.2 Identificar Pedidos en Pendiente de Pago"))
-    P623(("6.2.3 Transición a Cancelado y Rechazado"))
-    P624(("6.2.4 Liberar Stock Reservado"))
-    P625(("6.2.5 Registrar Auditoría y Retornar Balance"))
+    %% Almacenes Involucrados
+    subgraph ALMACENES ["Almacenes Involucrados"]
+        direction TB
+        D3[("D3: STOCK")]
+        D4[("D4: PEDIDO")]
+        D5[("D5: COMPROBANTE")]
+    end
+
+    %% Proceso Atómico
+    subgraph TX_CRON ["Proceso cancelar_pedidos_vencidos (Cron)"]
+        direction TB
+        P621(("6.2.1 Invocación con Bearer CRON_SECRET"))
+        P622(("6.2.2 Identificar Pedidos en Pendiente de Pago"))
+        P623(("6.2.3 Transición a Cancelado y Rechazado"))
+        P624(("6.2.4 Liberar Stock Reservado"))
+        P625(("6.2.5 Registrar Auditoría y Retornar Balance"))
+    end
 
     CRON -->|"POST /api/cron/vencidos los viernes 23:59 ART"| P621
     P621 -->|"Token validado"| P622
@@ -383,15 +472,24 @@ Explosión detallada del proceso 5.0.
 ```mermaid
 flowchart TD
     ADM["Administrador de Química"]
-    D3[("D3: STOCK")]
-    D7[("D7: ALERTA_STOCK")]
 
-    P511(("5.1.1 Calcular Stock Disponible"))
-    P512(("5.1.2 Comparar contra Cantidad Warning"))
-    P513(("5.1.3 Registrar Alerta de Stock Bajo"))
-    P521(("5.2.1 Consultar Alertas No Atendidas"))
-    P522(("5.2.2 Desplegar Popup Informativo en Panel"))
-    P523(("5.2.3 Marcar Alerta como Atendida"))
+    %% Almacenes Involucrados
+    subgraph ALMACENES ["Almacenes Involucrados"]
+        direction TB
+        D3[("D3: STOCK")]
+        D7[("D7: ALERTA_STOCK")]
+    end
+
+    %% Ciclo de Detección
+    subgraph CICLO_ALERTAS ["Ciclo de Detección y Popup de Alertas"]
+        direction TB
+        P511(("5.1.1 Calcular Stock Disponible"))
+        P512(("5.1.2 Comparar contra Cantidad Warning"))
+        P513(("5.1.3 Registrar Alerta de Stock Bajo"))
+        P521(("5.2.1 Consultar Alertas No Atendidas"))
+        P522(("5.2.2 Desplegar Popup Informativo en Panel"))
+        P523(("5.2.3 Marcar Alerta como Atendida"))
+    end
 
     D3 -->|"Lee cantidad_actual y cantidad_reservada"| P511
     P511 -->|"disponible = cantidad_actual - cantidad_reservada"| P512

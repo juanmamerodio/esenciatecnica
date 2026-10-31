@@ -185,3 +185,43 @@ describe('HU-5 (Auditor) · Fidelidad de dominio y ausencia de términos legacy'
     expect(html).toMatch(/viernes.*23:59/i);
   });
 });
+
+describe('HU-6 (Compactación y Optimización Visual) · Configuración y layout de DFD N0 a N3', () => {
+  it('configura Mermaid flowchart con nodeSpacing, rankSpacing reducidos y curve linear o natural', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    expect(js).toMatch(/nodeSpacing:\s*(3[5-9]|4[0-5])/);
+    expect(js).toMatch(/rankSpacing:\s*(4[0-9]|50)/);
+    expect(js).toMatch(/curve:\s*['"](linear|natural)['"]/);
+  });
+
+  it('organiza DFD N0 con simetría estructural y proceso central enmarcado', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    expect(js).toMatch(/id:\s*['"]dfd-n0['"][\s\S]*?subgraph/);
+    expect(js).toMatch(/id:\s*['"]dfd-n0['"][\s\S]*?P0\(\(["']?0\.\s*Sistema/);
+  });
+
+  it('organiza DFD N1 en carriles lógicos de Entidades, Procesos Principales y Almacenes D1–D7', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    expect(js).toMatch(/id:\s*['"]dfd-n1['"][\s\S]*?subgraph[\s\S]*?Entidades/i);
+    expect(js).toMatch(/id:\s*['"]dfd-n1['"][\s\S]*?subgraph[\s\S]*?Procesos/i);
+    expect(js).toMatch(/id:\s*['"]dfd-n1['"][\s\S]*?subgraph[\s\S]*?Almacenes/i);
+  });
+
+  it('organiza DFD N2 y N3 con subgrafos para alinear subprocesos y transacciones atómicas', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    expect(js).toMatch(/id:\s*['"]dfd-n2['"][\s\S]*?subgraph/);
+    expect(js).toMatch(/id:\s*['"]dfd-n3['"][\s\S]*?subgraph\s+TX1/);
+    expect(js).toMatch(/id:\s*['"]dfd-n3['"][\s\S]*?subgraph\s+TX2/);
+  });
+
+  it('mantiene intactos todos los almacenes canónicos D1 a D7 en DFD N1', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    expect(js).toMatch(/D1\[\("D1:\s*CLIENTE"\)\]/);
+    expect(js).toMatch(/D2\[\("D2:\s*PRODUCTO"\)\]/);
+    expect(js).toMatch(/D3\[\("D3:\s*STOCK"\)\]/);
+    expect(js).toMatch(/D4\[\("D4:\s*PEDIDO"\)\]/);
+    expect(js).toMatch(/D5\[\("D5:\s*COMPROBANTE"\)\]/);
+    expect(js).toMatch(/D6\[\("D6:\s*REMITO_VENTA"\)\]/);
+    expect(js).toMatch(/D7\[\("D7:\s*ALERTA_STOCK"\)\]/);
+  });
+});
