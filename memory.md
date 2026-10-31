@@ -1,9 +1,9 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (HU-15 de Spec Maestro #53: DFD niveles 0 a 3 en Mermaid con almacenes D1–D7 y correcciones de Ariel; 479 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Formalización de Diagramas Académicos en Mermaid: Clases UML, DCU, DER y actualización del Hub; 494 tests en verde).
 
 ## Ahora
-- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams (3 en review + 16 en backlog) en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
+- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
   verificado en Resend (SPF/DKIM) y sin cargar `RESEND_API_KEY` + `RESEND_FROM_EMAIL` en Vercel, Resend
   en modo sandbox sólo permite enviar al correo del titular de la cuenta: **no se puede testear el envío
@@ -19,17 +19,15 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **479 tests** en 36 archivos ·
-  `docs:links` 0 links sin resolver sobre 41 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **494 tests** en 37 archivos ·
+  `docs:links` 0 links sin resolver sobre 45 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde. Publicado el spec de cierre beta #53; abiertos el paraguas #1
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
 - BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones; las 10 tablas cerradas responden estrictamente `401`/`403`).
   Fuera del alcance de la anon key: `respaldo_legacy`, el tope de 5 MB y los MIME de cada bucket.
-- **Tablero**: auditado, sincronizado y depurado con `npm run teams` (27 tareas `done` > 24 h movidas a la
-  papelera; 6 tareas pasadas a `done`; 4 tareas operativas nuevas; avisos `BLOQUEO` y `AVANCE` en la
-  bandeja). Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
+- **Tablero**: auditado, sincronizado y depurado con `npm run teams` (3 tareas pasadas a `done`: `Diagrama de clases`, `Correcciones de documentación de cátedra`, `Migrar diagramas a mermaid`; aviso `AVANCE` en la bandeja). Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
 
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
@@ -44,6 +42,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-30 · Diagramas Académicos en Mermaid y Actualización del Hub #53)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/academico/CLASES.md` + `docs/academico/DCU.md` + `docs/academico/DER.md` + `docs/README.md` + `tests/front/diagramas-academicos.test.ts` + `quimicashop/index.html` + `quimicashop/config.js` | **HU-1 a HU-5 (#53):** Formalización de entregables de cátedra en Mermaid: Diagrama de Clases UML completo con 10 entidades canónicas y 6 servicios de dominio (Nieva), Diagrama de Casos de Uso (DCU) con validación manual sin IA y carrito en cliente (Celeste), y DER normalizado en 3FN con delimitación de Fase 2 (Isabella). Actualización integral del Hub en `quimicashop/index.html`: enlaces a `esenciatecnica.vercel.app`, purgado de vocabulario legacy (`productos`, `pedidos`, `verificaciones`, `validación IA`), tarjeta de Clases UML, badge DFD 4 niveles (N0–N3) y nuevo hito Cierre Beta en timeline. 15 tests nuevos en Vitest (494 en 37 archivos en verde). 3 tareas de Teams movidas a `done` y aviso `AVANCE` publicado. |
 
 ## Hecho (2026-10-30 · HU-15: DFD Académico en Mermaid #53)
 | Cambio | Qué dejó |

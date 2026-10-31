@@ -47,6 +47,7 @@ Una carpeta por feature; la spec se linkea desde su issue de GitHub.
 | [`specs/sobre-el-proyecto/spec.md`](specs/sobre-el-proyecto/spec.md) | Página institucional. |
 | [`specs/bd-mvp/spec.md`](specs/bd-mvp/spec.md) | Esquema de base del MVP. |
 | [`specs/migracion-otjph/spec.md`](specs/migracion-otjph/spec.md) | Aplicar las migraciones en el proyecto Supabase vivo (issue #15). |
+| [`specs/actualizacion-hub/spec.md`](specs/actualizacion-hub/spec.md) | Actualización del Hub y formalización de diagramas académicos. |
 
 ## `adr/` · Decisiones de arquitectura
 
@@ -88,8 +89,11 @@ Material de cátedra. Se adapta al código y al modelo; **no** manda sobre la im
 
 | Documento | Contenido |
 |---|---|
-| [`academico/DER-quimica.csv`](academico/DER-quimica.csv) | DER de 13 entidades. |
-| [`academico/DCU-Quimica.csv`](academico/DCU-Quimica.csv) | Casos de uso. |
+| [`academico/CLASES.md`](academico/CLASES.md) | Diagrama de Clases UML (cátedra Nieva) en Mermaid con entidades canónicas y servicios de dominio. |
+| [`academico/DCU.md`](academico/DCU.md) | Diagrama de Casos de Uso (DCU) en Mermaid con validación manual sin IA. |
+| [`academico/DER.md`](academico/DER.md) | Diagrama Entidad-Relación (DER) en Mermaid normalizado en 3FN y delimitación de Fase 2. |
+| [`academico/DER-quimica.csv`](academico/DER-quimica.csv) | DER borrador preliminar CSV. |
+| [`academico/DCU-Quimica.csv`](academico/DCU-Quimica.csv) | Casos de uso borrador preliminar CSV. |
 | [`academico/DFD.md`](academico/DFD.md) | Diagramas de Flujo de Datos (DFD niveles 0–3 en Mermaid) corregidos según observaciones docentes. |
 | [`academico/DFD1-Quimica.csv`](academico/DFD1-Quimica.csv), [`DFD2-Quimica.csv`](academico/DFD2-Quimica.csv), [`DFD3-Quimica.csv`](academico/DFD3-Quimica.csv) | DFD borradores originales niveles 1–3. |
 | [`academico/informe_Escencia_Tecnica.md`](academico/informe_Escencia_Tecnica.md) | Informe de cátedra. |
