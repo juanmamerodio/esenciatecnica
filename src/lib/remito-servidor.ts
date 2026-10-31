@@ -13,7 +13,7 @@ import type { PuertoDeCorreo, PuertoDelRemito, PuertosDelRemito } from "@/lib/re
  * clave sigue compilando (`AGENTS.md` §8).
  */
 
-const REMITENTE_POR_DEFECTO = "Esencia Técnica <ventas@ascender.uno>";
+const REMITENTE_POR_DEFECTO = "Esencia Técnica <ventas@nexobow.site>";
 
 /** Los tres puertos que necesita la emisión del remito. */
 export function buzonDelRemito(): PuertosDelRemito {

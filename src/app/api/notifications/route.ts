@@ -304,8 +304,8 @@ export async function POST(req: Request) {
       </html>
     `;
 
-    // 5. Envío mediante Resend con dominio verificado ascender.uno
-    const fromSender = process.env.RESEND_FROM || 'QuimicaShop Teams <notificaciones@ascender.uno>';
+    // 5. Envío mediante Resend con dominio verificado nexobow.site
+    const fromSender = process.env.RESEND_FROM || 'QuimicaShop Teams <notificaciones@nexobow.site>';
 
     const resendResponse = await correo().emails.send({
       from: fromSender,
