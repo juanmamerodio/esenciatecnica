@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Optimización topológica DFD N1 en Mermaid #54; 515 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-31 (Saneamiento de deuda de estándares: errores canónicos, dominio monetario y auditoría de superficie #55; 527 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Hoja de ruta secuencial en `docs/specs/cierre-beta/plan-ejecucion.md`.
@@ -11,14 +11,14 @@
   `Cancelado`), alertas de stock y hero propio (`public/hero/portada.jpg`). `/admin` responde `401` sin
   credenciales y `200` con la clave, sin pedir credenciales al navegar la tienda (#52).
 - **Trabas humanas y orden secuencial:**
-  1. **Fase 0 (Inmediata en código):** resolver deuda de estándares pendiente de la revisión del 28-10 (`5324ac47`) y asentar conteos de `respaldo_legacy` (`52e566f4`).
+  1. **Fase 0 (Inmediata en código):** asentar conteos de `respaldo_legacy` en `otjph` (#16, `52e566f4`). Deuda de estándares del 28-10 completamente resuelta (#55).
   2. **Fase 1 (Enzo #20 / #18):** cargar datos bancarios (`8943632c`), inyectar `CRON_SECRET` (`a1f81278`) y gestionar el dominio en Resend (`3503c1ff`).
   3. **Fase 2 (Gate en vivo):** promover tareas en `review` a `done` (`cf2285f5`, `40ede00d`, `d028b233`).
   4. **Fase 3 (QA E2E autónomo):** construir `scripts/verificar-e2e.mjs`, documentar `docs/testing/PLAN_DE_PRUEBAS.md`, asentar bitácora en Teams (`29509bd2`, `5823a2db`, `16878016`) y ratificar fotos de beta (`bede4513`).
   5. **Fase 4 (Documentación y Expo):** confeccionar `docs/MANUAL_DE_USO_Y_DESARROLLO.md` (`da6b26f3`) y `docs/academico/PRESENTACION_EXPO_TEC1.md` (`b81c3468`, guión listo en `review`).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **515 tests** en 38 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **527 tests** en 39 archivos ·
   `docs:links` 0 links sin resolver sobre 48 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
@@ -31,6 +31,7 @@
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
 |---|---|---|
+| #55 · Estándares | Saneamiento de deuda de estándares, dinero y auditoría | ✅ cerrado |
 | #54 · DFD N1 | Optimización visual y reorganización topológica DFD N1 | ✅ cerrado |
 | #53 · Spec | Spec Maestro de Cierre Beta (unificación de 19 tareas) | ✅ publicado (`ready-for-agent`) |
 | #15 · D1 | cerrar la migración del MVP | ✅ en todo lo que mide `bd:viva`; abierto sólo por la firma de `respaldo_legacy` |
@@ -42,6 +43,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-31 · Saneamiento de Deuda de Estándares, Dominio Monetario y Auditoría #55)
+| Cambio | Qué dejó |
+|---|---|
+| `src/lib/dinero.ts` + `src/lib/format.ts` + `src/lib/carrito.ts` + `src/lib/admin.ts` + `src/lib/checkout.ts` + `scripts/bd-viva-reglas.mjs` + `tests/front/dinero.test.ts` + `tests/db/cierre-beta.test.ts` + `tests/db/postgrest-falso.ts` | **Issue #55:** Desacople estricto entre dominio monetario (`src/lib/dinero.ts`: `redondearACentavos`, `subtotalDeLinea`, `totalDelPedido`) y presentación visual (`src/lib/format.ts`: `formatPrice`). Eliminación de conmutadores solapados en `describirError` (`src/lib/admin.ts` y `src/lib/checkout.ts`) adoptando conmutadores exhaustivos y tipados para motivos de dominio y Postgres (`ET001`–`ET007`, `23505`, `23514`, `PGRST*`). En `scripts/bd-viva-reglas.mjs`: `TABLAS_FASE_2` declarada como constante inmutable congelada (`Object.freeze`) sin `.filter()` sobre listas fijas y unificación de ramas 404 en `evaluarRpc`. Higiene estricta de excepciones con traza de error en los bordes de la aplicación y erradicación de duplicación en extracción de códigos de error de PostgREST en utilidades de prueba (`tests/db/postgrest-falso.ts` y `tests/db/cierre-beta.test.ts` reutilizando `codigoDeError`). 12 tests nuevos en Vitest (527 tests en 39 archivos en verde). |
 
 ## Hecho (2026-10-30 · Optimización Visual y Topológica DFD Nivel 1 #54)
 | Cambio | Qué dejó |
@@ -79,13 +85,13 @@
 3. 🟡 **Fotos definitivas del taller (#22, Celeste):** reemplazar desde `/admin` las fotos de demostración y pisar `public/hero/portada.jpg`.
 4. 🟡 **Verificación en pantalla (#23, Celeste):** recorrer la tienda y `/admin` en navegador (desktop y mobile) y dejar el resultado en la tarea `B6`.
 5. 🟡 **`respaldo_legacy` sin firmar (#16, Isabella / Juanma):** correr el bloque de conteos en el SQL Editor de `otjph` y pegarlo en #16.
-6. 🟡 **Deuda del review del 28-10 (con tarea en el tablero):** resuelta la exigencia de `401/403` en `admin`/`roll` en `bd:viva` (#53); pendiente la tarea de juicio «Deuda de estándares del cierre beta».
+6. ✅ **Deuda del review del 28-10 (#55):** saneada la deuda de estándares (dominio monetario en `src/lib/dinero.ts`, `describirError` sin solapamientos, `TABLAS_FASE_2` inmutable, `evaluarRpc` 404 unificado, higiene de excepciones con traza y utilidades PostgREST unificadas con 527 tests en verde).
 
 ## Reglas y decisiones que no hay que redescubrir
 - **1 ticket = 1 sesión = 1 commit quirúrgico.** TDD. Español único. Sin IA. Sin envío.
 - **Sin clientes al importar** (AGENTS §7.13): Supabase y Resend se instancian dentro de la función que los usa para que `npm run build` compile con el entorno vacío en CI.
 - **El contrato no guarda estado** (AGENTS §8): los conteos, las fechas y el semáforo viven **acá**; ningún spec ni guía congela el número de tests.
-- **Dinero:** `NUMERIC(12,2)`, `precio > 0` y `monto > 0`; redondeo en la aritmética (`redondearACentavos`, `subtotalDeLinea`, `totalDelPedido`) y formato adaptativo en la vista (`formatPrice`: entero sin decimales, con centavos dos decimales exactos; [`carrito/spec.md`](docs/specs/carrito/spec.md) §2, [#44](https://github.com/juanmamerodio/esenciatecnica/issues/44)).
+- **Dinero:** `NUMERIC(12,2)`, `precio > 0` y `monto > 0`; aritmética monetaria en `src/lib/dinero.ts` (`redondearACentavos`, `subtotalDeLinea`, `totalDelPedido`) y formato adaptativo en la vista `src/lib/format.ts` (`formatPrice`: entero sin decimales, con centavos dos decimales exactos; [`carrito/spec.md`](docs/specs/carrito/spec.md) §2, [#44](https://github.com/juanmamerodio/esenciatecnica/issues/44), #55).
 - **El remito lo emite la base** en la transacción de aprobación; el front lo compone y lo envía por Resend (posterior y no bloqueante).
 - **Storage y claves:** `comprobantes` privado (`foto_url` = clave, signed URL al leer) y `productos` público (`imagen_url` = URL pública). `claveDelArchivo` incluye el bucket (`productos/<id>/…`), así que la URL pública repite `…/object/public/productos/productos/<id>/…`.
 - **Hero con foto propia** (`public/hero/portada.jpg`, `FOTO_DEL_HERO`) pasando por `ImagenProducto` (#49).

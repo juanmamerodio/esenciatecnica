@@ -55,7 +55,8 @@ export async function pedirAlPanel(ruta: string, opciones: RequestInit): Promise
 
     const aviso = typeof cuerpo.aviso === "string" && cuerpo.aviso.trim() ? cuerpo.aviso : null;
     return aviso ? { ok: true, aviso } : { ok: true };
-  } catch {
+  } catch (error) {
+    console.error("Error al comunicar con el panel:", error);
     return { ok: false, mensaje: SIN_RESPUESTA };
   }
 }

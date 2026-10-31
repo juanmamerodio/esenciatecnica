@@ -1,3 +1,4 @@
+import { codigoDeError } from '@/lib/errores-bd';
 import type { Base } from './ayudantes';
 
 /**
@@ -79,7 +80,7 @@ export class Consulta<T> implements PromiseLike<Respuesta<T>> {
       }
       return { data: rows[0] ?? null, error: null };
     } catch (error) {
-      return { data: null, error: { code: codigoDe(error), message: mensajeDe(error) } };
+      return { data: null, error: { code: codigoDeError(error), message: mensajeDe(error) } };
     }
   }
 
@@ -120,13 +121,6 @@ export function clienteFalso(db: Base) {
   };
 }
 
-function codigoDe(error: unknown): string | null {
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    const codigo = (error as { code?: unknown }).code;
-    if (typeof codigo === 'string') return codigo;
-  }
-  return null;
-}
 
 function mensajeDe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);

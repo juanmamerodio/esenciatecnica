@@ -30,9 +30,7 @@ export const TABLAS_LEGACY_AUSENTES = [
 ];
 
 /** Tablas de fase 2: si existen, tienen que estar cerradas; si no existen, no es un fallo. */
-export const TABLAS_FASE_2 = TABLAS_CERRADAS.filter(
-  (tabla) => tabla === 'admin' || tabla === 'roll',
-);
+export const TABLAS_FASE_2 = Object.freeze(['admin', 'roll']);
 
 /** Objetos de lectura pública del contrato. */
 export const COLUMNAS_PUBLICAS = ['producto', 'stock', 'vista_catalogo'];
@@ -149,8 +147,8 @@ export function evaluarEscrituraCerrada(estado) {
  */
 export function evaluarRpc(estado, cuerpo) {
   if (estado === 404) {
-    if (cuerpo && cuerpo.code === 'PGRST202') return resultado(false, 'no existe (PGRST202)');
-    return resultado(false, 'no existe (HTTP 404)');
+    const detalle = cuerpo?.code === 'PGRST202' ? 'PGRST202' : 'HTTP 404';
+    return resultado(false, `no existe (${detalle})`);
   }
   if (esPermisoDenegado(estado)) return resultado(true, 'existe y está cerrada a anon');
   if (estado >= 500) return resultado(false, `error del servidor (HTTP ${estado})`);

@@ -1,3 +1,4 @@
+import { codigoDeError } from '../../src/lib/errores-bd';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -20,11 +21,7 @@ async function codigoDeErrorDe(promesa: Promise<unknown>): Promise<string | null
     await promesa;
     return null;
   } catch (error) {
-    if (typeof error === 'object' && error !== null && 'code' in error) {
-      const codigo = (error as { code: unknown }).code;
-      return typeof codigo === 'string' ? codigo : null;
-    }
-    return null;
+    return codigoDeError(error);
   }
 }
 

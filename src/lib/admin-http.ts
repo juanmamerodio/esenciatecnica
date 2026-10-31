@@ -74,7 +74,8 @@ export async function leerCuerpo(
 ): Promise<{ ok: true; datos: unknown } | { ok: false; respuesta: NextResponse }> {
   try {
     return { ok: true, datos: await peticion.json() };
-  } catch {
+  } catch (error) {
+    console.error("Error al leer cuerpo JSON de la petición:", error);
     return {
       ok: false,
       respuesta: errorDeEntrada("El cuerpo de la petición no es un JSON válido."),

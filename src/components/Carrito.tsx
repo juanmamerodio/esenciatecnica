@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { formatPrice } from "@/lib/format";
-import { subtotalDeLinea, totalDelPedido, totalUnidades } from "@/lib/carrito";
+import { totalUnidades } from "@/lib/carrito";
+import { subtotalDeLinea, totalDelPedido } from "@/lib/dinero";
 import { useCartStore } from "@/lib/store";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 

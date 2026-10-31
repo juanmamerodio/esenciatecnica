@@ -2,7 +2,7 @@ import { z } from "zod";
 import { claveDelArchivo, revisarArchivo, type ArchivoSubido } from "@/lib/archivo";
 import { camposDeZod, motivoDeBd, MOTIVOS_DEL_CHECKOUT, type MotivoDelCheckout } from "@/lib/errores-bd";
 import type { EstadoPedido, ItemPedido } from "@/lib/database.types";
-import { redondearACentavos } from "@/lib/format";
+import { redondearACentavos } from "@/lib/dinero";
 
 /**
  * Módulo de checkout — T5 · issue #10.
@@ -353,7 +353,15 @@ function coincideElMonto(uno: number, otro: number): boolean {
  * archivo y el de errores de base traducen el código a un **motivo del dominio** una sola vez
  * (#35 · #25) y acá sólo se elige el mensaje que lee el Cliente.
  */
-const MENSAJES_CHECKOUT: Record<string, string> = {
+const MENSAJES_CHECKOUT: Record<
+  | "stock-insuficiente"
+  | "producto-no-disponible"
+  | "items-invalidos"
+  | "monto-no-coincide"
+  | "pedido-no-pendiente"
+  | "datos-invalidos",
+  string
+> = {
   "stock-insuficiente":
     "No hay stock suficiente de uno de los productos. Ajustá las cantidades y volvé a intentar.",
   "producto-no-disponible":
@@ -364,21 +372,28 @@ const MENSAJES_CHECKOUT: Record<string, string> = {
     "El importe tiene que coincidir con el total del pedido.",
   "pedido-no-pendiente":
     "El pedido ya no está pendiente de pago.",
+  "datos-invalidos":
+    "Alguno de los datos del pedido no cumple las reglas del sistema.",
 };
 
 function describirError(error: unknown): { motivo: MotivoDelCheckout; mensaje: string } {
   const motivo = motivoDeBd(error);
-  if (motivo && motivo in MENSAJES_CHECKOUT) {
-    const motivoCheckout = motivo as MotivoDelCheckout;
-    return { motivo: motivoCheckout, mensaje: MENSAJES_CHECKOUT[motivoCheckout]! };
+  switch (motivo) {
+    case "stock-insuficiente":
+    case "producto-no-disponible":
+    case "items-invalidos":
+    case "monto-no-coincide":
+    case "pedido-no-pendiente":
+    case "datos-invalidos":
+      return { motivo, mensaje: MENSAJES_CHECKOUT[motivo] };
+    default:
+      return {
+        motivo: "error-del-servidor",
+        mensaje: fallaDeStorage(error)
+          ? "No pudimos subir el comprobante. El pedido quedó registrado: volvé a intentar la subida."
+          : "No pudimos completar el pedido. Volvé a intentar en unos minutos.",
+      };
   }
-
-  return {
-    motivo: "error-del-servidor",
-    mensaje: fallaDeStorage(error)
-      ? "No pudimos subir el comprobante. El pedido quedó registrado: volvé a intentar la subida."
-      : "No pudimos completar el pedido. Volvé a intentar en unos minutos.",
-  };
 }
 
 /** Una falla de Storage no trae `code` de Postgres: se reconoce por el mensaje del cliente. */

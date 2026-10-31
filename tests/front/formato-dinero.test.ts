@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { formatPrice, redondearACentavos } from '../../src/lib/format';
+import { formatPrice } from '../../src/lib/format';
+import { redondearACentavos, subtotalDeLinea, totalDelPedido } from '../../src/lib/dinero';
 import {
   agregar,
-  subtotalDeLinea,
-  totalDelPedido,
   type ItemCarrito,
   type ProductoParaAgregar,
 } from '../../src/lib/carrito';
@@ -12,7 +11,7 @@ import { leer } from './ayudantes';
 
 /**
  * `formato-del-dinero` · issue #44 — seam: los módulos puros del dinero
- * (`src/lib/format.ts` y `src/lib/carrito.ts`).
+ * (`src/lib/format.ts` y `src/lib/dinero.ts`).
  *
  * La regla es una sola: el subtotal se redondea a centavos, el total suma subtotales ya
  * redondeados y el formato muestra un entero sin decimales y un monto con centavos con dos

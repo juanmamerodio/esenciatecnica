@@ -424,4 +424,14 @@ describe('HU-2 · Helper compartido de cliente de servicio (obtenerClienteServic
       expect(fuente, ruta).not.toMatch(/createClient<Database>\(/);
     }
   });
+
+  it('HU-4 (#55) · utilidades de prueba no duplican extracción de código de error de PostgREST', () => {
+    const postgrestFalso = leer('tests/db/postgrest-falso.ts');
+    expect(postgrestFalso).toMatch(/codigoDeError/);
+    expect(postgrestFalso).not.toMatch(/function codigoDe\(/);
+
+    const cierreBeta = leer('tests/db/cierre-beta.test.ts');
+    expect(cierreBeta).toMatch(/codigoDeError/);
+    expect(cierreBeta).not.toMatch(/error as \{ code: unknown \}/);
+  });
 });

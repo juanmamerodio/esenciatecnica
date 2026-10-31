@@ -27,7 +27,8 @@ export async function POST(peticion: Request) {
   let formulario: FormData;
   try {
     formulario = await peticion.formData();
-  } catch {
+  } catch (error) {
+    console.error("Error al leer formulario del checkout:", error);
     return errorDeEntrada("No pudimos leer el formulario del pedido.");
   }
 
@@ -41,7 +42,8 @@ export async function POST(peticion: Request) {
   let datos: DatosDelFormulario;
   try {
     datos = JSON.parse(crudos) as DatosDelFormulario;
-  } catch {
+  } catch (error) {
+    console.error("Error al parsear datos JSON del checkout:", error);
     return errorDeEntrada("Los datos del pedido llegaron ilegibles.");
   }
 

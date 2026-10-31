@@ -599,4 +599,10 @@ describe('HU-4 · mensaje de confirmación empático y conciso', () => {
     expect(pagina).toMatch(/Si tenés dudas, podés\s+acercarte a la escuela o escribirnos/);
     expect(pagina).not.toMatch(/el proyecto no incluye envío ni seguimiento/i);
   });
+
+  it('HU-1 (#55) · describirError en checkout no presenta solapamientos ni conmutador ambiguo', () => {
+    const fuente = leer('src/lib/checkout.ts');
+    expect(fuente).not.toMatch(/motivo in MENSAJES_CHECKOUT/);
+    expect(fuente).toMatch(/switch\s*\(\s*motivo\s*\)/);
+  });
 });

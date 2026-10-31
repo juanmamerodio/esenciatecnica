@@ -7,7 +7,9 @@
  * stock ocurre recién al confirmar el pedido (T5).
  */
 import type { ProductoCatalogo } from "@/lib/catalogo";
-import { redondearACentavos } from "@/lib/format";
+import { subtotalDeLinea, totalDelPedido } from "@/lib/dinero";
+
+export { subtotalDeLinea, totalDelPedido };
 
 /** Una línea del carrito: un producto, una sola vez. */
 export type ItemCarrito = {
@@ -66,26 +68,6 @@ export function cambiarCantidad(items: ItemCarrito[], id: number, cantidad: numb
 
 export function quitar(items: ItemCarrito[], id: number): ItemCarrito[] {
   return items.filter((item) => item.id !== id);
-}
-
-/**
- * Subtotal de una línea: `precio × cantidad`, en la precisión del dinero (`NUMERIC(12,2)`).
- * Es la única forma de calcularlo: la usan el carrito, el checkout y el resumen del pedido.
- */
-export function subtotalDeLinea(precio: number, cantidad: number): number {
-  return redondearACentavos(precio * cantidad);
-}
-
-/**
- * Total del pedido: la suma de los subtotales **ya redondeados** (no de los productos crudos),
- * para que el resumen cierre línea por línea y coincida con lo que se cobra.
- */
-export function totalDelPedido(items: ItemCarrito[]): number {
-  const suma = items.reduce(
-    (total, item) => total + subtotalDeLinea(item.precio, item.cantidad),
-    0,
-  );
-  return redondearACentavos(suma);
 }
 
 /** Unidades del carrito (lo que muestra el contador del header), no líneas. */

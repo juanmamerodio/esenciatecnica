@@ -464,6 +464,25 @@ describe('T7 · aprobar y rechazar llaman a los RPC del dominio', () => {
     expect(resultado.motivo).toBe('error-del-servidor');
     expect(resultado.mensaje).not.toMatch(/connection refused/);
   });
+
+  it('un error de PostgREST (PGRST*) o desconocido en el panel se describe como error del servidor sin solapamiento (#55)', async () => {
+    const pgrst = puertoFalso({
+      falla: { en: 'actualizarStock', error: { code: 'PGRST116', message: 'multiple rows' } },
+    });
+    const resultado = await crearPanel(pgrst.puerto).editarStock(1, {
+      cantidad_actual: 5,
+      cantidad_warning: 2,
+    });
+
+    expect(resultado.estado).toBe('error');
+    if (resultado.estado !== 'error') return;
+    expect(resultado.motivo).toBe('error-del-servidor');
+    expect(resultado.mensaje).toMatch(/no pudimos completar la operación en el panel/i);
+    expect(resultado.mensaje).not.toMatch(/PGRST116/);
+
+    const fuente = leer('src/lib/admin.ts');
+    expect(fuente).not.toMatch(/motivo in MENSAJES_PANEL/);
+  });
 });
 
 // ── HU-6 y HU-7 · stock y alertas ─────────────────────────────────────────────

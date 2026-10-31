@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import EncabezadoSeccion from "@/components/EncabezadoSeccion";
 import SubirComprobante from "@/components/SubirComprobante";
-import { subtotalDeLinea, totalDelPedido } from "@/lib/carrito";
+import { subtotalDeLinea, totalDelPedido } from "@/lib/dinero";
 import { leerRespuestaCheckout, totalAVisualizar } from "@/lib/checkout";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/lib/store";
@@ -126,7 +126,8 @@ export default function CheckoutPage() {
         setMonto(cuerpo.total.toFixed(2));
         setMontoEditado(false);
       }
-    } catch {
+    } catch (error) {
+      console.error("Error al procesar el envío del pedido:", error);
       setError("No pudimos enviar el pedido. Revisá tu conexión y volvé a intentar.");
       setIdPedido(null);
       setTotalDeLaBase(null);

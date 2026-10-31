@@ -20,7 +20,8 @@ export async function POST(peticion: Request) {
   let formulario: FormData;
   try {
     formulario = await peticion.formData();
-  } catch {
+  } catch (error) {
+    console.error("Error al leer formulario de foto de producto:", error);
     return errorDeEntrada("No pudimos leer el formulario de la foto.");
   }
 

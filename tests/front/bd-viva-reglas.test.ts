@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   TABLAS_CERRADAS,
+  TABLAS_FASE_2,
   esPermisoDenegado,
   evaluarEscrituraCerrada,
   evaluarLecturaCerrada,
+  evaluarRpc,
 } from '../../scripts/bd-viva-reglas.mjs';
+import { leer } from './ayudantes';
 
 /**
  * HU-3 · Auditoría estricta de tablas cerradas en bd:viva (issue #53).
@@ -52,5 +55,32 @@ describe('HU-3 · Reglas estrictas de bd:viva para tablas cerradas', () => {
     expect(esPermisoDenegado(403)).toBe(true);
     expect(esPermisoDenegado(200)).toBe(false);
     expect(esPermisoDenegado(404)).toBe(false);
+  });
+
+  it('TABLAS_FASE_2 es una constante inmutable sin .filter() sobre listas fijas (#55)', () => {
+    expect(TABLAS_FASE_2).toEqual(['admin', 'roll']);
+    expect(Object.isFrozen(TABLAS_FASE_2)).toBe(true);
+
+    const fuente = leer('scripts/bd-viva-reglas.mjs');
+    expect(fuente).not.toMatch(/TABLAS_CERRADAS\.filter/);
+  });
+
+  it('evaluarRpc unifica respuestas 404 (PGRST202 y HTTP 404) sin bifurcación redundante (#55)', () => {
+    expect(evaluarRpc(404, { code: 'PGRST202' })).toEqual({
+      ok: false,
+      motivo: 'no existe (PGRST202)',
+    });
+    expect(evaluarRpc(404, null)).toEqual({
+      ok: false,
+      motivo: 'no existe (HTTP 404)',
+    });
+    expect(evaluarRpc(404)).toEqual({
+      ok: false,
+      motivo: 'no existe (HTTP 404)',
+    });
+
+    const fuente = leer('scripts/bd-viva-reglas.mjs');
+    // La función evaluarRpc no debe tener 'return resultado(false, 'no existe (PGRST202)')' duplicando la llamada return resultado
+    expect(fuente).not.toMatch(/if\s*\(cuerpo\s*&&\s*cuerpo\.code\s*===\s*['"]PGRST202['"]\)\s*return resultado/);
   });
 });

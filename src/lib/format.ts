@@ -1,22 +1,16 @@
 /**
- * Módulo del dinero — `formato-del-dinero` · issue #44.
+ * Formateo visual de precios — `src/lib/format.ts` · Issue #55 (#44).
  *
- * Una sola regla para toda la app (tienda, panel, remito y checkout): el dinero del modelo es
- * `NUMERIC(12,2)`, así que el **redondeo ocurre en la aritmética** (`redondearACentavos`) y la
- * vista sólo muestra el número (`formatPrice`). La vista no decide el valor.
+ * Módulo de presentación estricto para la UI: la aritmética y las reglas de precisión del
+ * dinero viven en `src/lib/dinero.ts`. La vista sólo formatea visualmente (`formatPrice`).
  */
-
-/** Lleva un monto a la precisión del modelo: dos decimales, sin el error del punto flotante. */
-export function redondearACentavos(monto: number): number {
-  return Math.round((monto + Number.EPSILON) * 100) / 100;
-}
 
 /**
  * Formatea un monto como precio argentino, con formato adaptativo: un entero se muestra sin
  * decimales (`$ 3.000`) y un monto con centavos, con dos decimales exactos (`$ 4,50`).
  *
  * La vista elige cuántos decimales mostrar, pero **no redondea el valor**: el monto llega ya
- * redondeado por la aritmética (`redondearACentavos`).
+ * redondeado por la aritmética (`redondearACentavos` de `src/lib/dinero.ts`).
  *
  * Ejemplos: `3000 → "$ 3.000"`, `4.5 → "$ 4,50"`, `3001.65 → "$ 3.001,65"`.
  */
