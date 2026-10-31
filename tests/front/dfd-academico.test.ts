@@ -122,4 +122,57 @@ describe('HU-15 · DFD Académico (Niveles 0, 1, 2 y 3 en Mermaid)', () => {
     // N3 (bloque 4 o transacciones)
     expect(doc).toMatch(/subgraph\s+(TX|SUB|Transaccion|Proceso)/i);
   });
+  it('HU-54 · DFD N1 utiliza orientación vertical flowchart TD y subgrafos jerárquicos (#54)', () => {
+    const doc = leerDFD();
+    const seccionNivel1 = doc.split(/##\s+.*Nivel\s+1/i)[1].split(/##\s+.*Nivel\s+2/i)[0];
+    const bloqueN1 = bloquesMermaid(seccionNivel1)[0];
+    expect(bloqueN1).toBeDefined();
+
+    // 1. Orientación vertical TD
+    expect(bloqueN1).toMatch(/^flowchart\s+TD/);
+
+    // 2. Contenedores de primer nivel
+    expect(bloqueN1).toMatch(/subgraph\s+ENTIDADES\s+\["Entidades\s+Externas"\]/i);
+    expect(bloqueN1).toMatch(/subgraph\s+PROCESOS\s+\["Procesos\s+Principales"\]/i);
+    expect(bloqueN1).toMatch(/subgraph\s+ALMACENES\s+\["Almacenes\s+de\s+Datos\s+\(D1–D7\)"\]/i);
+
+    // 3. Subgrafos funcionales internos
+    // Entidades en entornos simétricos
+    expect(bloqueN1).toMatch(/subgraph\s+EXT_CLI\s+\["Entorno\s+Cliente"\]/i);
+    expect(bloqueN1).toMatch(/subgraph\s+EXT_GESTION\s+\["Entorno\s+Gestión\s+y\s+Control"\]/i);
+
+    // Procesos en dos carriles (Venta vs Gestión)
+    expect(bloqueN1).toMatch(/subgraph\s+PROC_VENTA\s+\["Flujo\s+de\s+Venta/i);
+    expect(bloqueN1).toMatch(/subgraph\s+PROC_GESTION\s+\["Flujo\s+de\s+Gestión/i);
+
+    // Almacenes por afinidad transaccional
+    expect(bloqueN1).toMatch(/subgraph\s+ALM_VENTA\s+\["Almacenes\s+de\s+Venta/i);
+    expect(bloqueN1).toMatch(/subgraph\s+ALM_STOCK\s+\["Almacenes\s+de\s+Catálogo/i);
+
+    // 4. Presencia inalterada de las 3 entidades, 6 procesos y 7 almacenes canónicos
+    expect(bloqueN1).toMatch(/CLI\["Cliente\s+\(Comprador\s+Invitado\)"\]/);
+    expect(bloqueN1).toMatch(/ADM\["Administrador\s+de\s+Química"\]/);
+    expect(bloqueN1).toMatch(/CRON\["Temporizador\s+Semanal\s+\(Vercel\s+Cron\)"\]/);
+
+    expect(bloqueN1).toMatch(/P1\(\("1\.0\s+Consultar\s+Catálogo\s+y\s+Disponibilidad"\)\)/);
+    expect(bloqueN1).toMatch(/P2\(\("2\.0\s+Registrar\s+Pedido\s+y\s+Reservar\s+Stock"\)\)/);
+    expect(bloqueN1).toMatch(/P3\(\("3\.0\s+Gestionar\s+Comprobante\s+y\s+Validación\s+Manual"\)\)/);
+    expect(bloqueN1).toMatch(/P4\(\("4\.0\s+Administrar\s+Catálogo\s+y\s+Stock\s+Físico"\)\)/);
+    expect(bloqueN1).toMatch(/P5\(\("5\.0\s+Controlar\s+Umbrales\s+y\s+Alertas\s+de\s+Stock"\)\)/);
+    expect(bloqueN1).toMatch(/P6\(\("6\.0\s+Cancelar\s+Pedidos\s+Vencidos\s+\(Cron\)"\)\)/);
+
+    expect(bloqueN1).toMatch(/D1\[\("D1:\s*CLIENTE"\)\]/);
+    expect(bloqueN1).toMatch(/D2\[\("D2:\s*PRODUCTO"\)\]/);
+    expect(bloqueN1).toMatch(/D3\[\("D3:\s*STOCK"\)\]/);
+    expect(bloqueN1).toMatch(/D4\[\("D4:\s*PEDIDO"\)\]/);
+    expect(bloqueN1).toMatch(/D5\[\("D5:\s*COMPROBANTE"\)\]/);
+    expect(bloqueN1).toMatch(/D6\[\("D6:\s*REMITO_VENTA"\)\]/);
+    expect(bloqueN1).toMatch(/D7\[\("D7:\s*ALERTA_STOCK"\)\]/);
+
+    // 5. Compactación de etiquetas con saltos <br/>
+    expect(bloqueN1).toMatch(/<br\/>/);
+    expect(bloqueN1).toMatch(/Confirmación\s+de\s+compra<br\/>\(desde\s+carrito\s+en\s+cliente\)/);
+    expect(bloqueN1).toMatch(/RPC\s+crear_pedido/);
+    expect(bloqueN1).toMatch(/RPC\s+cancelar_pedidos_vencidos/);
+  });
 });

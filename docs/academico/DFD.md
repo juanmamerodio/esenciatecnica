@@ -89,83 +89,98 @@ flowchart TD
 El Nivel 1 descompone el sistema central en seis procesos principales y expone los siete almacenes de datos canónicos (D1 a D7). Se explicita que el carrito reside en el cliente y no en la base de datos.
 
 ```mermaid
-flowchart LR
+flowchart TD
     %% Carril 1: Entidades Externas
     subgraph ENTIDADES ["Entidades Externas"]
-        direction TB
-        CLI["Cliente (Comprador Invitado)"]
-        ADM["Administrador de Química"]
-        CRON["Temporizador Semanal (Vercel Cron)"]
+        subgraph EXT_CLI ["Entorno Cliente"]
+            direction TB
+            CLI["Cliente (Comprador Invitado)"]
+        end
+        subgraph EXT_GESTION ["Entorno Gestión y Control"]
+            direction TB
+            ADM["Administrador de Química"]
+            CRON["Temporizador Semanal (Vercel Cron)"]
+        end
     end
 
     %% Carril 2: Procesos Principales
     subgraph PROCESOS ["Procesos Principales"]
-        direction TB
-        P1(("1.0 Consultar Catálogo y Disponibilidad"))
-        P2(("2.0 Registrar Pedido y Reservar Stock"))
-        P3(("3.0 Gestionar Comprobante y Validación Manual"))
-        P4(("4.0 Administrar Catálogo y Stock Físico"))
-        P5(("5.0 Controlar Umbrales y Alertas de Stock"))
-        P6(("6.0 Cancelar Pedidos Vencidos (Cron)"))
+        subgraph PROC_VENTA ["Flujo de Venta (Cliente)"]
+            direction TB
+            P1(("1.0 Consultar Catálogo y Disponibilidad"))
+            P2(("2.0 Registrar Pedido y Reservar Stock"))
+            P3(("3.0 Gestionar Comprobante y Validación Manual"))
+        end
+        subgraph PROC_GESTION ["Flujo de Gestión y Control"]
+            direction TB
+            P4(("4.0 Administrar Catálogo y Stock Físico"))
+            P5(("5.0 Controlar Umbrales y Alertas de Stock"))
+            P6(("6.0 Cancelar Pedidos Vencidos (Cron)"))
+        end
     end
 
     %% Carril 3: Almacenes Canónicos
     subgraph ALMACENES ["Almacenes de Datos (D1–D7)"]
-        direction TB
-        D1[("D1: CLIENTE")]
-        D2[("D2: PRODUCTO")]
-        D3[("D3: STOCK")]
-        D4[("D4: PEDIDO")]
-        D5[("D5: COMPROBANTE")]
-        D6[("D6: REMITO_VENTA")]
-        D7[("D7: ALERTA_STOCK")]
+        subgraph ALM_VENTA ["Almacenes de Venta (Transaccionales)"]
+            direction TB
+            D1[("D1: CLIENTE")]
+            D4[("D4: PEDIDO")]
+            D5[("D5: COMPROBANTE")]
+            D6[("D6: REMITO_VENTA")]
+        end
+        subgraph ALM_STOCK ["Almacenes de Catálogo y Stock"]
+            direction TB
+            D2[("D2: PRODUCTO")]
+            D3[("D3: STOCK")]
+            D7[("D7: ALERTA_STOCK")]
+        end
     end
 
     %% Flujos Proceso 1.0
-    CLI -->|"Consulta de cosmética e higiene"| P1
+    CLI -->|"Consulta de cosmética<br/>e higiene"| P1
     D2 -->|"Productos activos"| P1
     D3 -->|"Stock actual y reservado"| P1
-    P1 -->|"Vista de catálogo con disponibilidad real"| CLI
+    P1 -->|"Vista de catálogo con<br/>disponibilidad real"| CLI
 
     %% Flujos Proceso 2.0 (Carrito en cliente -> Pedido en BD)
-    CLI -->|"Confirmación de compra (desde carrito en cliente)"| P2
-    P2 -->|"Upsert datos de contacto por email"| D1
-    P2 -->|"Registro de pedido pendiente y detalle"| D4
-    P2 -->|"Incrementa cantidad_reservada (RPC crear_pedido)"| D3
-    P2 -->|"Número de pedido y datos de Cooperadora"| CLI
+    CLI -->|"Confirmación de compra<br/>(desde carrito en cliente)"| P2
+    P2 -->|"Upsert datos de contacto<br/>por email"| D1
+    P2 -->|"Registro de pedido<br/>pendiente y detalle"| D4
+    P2 -->|"Incrementa cantidad_reservada<br/>(RPC crear_pedido)"| D3
+    P2 -->|"Número de pedido y<br/>datos de Cooperadora"| CLI
 
     %% Flujos Proceso 3.0
-    CLI -->|"Subida de comprobante (foto y monto)"| P3
-    P3 -->|"Guarda comprobante (Comprobante Subido)"| D5
-    D4 -->|"Lectura de pedidos para cotejo"| P3
-    D5 -->|"Lectura de comprobantes para revisión"| P3
-    P3 -->|"Pedidos y comprobantes pendientes"| ADM
-    ADM -->|"Decisión de validación manual (Aprobar / Rechazar)"| P3
-    P3 -->|"Aprobado: estado Pago Validado / Rechazado: estado Rechazado"| D4
-    P3 -->|"Aprobado: descuenta stock y libera reserva / Rechazado: libera reserva"| D3
-    P3 -->|"Genera remito de venta con número oficial"| D6
-    P3 -->|"Despacha remito HTML por correo electrónico"| CLI
+    CLI -->|"Subida de comprobante<br/>(foto y monto)"| P3
+    P3 -->|"Guarda comprobante<br/>(Comprobante Subido)"| D5
+    D4 -->|"Lectura de pedidos<br/>para cotejo"| P3
+    D5 -->|"Lectura de comprobantes<br/>para revisión"| P3
+    P3 -->|"Pedidos y comprobantes<br/>pendientes"| ADM
+    ADM -->|"Decisión de validación<br/>manual (Aprobar / Rechazar)"| P3
+    P3 -->|"Aprobado: estado Pago Validado<br/>Rechazado: estado Rechazado"| D4
+    P3 -->|"Aprobado: descuenta stock y libera reserva<br/>Rechazado: libera reserva"| D3
+    P3 -->|"Genera remito de venta<br/>con número oficial"| D6
+    P3 -->|"Despacha remito HTML<br/>por correo electrónico"| CLI
 
     %% Flujos Proceso 4.0
-    ADM -->|"Actualización de productos e inventario"| P4
-    P4 -->|"Baja lógica y edición de productos"| D2
-    P4 -->|"Ajuste de cantidad_actual y cantidad_warning"| D3
+    ADM -->|"Actualización de productos<br/>e inventario"| P4
+    P4 -->|"Baja lógica y<br/>edición de productos"| D2
+    P4 -->|"Ajuste de cantidad_actual<br/>y cantidad_warning"| D3
 
     %% Flujos Proceso 5.0
-    D3 -->|"Monitoreo de stock disponible"| P5
-    P5 -->|"Genera alerta si disponible <= warning"| D7
-    D7 -->|"Lectura de alertas pendientes"| P5
-    P5 -->|"Popup informativo de stock bajo"| ADM
+    D3 -->|"Monitoreo de stock<br/>disponible"| P5
+    P5 -->|"Genera alerta si<br/>disponible <= warning"| D7
+    D7 -->|"Lectura de alertas<br/>pendientes"| P5
+    P5 -->|"Popup informativo<br/>de stock bajo"| ADM
     ADM -->|"Marca alerta como atendida"| P5
     P5 -->|"Actualiza atendida = true"| D7
 
     %% Flujos Proceso 6.0
-    CRON -->|"Disparo semanal de los viernes 23:59 ART"| P6
-    D4 -->|"Consulta de pedidos Pendiente de Pago"| P6
-    P6 -->|"Actualiza pedidos a Cancelado"| D4
-    P6 -->|"Actualiza comprobantes a Rechazado"| D5
-    P6 -->|"Libera cantidad_reservada en stock (RPC cancelar_pedidos_vencidos)"| D3
-    P6 -->|"Reporte de ejecución con cantidad de pedidos cancelados"| CRON
+    CRON -->|"Disparo semanal programado<br/>(Viernes 23:59 ART)"| P6
+    D4 -->|"Consulta de pedidos<br/>Pendiente de Pago"| P6
+    P6 -->|"Actualiza pedidos<br/>a Cancelado"| D4
+    P6 -->|"Actualiza comprobantes<br/>a Rechazado"| D5
+    P6 -->|"Libera cantidad_reservada en stock<br/>(RPC cancelar_pedidos_vencidos)"| D3
+    P6 -->|"Reporte de ejecución con<br/>pedidos cancelados"| CRON
 ```
 
 ---

@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Dominio temporal nexobow.site y Resend API operativos y verificados en vivo; 513 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Optimización topológica DFD N1 en Mermaid #54; 515 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Hoja de ruta secuencial en `docs/specs/cierre-beta/plan-ejecucion.md`.
@@ -18,8 +18,8 @@
   5. **Fase 4 (Documentación y Expo):** confeccionar `docs/MANUAL_DE_USO_Y_DESARROLLO.md` (`da6b26f3`) y `docs/academico/PRESENTACION_EXPO_TEC1.md` (`b81c3468`, guión listo en `review`).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **513 tests** en 38 archivos ·
-  `docs:links` 0 links sin resolver sobre 47 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **515 tests** en 38 archivos ·
+  `docs:links` 0 links sin resolver sobre 48 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
 - **GitHub**: `main` en verde y sincronizado con `origin/main` en `esenciatecnica` y `quimicashop`. Publicado el spec de cierre beta #53; abiertos el paraguas #1
@@ -31,6 +31,7 @@
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
 |---|---|---|
+| #54 · DFD N1 | Optimización visual y reorganización topológica DFD N1 | ✅ cerrado |
 | #53 · Spec | Spec Maestro de Cierre Beta (unificación de 19 tareas) | ✅ publicado (`ready-for-agent`) |
 | #15 · D1 | cerrar la migración del MVP | ✅ en todo lo que mide `bd:viva`; abierto sólo por la firma de `respaldo_legacy` |
 | #16 · B1 | respaldo + `00`–`06` aplicadas en `otjph` | ✅ `01`–`06` aplicadas y medidas; falta firmar `respaldo_legacy` en el SQL Editor |
@@ -41,6 +42,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-10-30 · Optimización Visual y Topológica DFD Nivel 1 #54)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/academico/DFD.md` + `quimicashop/diagramas-visor.js` + `tests/front/dfd-academico.test.ts` + `tests/front/hub-diagramas.test.ts` + `docs/specs/dfd-nivel-1/spec.md` | **HU-54 (#54):** Reorganización topológica y eliminación de cruces caóticos de cables en el DFD Nivel 1 mediante layout vertical `flowchart TD` y descomposición en subgrafos simétricos de primer y segundo nivel: `ENTIDADES` (`EXT_CLI` vs `EXT_GESTION`), `PROCESOS` en dos carriles funcionales (`PROC_VENTA` con 1.0, 2.0 y 3.0 vs `PROC_GESTION` con 4.0, 5.0 y 6.0) y `ALMACENES` por afinidad transaccional (`ALM_VENTA` con D1, D4, D5, D6 vs `ALM_STOCK` con D2, D3, D7). Compactación visual de todas las etiquetas de aristas de más de 25 caracteres con saltos `<br/>`. Preservación estricta del 100% de entidades, procesos, almacenes y transferencias de datos sin términos legacy. 2 tests nuevos en Vitest (515 tests en 38 archivos en verde). |
 
 ## Hecho (2026-10-30 · Guión EXPO TEC1 & Acceso Rápido en Hub #53)
 | Cambio | Qué dejó |

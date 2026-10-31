@@ -13,7 +13,7 @@
 ## 1. Identidad, alcance y límites del repositorio (§1–§3)
 
 Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** en este repo (`esenciatecnica` → Vercel → Supabase `otjph…`): catálogo, carrito, checkout, validación manual, `/admin`, APIs, migraciones y tests.
-- El Hub y Teams viven en [`quimicashop`](https://github.com/juanmamerodio/quimicashop) (GitHub Pages → Supabase `uchy…`, tablas `team_*`). Prohibido agregar HTML del Hub, `tasks.js`, `style.css`, minutas o tablas `team_*` acá ([`docs/estado/SEPARACION.md`](docs/estado/SEPARACION.md)).
+- El Hub y Teams viven en [`quimicashop`](https://github.com/juanmamerodio/quimicashop) (GitHub Pages → Supabase `uchy…`, tablas `team_*`). Prohibido agregar HTML del Hub, `tasks.js`, `style.css`, minutas o tablas `team_*` acá ([`docs/estado/SEPARACION.md`](docs/estado/SEPARACION.md)). Enlaces a `quimicashop` en docs van en backticks o URL absoluta de GitHub, nunca rutas relativas (rompen `docs:links`).
 - Únicos puentes temporales hacia Teams: `/api/notifications` y `npm run teams` ([`docs/agentes/teams.md`](docs/agentes/teams.md)). `.env.local` y claves privadas **nunca** se commitean.
 
 ## 2. Fuentes de verdad y términos prohibidos
@@ -35,13 +35,13 @@ Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** en est
 
 ## 6. Método de trabajo ([`docs/metodo/brain.md`](docs/metodo/brain.md))
 
-- **Sesión y alineación:** `1 ticket = 1 sesión limpia (<140k tokens, /compact) = 1 commit quirúrgico`. Entrevista previa (`/grill-me`), términos nuevos en `GLOSSARY.md` y decisiones en `docs/adr/`.
+- **Sesión y alineación:** `1 ticket = 1 sesión limpia (<140k tokens, /compact) = 1 commit quirúrgico`. Entrevista previa (`/grill-me`), términos nuevos en `GLOSSARY.md` y decisiones en `docs/adr/`. Tareas en segundo plano: no hacer polling ni fijar timers; ceder el turno y aguardar el wakeup reactivo del sistema.
 - **TDD obligatorio (`Red → Green → Refactor`):** escribir primero el test que falla en **Vitest** ([`docs/metodo/TESTING.md`](docs/metodo/TESTING.md)), pasar a verde con el código mínimo y refactorizar. Ningún cambio cierra sin test (salvo docs/config).
-- **Revisión y retro:** auditar con subagente de solo lectura en contexto limpio (ejes: Estándares y Spec) sin parchear en la misma sesión; al cerrar módulo, ejecutar `/retro`.
+- **Revisión y retro:** auditar con subagente de solo lectura en contexto limpio (ejes: Estándares y Spec) sin parchear en la misma sesión; al cerrar módulo o detectar fricción, ejecutar `/retro`.
 
 ### 6.2 Spec y tickets
 
-La spec vive en un issue de GitHub ([`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md)) y, si requiere detalle, en `docs/specs/<feature>/spec.md` siguiendo [`docs/specs/PLANTILLA.md`](docs/specs/PLANTILLA.md) (7 secciones en orden y HU `Como <actor>, quiero <feature>, para <beneficio>`). Cada ticket es una **tajada vertical** (BD + API + UI + test) trabajada blockers-first; prohibido dividir por capas horizontales.
+La spec vive en un issue de GitHub ([`docs/agentes/issue-tracker.md`](docs/agentes/issue-tracker.md), creado con `/to-spec` y etiqueta `ready-for-agent`) y, si requiere detalle, en `docs/specs/<feature>/spec.md` siguiendo [`docs/specs/PLANTILLA.md`](docs/specs/PLANTILLA.md) (7 secciones en orden, seam más alto y HU `Como <actor>, quiero <feature>, para <beneficio>`). Cada ticket es una **tajada vertical** (BD + API + UI + test) trabajada blockers-first; prohibido dividir por capas horizontales.
 
 ## 7. Reglas de código
 
@@ -72,4 +72,4 @@ La puerta es **local y de GitHub Actions** ([`.github/workflows/ci.yml`](.github
 1. Leer `memory.md` y el ticket; cargar `GLOSSARY.md`, `docs/MODELO.md` o `spec.md` bajo demanda y medir línea base (`npm run typecheck`).
 2. Escribir el test en rojo (TDD), aplicar el cambio mínimo y verificar `typecheck`, `lint`, `test`, `docs:links` y `build`.
 3. Actualizar glosario/modelo/ADR si cambió una decisión y hacer commit quirúrgico sin archivos sueltos.
-4. Sincronizar el tablero (`npm run teams`), archivar `done` > 24 h (`npm run teams -- papelera`), publicar avance y reescribir `memory.md`.
+4. Ejecutar `/retro` si hubo fricción de herramientas o reglas; sincronizar el tablero (`npm run teams`), archivar `done` > 24 h (`npm run teams -- papelera`), publicar avance y reescribir `memory.md`.

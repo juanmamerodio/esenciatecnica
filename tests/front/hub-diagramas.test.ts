@@ -224,4 +224,40 @@ describe('HU-6 (Compactación y Optimización Visual) · Configuración y layout
     expect(js).toMatch(/D6\[\("D6:\s*REMITO_VENTA"\)\]/);
     expect(js).toMatch(/D7\[\("D7:\s*ALERTA_STOCK"\)\]/);
   });
+  it('HU-54 · organiza DFD N1 con orientación vertical flowchart TD y subgrafos jerárquicos (#54)', () => {
+    const js = readFileSync(RUTA_VISOR_JS, 'utf8');
+    const matchN1 = js.match(/id:\s*['"]dfd-n1['"][\s\S]*?code:\s*`([\s\S]*?)`/);
+    expect(matchN1).toBeTruthy();
+    const codigoN1 = matchN1 ? matchN1[1] : '';
+
+    // Orientación TD
+    expect(codigoN1).toMatch(/^flowchart\s+TD/);
+
+    // Subgrafos y carriles
+    expect(codigoN1).toMatch(/subgraph\s+ENTIDADES\s+\["Entidades\s+Externas"\]/i);
+    expect(codigoN1).toMatch(/subgraph\s+EXT_CLI\s+\["Entorno\s+Cliente"\]/i);
+    expect(codigoN1).toMatch(/subgraph\s+EXT_GESTION\s+\["Entorno\s+Gestión\s+y\s+Control"\]/i);
+
+    expect(codigoN1).toMatch(/subgraph\s+PROCESOS\s+\["Procesos\s+Principales"\]/i);
+    expect(codigoN1).toMatch(/subgraph\s+PROC_VENTA\s+\["Flujo\s+de\s+Venta/i);
+    expect(codigoN1).toMatch(/subgraph\s+PROC_GESTION\s+\["Flujo\s+de\s+Gestión/i);
+
+    expect(codigoN1).toMatch(/subgraph\s+ALMACENES\s+\["Almacenes\s+de\s+Datos\s+\(D1–D7\)"\]/i);
+    expect(codigoN1).toMatch(/subgraph\s+ALM_VENTA\s+\["Almacenes\s+de\s+Venta/i);
+    expect(codigoN1).toMatch(/subgraph\s+ALM_STOCK\s+\["Almacenes\s+de\s+Catálogo/i);
+
+    // Entidades, procesos y almacenes
+    expect(codigoN1).toMatch(/CLI\["Cliente\s+\(Comprador\s+Invitado\)"\]/);
+    expect(codigoN1).toMatch(/ADM\["Administrador\s+de\s+Química"\]/);
+    expect(codigoN1).toMatch(/CRON\["Temporizador\s+Semanal\s+\(Vercel\s+Cron\)"\]/);
+
+    expect(codigoN1).toMatch(/P1\(\("1\.0\s+Consultar/);
+    expect(codigoN1).toMatch(/P6\(\("6\.0\s+Cancelar/);
+
+    // Compactación de etiquetas con <br/>
+    expect(codigoN1).toMatch(/<br\/>/);
+    expect(codigoN1).toMatch(/Confirmación\s+de\s+compra<br\/>\(desde\s+carrito\s+en\s+cliente\)/);
+    expect(codigoN1).toMatch(/RPC\s+crear_pedido/);
+    expect(codigoN1).toMatch(/RPC\s+cancelar_pedidos_vencidos/);
+  });
 });
