@@ -479,9 +479,6 @@ describe('T7 · aprobar y rechazar llaman a los RPC del dominio', () => {
     expect(resultado.motivo).toBe('error-del-servidor');
     expect(resultado.mensaje).toMatch(/no pudimos completar la operación en el panel/i);
     expect(resultado.mensaje).not.toMatch(/PGRST116/);
-
-    const fuente = leer('src/lib/admin.ts');
-    expect(fuente).not.toMatch(/motivo in MENSAJES_PANEL/);
   });
 });
 

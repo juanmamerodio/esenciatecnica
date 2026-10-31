@@ -7,9 +7,6 @@
  * stock ocurre recién al confirmar el pedido (T5).
  */
 import type { ProductoCatalogo } from "@/lib/catalogo";
-import { subtotalDeLinea, totalDelPedido } from "@/lib/dinero";
-
-export { subtotalDeLinea, totalDelPedido };
 
 /** Una línea del carrito: un producto, una sola vez. */
 export type ItemCarrito = {

@@ -600,9 +600,26 @@ describe('HU-4 · mensaje de confirmación empático y conciso', () => {
     expect(pagina).not.toMatch(/el proyecto no incluye envío ni seguimiento/i);
   });
 
-  it('HU-1 (#55) · describirError en checkout no presenta solapamientos ni conmutador ambiguo', () => {
-    const fuente = leer('src/lib/checkout.ts');
-    expect(fuente).not.toMatch(/motivo in MENSAJES_CHECKOUT/);
-    expect(fuente).toMatch(/switch\s*\(\s*motivo\s*\)/);
+  it('HU-1 (#55) · mapea 23514 a datos-invalidos y errores no mapeados a error-del-servidor de forma unívoca', async () => {
+    const { puerto: puertoCheck } = puertoFalso({
+      falla: { en: 'crearPedido', error: { code: '23514', message: 'check failed' } },
+    });
+    const resCheck = await confirmarPedido(puertoCheck, entrada({ monto: 2500 }));
+    expect(resCheck.estado).toBe('error');
+    if (resCheck.estado === 'error') {
+      expect(resCheck.motivo).toBe('datos-invalidos');
+      expect(resCheck.mensaje).toMatch(/reglas del sistema/i);
+    }
+
+    const { puerto: puertoPgrst } = puertoFalso({
+      falla: { en: 'crearPedido', error: { code: 'PGRST116', message: 'multiple rows' } },
+    });
+    const resPgrst = await confirmarPedido(puertoPgrst, entrada({ monto: 2500 }));
+    expect(resPgrst.estado).toBe('error');
+    if (resPgrst.estado === 'error') {
+      expect(resPgrst.motivo).toBe('error-del-servidor');
+      expect(resPgrst.mensaje).toMatch(/no pudimos completar el pedido/i);
+      expect(resPgrst.mensaje).not.toMatch(/PGRST116/);
+    }
   });
 });

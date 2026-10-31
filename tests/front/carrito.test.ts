@@ -5,10 +5,10 @@ import {
   agregar,
   cambiarCantidad,
   quitar,
-  totalDelPedido,
   totalUnidades,
   type ItemCarrito,
 } from '../../src/lib/carrito';
+import { totalDelPedido } from '../../src/lib/dinero';
 import { RAIZ, leer } from './ayudantes';
 
 /**
