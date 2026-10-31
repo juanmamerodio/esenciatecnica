@@ -1,9 +1,9 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Formalización de Diagramas Académicos en Mermaid: Clases UML, DCU, DER y actualización del Hub; 494 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Reforma Integral del Hub: Pestaña Interactiva de Diagramas Mermaid y Visor Académico; 507 tests en verde).
 
 ## Ahora
-- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las 19 tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
+- **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Documentado en `docs/specs/cierre-beta/spec.md` con etiqueta `ready-for-agent`.
 - **Bloqueo crítico urgente: compra del dominio para conectar Resend (#20, Enzo).** Sin dominio propio
   verificado en Resend (SPF/DKIM) y sin cargar `RESEND_API_KEY` + `RESEND_FROM_EMAIL` en Vercel, Resend
   en modo sandbox sólo permite enviar al correo del titular de la cuenta: **no se puede testear el envío
@@ -19,7 +19,7 @@
   3. **Isabella / Juanma (#16 / #15):** correr el bloque de conteos de `respaldo_legacy` en el SQL Editor y pegarlo en #16.
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **494 tests** en 37 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **507 tests** en 38 archivos ·
   `docs:links` 0 links sin resolver sobre 45 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
@@ -27,7 +27,7 @@
   y los tickets que esperan acciones humanas o entorno vivo (#15, #16, #18, #20, #22, #23).
 - BD prod `otjph…`: **VERDE** con `npm run bd:viva` (`01`–`06` aplicadas y medidas en las 7 secciones; las 10 tablas cerradas responden estrictamente `401`/`403`).
   Fuera del alcance de la anon key: `respaldo_legacy`, el tope de 5 MB y los MIME de cada bucket.
-- **Tablero**: auditado, sincronizado y depurado con `npm run teams` (3 tareas pasadas a `done`: `Diagrama de clases`, `Correcciones de documentación de cátedra`, `Migrar diagramas a mermaid`; aviso `AVANCE` en la bandeja). Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
+- **Tablero**: auditado, sincronizado y depurado con `npm run teams` (aviso `AVANCE` de visor de diagramas en la bandeja). Se lee en vivo con `npm run teams -- leer` ([`teams.md`](docs/agentes/teams.md) §7).
 
 ## Tickets del cierre beta
 | Ticket | Qué | Estado |
@@ -43,35 +43,20 @@
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
 
-## Hecho (2026-10-30 · Diagramas Académicos en Mermaid y Actualización del Hub #53)
+## Hecho (2026-10-30 · Reforma Integral del Hub: Visor Interactivo Mermaid #53)
 | Cambio | Qué dejó |
 |---|---|
-| `docs/academico/CLASES.md` + `docs/academico/DCU.md` + `docs/academico/DER.md` + `docs/README.md` + `tests/front/diagramas-academicos.test.ts` + `quimicashop/index.html` + `quimicashop/config.js` | **HU-1 a HU-5 (#53):** Formalización de entregables de cátedra en Mermaid: Diagrama de Clases UML completo con 10 entidades canónicas y 6 servicios de dominio (Nieva), Diagrama de Casos de Uso (DCU) con validación manual sin IA y carrito en cliente (Celeste), y DER normalizado en 3FN con delimitación de Fase 2 (Isabella). Actualización integral del Hub en `quimicashop/index.html`: enlaces a `esenciatecnica.vercel.app`, purgado de vocabulario legacy (`productos`, `pedidos`, `verificaciones`, `validación IA`), tarjeta de Clases UML, badge DFD 4 niveles (N0–N3) y nuevo hito Cierre Beta en timeline. 15 tests nuevos en Vitest (494 en 37 archivos en verde). 3 tareas de Teams movidas a `done` y aviso `AVANCE` publicado. |
+| `quimicashop/index.html` + `quimicashop/style.css` + `quimicashop/diagramas-visor.js` + `tests/front/hub-diagramas.test.ts` | **HU-1 a HU-5:** Sistema de navegación por pestañas en el Hub (`role="tablist"`, `role="tab"`, `role="tabpanel"`, con hash `#diagramas`). Visor documental desacoplado con renderizado Mermaid v10+ secuencial de los 7 modelos canónicos en orden: DFD N0, DFD N1 (D1–D7), DFD N2 (Subsistemas), DFD N3 (Transaccional `crear_pedido`/`aprobar_comprobante`), DER normalizado en 3FN (10 entidades canónicas), Diagrama de Clases UML (entidades y servicios de aplicación) y DCU con validación manual sin IA. Barra de herramientas por diagrama con Zoom (+/-), Reset (1:1), paneo por arrastre táctil/ratón, copia de código Mermaid, descarga directa SVG y PNG (canvas 2x) y modal de Pantalla Completa para la EXPO TEC1. Purgado de vocabulario legacy. 13 tests nuevos en Vitest (507 en 38 archivos en verde). Publicado aviso `AVANCE` en Teams. |
+
+## Hecho (2026-10-30 · Formalización de Diagramas Académicos en Mermaid #53)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/academico/CLASES.md` + `docs/academico/DCU.md` + `docs/academico/DER.md` + `docs/README.md` + `tests/front/diagramas-academicos.test.ts` + `quimicashop/index.html` + `quimicashop/config.js` | **HU-1 a HU-5 (#53):** Formalización de entregables de cátedra en Mermaid: Diagrama de Clases UML completo con 10 entidades canónicas y 6 servicios de dominio (Nieva), Diagrama de Casos de Uso (DCU) con validación manual sin IA y carrito en cliente (Celeste), y DER normalizado en 3FN con delimitación de Fase 2 (Isabella). 15 tests nuevos en Vitest. 3 tareas de Teams movidas a `done` y aviso `AVANCE` publicado. |
 
 ## Hecho (2026-10-30 · HU-15: DFD Académico en Mermaid #53)
 | Cambio | Qué dejó |
 |---|---|
 | `docs/academico/DFD.md` + `docs/README.md` + `tests/front/dfd-academico.test.ts` | **HU-15 (#53):** Formalización de los Diagramas de Flujo de Datos (DFD) de niveles 0, 1, 2 y 3 en formato Mermaid (`flowchart TD`) incorporando todas las observaciones docentes de Ariel: eliminación de almacenes de datos en Nivel 0 (Diagrama de Contexto), estructuración de almacenes canónicos D1 a D7 (`CLIENTE`, `PRODUCTO`, `STOCK`, `PEDIDO`, `COMPROBANTE`, `REMITO_VENTA`, `ALERTA_STOCK`) alineados con `docs/MODELO.md`, explicitación del Carrito en el navegador del cliente (sin persistencia en BD), corrección de la liberación de reserva de stock por cron semanal de los viernes 23:59 ART (`cancelar_pedidos_vencidos`) en reemplazo de temporizadores diarios, y notificación de alertas de stock exclusiva como popup en `/admin` (sin correos electrónicos al Administrador). 7 tests nuevos (479 en 36 archivos en verde). Tarea de Celeste movida a `done` en Teams. |
-
-## Hecho (2026-10-30 · HU-1 a HU-4: Cierre Beta - Núcleo Técnico #53)
-| Cambio | Qué dejó |
-|---|---|
-| `src/lib/cliente-servidor.ts` + `src/lib/{admin,checkout,cron,remito}-servidor.ts` + `src/app/api/cron/vencidos/route.ts` + `scripts/bd-viva-reglas.mjs` + `scripts/verificar-bd-viva.mjs` + `src/lib/errores-bd.ts` + `src/lib/{admin,checkout}.ts` + tests | **HU-1 a HU-4 (#53):** Helper reutilizable `obtenerClienteServicio` en `src/lib/cliente-servidor.ts` con instanciación estricta en tiempo de ejecución (AGENTS §7.13) y excepción `FaltaConfiguracion`; eliminación de guardias duplicadas en los adaptadores del servidor; cron responde `503` con motivo semántico `sin-configuracion` ante credenciales ausentes, reservando `500` para fallos de red/base; `bd:viva` endurecido a `401`/`403` estricto en las diez tablas cerradas (sin tolerar `404` en `admin`/`roll`); eliminación de función huérfana `estadoHttp()` y unificación declarativa de `describirError` en diccionarios tipados. 15 tests nuevos (472 en 35 archivos en verde). |
-
-## Hecho (2026-10-29 · Diferenciación de configuración en el cron)
-| Cambio | Qué dejó |
-|---|---|
-| `src/lib/cron-servidor.ts` + `src/lib/cron.ts` + `src/app/api/cron/vencidos/route.ts` + `tests/front/cron.test.ts` | **El cron no distingue configuración faltante de fallo transitorio:** el adaptador lanza `FaltaConfiguracion` (`src/lib/errores-bd.ts`) ante la ausencia de `SUPABASE_SERVICE_ROLE_KEY` o `NEXT_PUBLIC_SUPABASE_URL` y desacopla la ejecución de la RPC con `puertoSobre(cliente)`. `manejarCron` responde `503` con motivo `sin-configuracion` ante configuración faltante y `500` con `error-del-servidor` ante fallos de conexión o base sin filtrar detalles internos. 4 tests nuevos (457 en verde). Tarea de Teams pasada a `review`. |
-| `src/app/admin/page.tsx` + `src/components/admin/PanelDeStock.tsx` + `tests/front/admin.test.ts` | **HU-5 a HU-7:** eliminación del banner inferior informativo residual de credenciales ("El panel está protegido..."), síntesis de los subtítulos de Pedidos, Stock y Productos a instrucciones breves y operativas sin jerga técnica interna, sub-navegación compacta por anclas (`#pedidos`, `#stock`, `#productos`) con `scroll-mt-20`, y sustitución en la UI de "umbral" por "Stock mínimo" y "Stock bajo, sin atender", preservando los nombres internos de base de datos (`umbral_minimo`). 3 tests nuevos (453 en total en verde). |
-| `src/app/icon.svg` + `src/components/Header.tsx` + `src/components/Footer.tsx` + `src/app/about/page.tsx` + `src/app/page.tsx` + `src/app/checkout/page.tsx` + tests | **HU-1 a HU-4:** Favicon institucional vectorial SVG (`#3D8C6E`), acceso "Noticias" en Header/Footer y título de `/about`, sección "Forma de pago" con datos oficiales de retiro en Home ("Int. Moro 1122, Campana", L a V 8:00 a 17:00 hs, Departamento de Química), y confirmación de compra cálida y empática en checkout sin tecnicismos internos. 5 tests nuevos. |
-| `src/lib/checkout.ts` + `src/app/checkout/page.tsx` + `tests/front/checkout.test.ts` | Recalcular `totalAVisualizar` con aritmética canónica (`redondearACentavos`) y resetear `totalDeLaBase`, `idPedido` y `montoEditado` si el usuario altera el carrito o si la creación del pedido falla / no devuelve total. 3 tests nuevos. Tarea de Teams movida a `done`. |
-| `AGENTS.md` + `tests/front/skills-del-proyecto.test.ts` | Reducción de `AGENTS.md` de **336 a 75 líneas (-77.7%)** aplicando divulgación progresiva (`brain.md` §2.3: Nivel 1–2 al abrir sesión, Nivel 3 bajo demanda) y test estructural que exige `<= 100` líneas. Retirados los 5 documentos históricos/legacy obsoletos (`AUDITORIA.md`, `DEUDA_TECNICA.md`, `HANDOFF-ISABELLA.md`, `GUIA-ISABELLA.md`, `GUIA-QUEIPO.md`: -1.346 líneas). |
-| `scripts/teams-tablero.mjs` + `scripts/teams-papelera-reglas.mjs` + `tests/front/teams-papelera.test.ts` | Subcomando `npm run teams -- papelera [--horas 24] --autor <key> [--confirmar]`: selecciona tareas `done` con más de 24 h, guarda respaldo local en `docs/agentes/papelera/` (ignorado en Git por `AGENTS.md` §1), las borra de `team_tasks` y registra `DELETE` en `task_audit_logs`. 6 tests puros en verde; 27 tareas archivadas. |
-| `next.config.ts` + `AGENTS.md` §8 | Se retiró `typescript.ignoreBuildErrors: true`. `npm run build` ahora valida tipos durante la compilación además de CI. |
-| `scripts/verificar-links-docs.mjs` | Filtra archivos borrados en el árbol de trabajo antes de abrirlos (evita `ENOENT`) y sale con `process.exitCode = 1` cuando hay links rotos o sin migrar, haciendo efectiva la puerta `docs:links` en CI. |
-| Limpieza de `docs/specs/`, `docs/estado/` y `scripts/` | Eliminados los 9 specs de tickets puntuales ya quemados (`busqueda-por-campos`, `detalle-404`, `deuda-codigo-25-10`, `formato-del-dinero`, `iconos-y-copy-del-dominio`, `integracion-continua`, `plantilla-de-spec`, `skills-del-proyecto`, `trazabilidad-issues`), `docs/estado/ORDEN_DE_EJECUCION.md`, `scripts/reorganizar-docs.mjs` y el directorio vacío `docs/agents/`. En `docs/specs/` quedan los 10 specs de features + `PLANTILLA.md`. |
-| `.agents/skills/*` + `docs/agentes/teams.md` + `tests/front/skills-del-proyecto.test.ts` | Cierra la deuda de skills del 28-10: anatomía de `brain.md` §4.1 en orden (`PROPÓSITO` → `PARÁMETROS DE ENTRADA` → `GUARDRAILS` → `PASOS DE EJECUCIÓN`), link a `scripts/verificar-bd-viva.mjs`, retiro de término legacy en `teams.md` y limpieza de conteos congelados en los specs. |
-| GitHub y Teams | Cerrados #17, #19 y #25 con evidencia; 6 tareas pasadas a `done`, 4 tareas nuevas creadas y 2 avisos (`BLOQUEO` urgente por dominio/Resend y `AVANCE` con auditoría de build) publicados en la bandeja. |
 
 ## Hallazgos abiertos
 1. 🔴 **URGENTE — Dominio y Resend (#20, Enzo):** comprar el dominio, verificar SPF/DKIM en Resend y cargar `RESEND_API_KEY` y `RESEND_FROM_EMAIL` en Vercel. Bloquea testear el envío real del Remito de venta al Cliente y `/api/notifications`.
