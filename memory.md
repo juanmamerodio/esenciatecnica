@@ -1,10 +1,10 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Alineación de remitentes Resend con dominio temporal nexobow.site verificado; 513 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-30 (Dominio temporal nexobow.site y Resend API operativos y verificados en vivo; 513 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Hoja de ruta secuencial en `docs/specs/cierre-beta/plan-ejecucion.md`.
-- **Dominio temporal en Resend (`nexobow.site`, #20):** Registros DNS (DKIM/SPF) verificados en Cloudflare/Resend. Remitentes por defecto actualizados en código (`src/app/api/notifications/route.ts` y `src/lib/remito-servidor.ts`). Pendiente inmediato: cargar `RESEND_API_KEY` en Vercel y `.env.local` para habilitar el envío real.
+- **Dominio y Resend 100% operativos (`nexobow.site`, #20):** Dominio verificado en Cloudflare/Resend (SPF/DKIM). API Key validada en vivo vía SDK Resend (`status: verified`, `sa-east-1`, `sending: enabled`). Tarea de Teams movida a `done`. Desbloqueado el testeo en vivo del Remito de venta y `/api/notifications`.
 - **Producción (`esenciatecnica.vercel.app`) y base viva (`otjph…`) funcionando con la demo sembrada (#22):**
   nueve productos con foto real en el bucket público `productos`, seis Pedidos en los cuatro estados
   canónicos (`Pendiente de Pago` ×2, `Pago Validado` ×2 con remitos `R-2026-0000{01,02}`, `Rechazado` y
@@ -68,7 +68,7 @@
 | `docs/academico/DFD.md` + `docs/README.md` + `tests/front/dfd-academico.test.ts` | **HU-15 (#53):** Formalización de los Diagramas de Flujo de Datos (DFD) de niveles 0, 1, 2 y 3 en formato Mermaid (`flowchart TD`) incorporando todas las observaciones docentes de Ariel: eliminación de almacenes de datos en Nivel 0 (Diagrama de Contexto), estructuración de almacenes canónicos D1 a D7 (`CLIENTE`, `PRODUCTO`, `STOCK`, `PEDIDO`, `COMPROBANTE`, `REMITO_VENTA`, `ALERTA_STOCK`) alineados con `docs/MODELO.md`, explicitación del Carrito en el navegador del cliente (sin persistencia en BD), corrección de la liberación de reserva de stock por cron semanal de los viernes 23:59 ART (`cancelar_pedidos_vencidos`) en reemplazo de temporizadores diarios, y notificación de alertas de stock exclusiva como popup en `/admin` (sin correos electrónicos al Administrador). 7 tests nuevos (479 en 36 archivos en verde). Tarea de Celeste movida a `done` en Teams. |
 
 ## Hallazgos abiertos
-1. 🟡 **Dominio y Resend (#20, Enzo):** dominio temporal `nexobow.site` verificado en Resend con SPF/DKIM en Cloudflare. Falta cargar `RESEND_API_KEY` en Vercel y `.env.local` para probar el envío real del Remito de venta y notificaciones.
+1. ✅ **Dominio y Resend (#20, Enzo):** `nexobow.site` verificado con SPF/DKIM y API key activa en Resend (`sa-east-1`). Remito y `/api/notifications` desbloqueados para pruebas reales.
 2. 🟡 **Datos de la Cooperadora y `CRON_SECRET` (#20 / #18, Enzo):** cargar `NEXT_PUBLIC_TRANSFERENCIA_*` y `CRON_SECRET` en Vercel.
 3. 🟡 **Fotos definitivas del taller (#22, Celeste):** reemplazar desde `/admin` las fotos de demostración y pisar `public/hero/portada.jpg`.
 4. 🟡 **Verificación en pantalla (#23, Celeste):** recorrer la tienda y `/admin` en navegador (desktop y mobile) y dejar el resultado en la tarea `B6`.
