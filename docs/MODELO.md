@@ -30,129 +30,64 @@
 
 ## 2. ERD del MVP
 
-> Los nombres del ERD son lógicos. La tabla física puede conservar el plural actual
-> (`estados_pedidos`, `estados_comprobante`, `remitos_de_venta`, `alerta_de_estado`); el mapeo está en
-> [`AUDITORIA_BD.md`](./estado/AUDITORIA_BD.md).
+> **Nombres físicos, sin alias.** Este diagrama usa los nombres exactos de las tablas de `public`
+> en la base viva `otjph…`. El diagrama canónico —con todas las columnas, tipos SQL, claves y
+> reglas— vive en [`academico/DER.md`](./academico/DER.md) y está fijado contra el DDL ejecutable
+> por `tests/front/der-paridad-esquema.test.ts`. Acá se muestra la estructura: una segunda copia
+> completa se desincronizaría, que es exactamente el problema que este cambio cierra.
 
 ```mermaid
 erDiagram
-    CLIENTE ||--o{ PEDIDO : realiza
-    CLIENTE ||--o{ REMITO_VENTA : recibe
+    cliente ||--o{ pedido : "realiza"
+    cliente ||--o{ remitos_de_venta : "recibe"
 
-    PRODUCTO ||--|| STOCK : tiene
-    PRODUCTO ||--o{ DETALLE_PEDIDO : aparece
+    producto ||--|| stock : "tiene"
+    producto ||--o{ detalle_del_pedido : "aparece en"
 
-    PEDIDO ||--o{ DETALLE_PEDIDO : contiene
-    PEDIDO ||--o{ ESTADO_PEDIDO : registra
-    PEDIDO ||--o{ COMPROBANTE : presenta
+    pedido ||--o{ detalle_del_pedido : "contiene"
+    pedido ||--o{ estados_pedidos : "registra"
+    pedido ||--o{ comprobante : "presenta"
 
-    COMPROBANTE ||--o{ ESTADO_COMPROBANTE : registra
-    COMPROBANTE ||--o| REMITO_VENTA : genera
+    comprobante ||--o{ estados_comprobante : "registra"
+    comprobante ||--o| remitos_de_venta : "genera"
 
-    STOCK ||--o{ ALERTA_STOCK : dispara
-
-    CLIENTE {
-        int id_cliente PK
-        string dni
-        string nombre
-        string email
-        string telefono
-    }
-
-    PRODUCTO {
-        int id_producto PK
-        string nombre
-        string categoria
-        string tipo
-        string descripcion
-        decimal precio
-        int tiempo_produccion
-        boolean activo
-        string imagen_url
-    }
-
-    STOCK {
-        int id_stock PK
-        int id_producto FK
-        int cantidad_actual
-        int cantidad_reservada
-        int cantidad_warning
-    }
-
-    PEDIDO {
-        int id_pedido PK
-        int id_cliente FK
-        date fecha
-        decimal total
-        string estado_actual
-    }
-
-    DETALLE_PEDIDO {
-        int id_detalle_pedido PK
-        int id_pedido FK
-        int id_producto FK
-        int cantidad
-        decimal precio_unitario
-        decimal subtotal
-    }
-
-    ESTADO_PEDIDO {
-        int id_estado_pedido PK
-        int id_pedido FK
-        string estado
-        date fecha
-    }
-
-    COMPROBANTE {
-        int id_comprobante PK
-        int id_pedido FK
-        string foto_url
-        date fecha
-        decimal monto
-        string estado_actual
-    }
-
-    ESTADO_COMPROBANTE {
-        int id_estado_comprobante PK
-        int id_comprobante FK
-        string estado
-        date fecha
-    }
-
-    REMITO_VENTA {
-        int id_remito PK
-        int id_comprobante FK
-        int id_cliente FK
-        date fecha
-        decimal total
-        string numero
-    }
-
-    ALERTA_STOCK {
-        int id_alerta PK
-        int id_stock FK
-        date fecha
-        string mensaje
-        boolean atendida
-    }
+    stock ||--o{ alerta_de_estado : "dispara"
 ```
+
+**Objetos reales de `public` (13):**
+
+| Objeto | Tipo | Rol en el MVP |
+|---|---|---|
+| `cliente` | tabla | Comprador invitado; `email` único es la identidad. |
+| `producto` | tabla | Catálogo con baja lógica (`activo`). |
+| `stock` | tabla | Una fila por producto: actual, reservada y umbral. |
+| `pedido` | tabla | Orden con `estado_actual` y `total` derivado. |
+| `detalle_del_pedido` | tabla | Líneas con `subtotal` generado. |
+| `estados_pedidos` | tabla | Historial auditable de las transiciones. |
+| `comprobante` | tabla | Transferencia subida al bucket privado. |
+| `estados_comprobante` | tabla | Historial de las revisiones manuales. |
+| `remitos_de_venta` | tabla | Remito `R-YYYY-NNNNNN`, uno por comprobante. |
+| `alerta_de_estado` | tabla | Aviso de stock bajo, popup en `/admin`. |
+| `admin` | tabla | **Residuo de Fase 2**, cerrada por RLS; el MVP no la usa. |
+| `roll` | tabla | **Residuo de Fase 2** (typo histórico de `rol`), cerrada por RLS. |
+| `vista_catalogo` | vista | `security_invoker`: catálogo + `disponible` para la tienda. |
 
 ---
 
 ## 3. Reglas de integridad
 
-- **Una sola dirección por relación.** `STOCK.id_producto` (no `PRODUCTO.id_stock`), `ESTADO_PEDIDO.id_pedido` (no `PEDIDO.id_estado`). El carrito no tiene tablas en el MVP.
-- **Estado actual + historial.** `PEDIDO.estado_actual` y `COMPROBANTE.estado_actual` son la lectura rápida del panel; `ESTADO_PEDIDO` y `ESTADO_COMPROBANTE` son el historial auditable. Se actualizan en la misma transacción.
-- **Total derivado.** `PEDIDO.total = SUM(DETALLE_PEDIDO.subtotal)` y `DETALLE_PEDIDO.subtotal = cantidad × precio_unitario`.
-- **Comprobante contra pedido.** `COMPROBANTE.monto` debe coincidir con `PEDIDO.total` para que el Admin pueda aprobar.
-- **Reserva.** Al confirmar el pedido: `STOCK.cantidad_reservada += cantidad`. Al aprobar: `cantidad_actual -= cantidad` y `cantidad_reservada -= cantidad`. Al rechazar o vencer: solo `cantidad_reservada -= cantidad`. La base rechaza con `ET007` dejar `cantidad_actual < cantidad_reservada`.
-- **Dinero.** `PRODUCTO.precio > 0` y `COMPROBANTE.monto > 0`: un pedido de total 0 no se puede aprobar.
+- **Una sola dirección por relación.** `stock.id_producto` (no `producto.id_stock`), `estados_pedidos.id_pedido` (no `pedido.id_estado`). El carrito no tiene tablas en el MVP.
+- **Estado actual + historial.** `pedido.estado_actual` y `comprobante.estado_actual` son la lectura rápida del panel; `estados_pedidos` y `estados_comprobante` son el historial auditable. Se actualizan en la misma transacción.
+- **Total derivado.** `pedido.total = SUM(detalle_del_pedido.subtotal)` y `detalle_del_pedido.subtotal = cantidad × precio_unitario`.
+- **Comprobante contra pedido.** `comprobante.monto` debe coincidir con `pedido.total` para que el Admin pueda aprobar.
+- **Reserva.** Al confirmar el pedido: `stock.cantidad_reservada += cantidad`. Al aprobar: `cantidad_actual -= cantidad` y `cantidad_reservada -= cantidad`. Al rechazar o vencer: solo `cantidad_reservada -= cantidad`. La base rechaza con `ET007` dejar `cantidad_actual < cantidad_reservada`.
+- **Dinero.** `producto.precio > 0` y `comprobante.monto > 0`: un pedido de total 0 no se puede aprobar.
 - **Vencimiento.** El cron de los **viernes 23:59 (America/Argentina/Buenos_Aires)** cancela todos los pedidos `Pendiente de Pago`, rechaza su comprobante pendiente y libera la reserva. Es idempotente.
-- **Disponible.** `STOCK.cantidad_actual - STOCK.cantidad_reservada`; el umbral de aviso es `cantidad_warning`.
+- **Disponible.** `stock.cantidad_actual - stock.cantidad_reservada`; el umbral de aviso es `cantidad_warning`.
 - **Remito.** Se genera al aprobar el comprobante; es el estado final del MVP. No hay envío ni seguimiento.
-- **Borrado lógico.** `PRODUCTO.activo = false`; no se borran productos con historial.
+- **Borrado lógico.** `producto.activo = false`; no se borran productos con historial.
 - **Sin IA.** Los Administradores de Química comparan imagen y monto; no hay validación automática.
-- **RLS.** Catálogo (`PRODUCTO`, `STOCK`) puede ser de lectura pública; `CLIENTE`, `PEDIDO`, `COMPROBANTE`, `REMITO` y `ALERTA` solo con service role o políticas por perfil. Ninguna escritura pública.
+- **RLS.** Catálogo (`producto`, `stock`, `vista_catalogo`) de lectura pública; `cliente`, `pedido`, `detalle_del_pedido`, `comprobante`, `remitos_de_venta`, `alerta_de_estado` y el residuo `admin`/`roll` solo con service role o políticas por perfil. Ninguna escritura pública.
 
 ---
 
@@ -294,7 +229,7 @@ dicen “decisión” son acuerdos de implementación, no invariantes que la bas
 |---|---|---|---|---|
 | Historial `fecha` | `date` | `timestamptz` | Un `date` no permite ordenar dos cambios del mismo día. | `aprobacion.test.ts` (historial) |
 | `cliente.email` | sin definir | único (`lower(email)`) | Evita clientes duplicados en checkout invitado. El DNI **no** es clave de identidad: solo valida formato (`^[0-9]{7,8}$`). | `contrato.test.ts` |
-| Nombres físicos | lógicos en singular | plural actual (`estados_pedidos`, `remitos_de_venta`, `alerta_de_estado`) | Reduce la migración. | `contrato.test.ts` |
+| Nombres | el diagrama usaba lógicos en singular (`ESTADO_PEDIDO`, `REMITO_VENTA`) | se publican los físicos (`estados_pedidos`, `estados_comprobante`, `remitos_de_venta`, `alerta_de_estado`, `detalle_del_pedido`) | Un diagrama que no coincide con la base hace creer que el esquema es otro; el desajuste se auditó el 2026-11-05. | `der-paridad-esquema.test.ts` · `contrato.test.ts` |
 | `detalle_carrito` | fase 2 | se elimina (vacía) | El MVP no persiste carrito. | `contrato.test.ts` |
 | `subtotal` / `total` | derivados | `subtotal` generado + trigger en `pedido` | La base garantiza el invariante. | `pedidos.test.ts` |
 | Lectura del catálogo | — | vista `vista_catalogo` con `disponible` | Una sola forma de leer stock disponible. | `rls.test.ts` (HU-1) |

@@ -1,6 +1,6 @@
 # memory.md · estado de build
 
-> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-10-31 (Saneamiento de deuda de estándares: errores canónicos, dominio monetario y auditoría de superficie #55; 527 tests en verde).
+> Hiper-corto. Leer al abrir sesión; reescribir al cerrar. **Última:** 2026-11-05 (DER contra la base viva: paridad verificada por TDD y enlaces de Lucidchart restaurados en el Hub; 534 tests en verde).
 
 ## Ahora
 - **Spec Maestro de Cierre Beta unificado (#53):** Consolida las tareas pendientes de Teams en tres pilares: Núcleo Técnico (`esenciatecnica`), Gate de Validación Operativa en Vivo (dominio/Resend/Vercel) y Protocolo de QA + Entregables Académicos. Hoja de ruta secuencial en `docs/specs/cierre-beta/plan-ejecucion.md`.
@@ -18,7 +18,7 @@
   5. **Fase 4 (Documentación y Expo):** confeccionar `docs/MANUAL_DE_USO_Y_DESARROLLO.md` (`da6b26f3`) y `docs/academico/PRESENTACION_EXPO_TEC1.md` (`b81c3468`, guión listo en `review`).
 
 ## Semáforo
-- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **527 tests** en 39 archivos ·
+- Local: `typecheck` 0 errores · `lint` 0 errores y 0 warnings · **534 tests** en 40 archivos ·
   `docs:links` 0 links sin resolver sobre 48 archivos `.md` (con salida `!= 0` ante enlaces rotos) ·
   `npm run build` compila las 17 rutas + `src/middleware.ts` **validando tipos en el build**
   (`ignoreBuildErrors: true` retirado de `next.config.ts`) y sin requerir secretos en el entorno.
@@ -43,6 +43,11 @@
 | #21 · B2 | `bd:viva` prueba toda la superficie pública | ✅ cerrado (`65657d5`) |
 | #22 · B5 | semilla y fotos de la beta | ⏳ sembrada en `otjph` (`20b50d9`); pendiente reemplazar las fotos de demo por las del taller |
 | #23 · B6 | verificación punta a punta en navegador | ⏳ Celeste; desbloqueada en producción (salvo el envío real de email que requiere el dominio en Resend) |
+
+## Hecho (2026-11-05 · DER contra la base viva y enlaces de Lucidchart en el Hub)
+| Cambio | Qué dejó |
+|---|---|
+| `docs/academico/DER.md` + `docs/MODELO.md` + `tests/front/der-paridad-esquema.test.ts` + `tests/front/diagramas-academicos.test.ts` + `quimicashop/diagramas-visor.js` + `quimicashop/index.html` | **DER contra la base viva:** el DER Mermaid declaraba 10 entidades con nombres lógicos (`CLIENTE`, `ESTADO_PEDIDO`, `REMITO_VENTA`…) mientras la base viva `otjphjnrwihqzzhbfnmh` tiene **13 objetos** con otros nombres y columnas que el diagrama no mostraba. Se auditó el proyecto por la especificación OpenAPI de PostgREST con la service role key (12 tablas + la vista `vista_catalogo`) y se reescribió el DER con los **nombres físicos exactos**, todas las columnas, el tipo SQL real y sus reglas; además entraron la vista `vista_catalogo` y el residuo de Fase 2 (`admin`, `roll`) que sigue vivo y cerrado por RLS. El DER del visor del Hub es ahora idéntico al del documento y se sincroniza con un script. **TDD:** 7 tests nuevos en `tests/front/der-paridad-esquema.test.ts` que levantan las migraciones en PGlite y comparan el diagrama tabla por tabla, columna por columna, tipo por tipo, FK por FK (con la cardinalidad validada contra la unicidad real) y `NUMERIC(12,2)` por columna monetaria. Los 7 diagramas del visor se validaron además con Mermaid v10 real. **Hub:** se restauraron los 5 enlaces de Lucidchart que el commit `b8f19c9` había reemplazado por anclas internas (N1 `b61b3f10`, N2 `afb9b366`, N3 `d94e24c2`, DER `d8c27501`, DCU `de071bba`); las tarjetas pasaron de `<a>` único a contenedor con dos enlaces reales (visor + tablero externo) y Clases UML volvió a `CLASES.md`. Commit `624b087` en `quimicashop`. |
 
 ## Hecho (2026-10-31 · Saneamiento de Deuda de Estándares, Dominio Monetario y Auditoría #55)
 | Cambio | Qué dejó |

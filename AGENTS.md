@@ -26,7 +26,7 @@ Sos un **ingeniero full-stack senior**. Construís **solo el e-commerce** en est
 - **Stack:** Next.js 15 (App Router) · TypeScript estricto (sin `any`) · Tailwind CSS 3 (M3 Expressive + iOS 26/27) · Supabase (`otjph…`, PostgreSQL + Storage, RLS obligatoria) · Resend · Vitest + PGlite · Vercel · **Español único** (sin `[lang]` ni diccionarios). Avisar antes de cualquier cambio de stack.
 - **Dominio ([`docs/MODELO.md`](docs/MODELO.md)):**
   1. **Producto:** cosmética/higiene de Química (`precio > 0`). Baja lógica (`activo = false`), nunca borrado físico con historial.
-  2. **Carrito y Pedido:** Carrito en cliente (cookie/localStorage, no reserva). Pedido confirmado incrementa `cantidad_reservada`; `PEDIDO.total = SUM(DETALLE_PEDIDO.subtotal)`.
+  2. **Carrito y Pedido:** Carrito en cliente (cookie/localStorage, no reserva). Pedido confirmado incrementa `cantidad_reservada`; `pedido.total = SUM(detalle_del_pedido.subtotal)`.
   3. **Comprobante y validación manual:** el Cliente sube imagen y `monto > 0` (debe coincidir con `total`). Los Administradores de Química validan **a mano** en `/admin` (Basic Auth con `ADMIN_PASSWORD`, ADR 0005; `ADMIN`/`ROL` quedan para fase 2; **sin IA**).
   4. **Aprobado (`Pago Validado`):** descuenta `cantidad_actual`, libera reserva y emite **Remito de venta** por email al Cliente. **El MVP termina acá** (sin envío ni estados `En Preparación`/`Enviado`/`Entregado`).
   5. **Rechazado o vencido:** libera reserva. El cron de los **viernes 23:59 ART** cancela pedidos sin comprobante aprobado.

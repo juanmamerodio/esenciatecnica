@@ -130,23 +130,35 @@ describe('DER Actualizado (docs/academico/DER.md)', () => {
     expect(existsSync(RUTA_DER)).toBe(true);
   });
 
-  it('contiene un bloque erDiagram de Mermaid válido con las 10 entidades canónicas', () => {
+  it('contiene un bloque erDiagram con los nombres físicos de la base viva', () => {
     const doc = readFileSync(RUTA_DER, 'utf8');
     const bloques = extraerBloquesMermaid(doc);
     expect(bloques.length).toBeGreaterThanOrEqual(1);
     const erBlock = bloques.find((b) => /^erDiagram\b/.test(b));
     expect(erBlock).toBeDefined();
 
-    expect(erBlock).toMatch(/\bCLIENTE\b/);
-    expect(erBlock).toMatch(/\bPRODUCTO\b/);
-    expect(erBlock).toMatch(/\bSTOCK\b/);
-    expect(erBlock).toMatch(/\bPEDIDO\b/);
-    expect(erBlock).toMatch(/\bDETALLE_PEDIDO\b/);
-    expect(erBlock).toMatch(/\bESTADO_PEDIDO\b/);
-    expect(erBlock).toMatch(/\bCOMPROBANTE\b/);
-    expect(erBlock).toMatch(/\bESTADO_COMPROBANTE\b/);
-    expect(erBlock).toMatch(/\bREMITO_VENTA\b/);
-    expect(erBlock).toMatch(/\bALERTA_STOCK\b/);
+    // Las 10 tablas del MVP, tal como existen en `public` (no hay alias lógicos).
+    for (const tabla of [
+      'cliente',
+      'producto',
+      'stock',
+      'pedido',
+      'detalle_del_pedido',
+      'estados_pedidos',
+      'comprobante',
+      'estados_comprobante',
+      'remitos_de_venta',
+      'alerta_de_estado',
+    ]) {
+      expect(erBlock).toMatch(new RegExp(`\\b${tabla}\\b`));
+    }
+
+    // La vista del catálogo y el residuo de Fase 2 que sigue vivo en otjph….
+    expect(erBlock).toMatch(/\bvista_catalogo\b/);
+    expect(erBlock).toMatch(/\badmin\b/);
+    expect(erBlock).toMatch(/\broll\b/);
+
+    // La paridad fina (columnas, tipos, claves y relaciones) la fija der-paridad-esquema.test.ts.
   });
 
   it('aclara la frontera del MVP y las entidades pospuestas a Fase 2', () => {
